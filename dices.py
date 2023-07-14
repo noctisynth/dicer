@@ -93,10 +93,17 @@ def ra(args, event):
     if not card_data:
         return "在执行参数检定前, 请先完成车卡并保存."
     inv = Investigator().load(card_data)
+    is_base = False
     for attr, alias in attrs_dict.items():
         if args[0] in alias:
             v = int(eval("inv.{prop}".format(prop=alias[0])))
+            is_base = True
             break
+    if not is_base:
+        for skill in inv.skills:
+            if args[0] == skill:
+                v = inv.skills[skill]
+                break
     if len(args) == 1:
         t = 100
     else:

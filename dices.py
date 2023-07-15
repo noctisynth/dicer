@@ -4,6 +4,7 @@ from typing import Optional
 import diro
 from messages import help_messages
 from cards import cards, attrs_dict, Investigator, expr
+from messages import help_messages
 
 class Mylist(list):
     def next(self, index: int):
@@ -11,14 +12,6 @@ class Mylist(list):
             return self[index+1]
         else:
             return ""
-
-
-def help_message(args: str):
-    if args in help_messages.__dict__.keys():
-        return help_messages.__dict__[args]
-    else:
-        return help_messages.main
-
 
 def dhr(t, o):
     if t == 0 and o == 0:

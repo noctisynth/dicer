@@ -1,12 +1,15 @@
+version = "2.2.0alpha3"
+
 class Help_messages():
     def __init__(self):
-        self.main = """此骰娘基于腾讯QQ机器人(botpy)搭建, \
-由欧若可(Oracle, 基于GPT-4及Google TensorFlow)提供算法支持.
+        self.main = f"""欧若可骰娘 Version {version}
+此骰娘基于腾讯QQ机器人(botpy)搭建, \
+由欧若可(Oracle, 基于GPT-4及Google TensorFlow)提供神经网络算法支持.
 最终版本由未知访客团队(Unknow Visitor, 原左旋联盟)完成.
 感谢 灵冬-老孙 提供相关技术支持.
 
 .help 帮助信息
-.coc  coc角色作成
+.coc  进行车卡, 完成coc角色作成
 .r    投掷指令 例如:
             .r 10 100 (10D100)
         d   制定骰子面数
@@ -46,32 +49,43 @@ class Help_messages():
         #   多轮投掷指令, `#`后接数字即可设定多轮投掷
         bp  奖励骰与惩罚骰, 但是遗憾的是, 该指令的算法无效
         +/- 附加计算指令, 遗憾的是, 该指令的算法无效"""
-        self.sc = """.sc [int: success]/[int: failure] [int: SAN]
+        self.sc = """.sc [int: success]/[int: failure] [int: SAN]   疯狂检定
         success: 判定成功降低san值, 不支持或xDy语法(x与y为数字);
         failure: 判定失败降低san值, 支持语法如上;
         SAN: 当前SAN值, 缺省该参数则会自动使用该用户已保存的人物卡数据."""
-        self.set = """.set [str: attr_name] [(num or str): attr_num]
-            attr_name: 属性名称 例如:
-                .set 名字 阿斯塔特 (将你的名字设置为 “阿斯塔特”)
-                .set 幸运 80 (将你的幸运设置为 80)
-            attr_num: 目标属性值
-            可以单独输入`.set`指令, 欧若可将自动读取最近一次coc指令结果进行保存"""
-        self.show = """.show[s] [@xxx]
-            查看指定调查员保存的人物卡, 缺省@则查询自身人物卡
-            .shows 为查看技能指令"""
-        self.sa = ".sa [attr_name]\n" \
-            "attr_name: 属性名称, 例: name、名字、str、力量"
+        self.set = """.set [str: name] [(num or str): data]
+        name: 属性名称
+        data: 目标属性值 例如:
+            .set 名字 阿斯塔特 (将你的名字设置为 “阿斯塔特”, 注意, 设置中文参数不支持无间隔传参)
+            .set 幸运 80 (将你的幸运设置为 80)
+            .set 计算机 99 (将你的计算机技能设置为 99)            
+        可以单独输入`.set`指令, 欧若可将自动读取最近一次coc指令结果进行保存.
+        .set 指令已经支持批量数据传输, 例如:
+            .set 名字 阿斯塔特 幸运 80 (将你的名字设置为 “阿斯塔特” 并将你的幸运设置为 80)"""
+        self.show = """.show [skill(skills, s)|all]
+        目前仅支持查询自身人物卡.
+            .show skill 查看自身人物卡技能
+            .show all 查询所有存储的人物卡"""
+        self.sa = """.sa [str: name]    快速检定
+        name: 属性名称 例如:
+            .sa 幸运 快速检定幸运
+            .sa 力量 快速检定力量"""
         self.en = ".en skill_level\n" \
             "skill_level: 需要成长的技能当前等级。"
-        self.del_ = ".del [c|card|xxx]\n" \
-            "删除数据, args可以有以下值\n" \
-            "c:清空暂存数据\n" \
-            "card:删除使用中的人物卡(慎用)\n" \
-            "xxx:其他任意技能名\n" \
-            "该命令支持多个参数混合使用, 可以一次指定多个技能名, 使用空格隔开"
-
+        self.del_ = """.del [c|card|str: talent]
+        删除数据, args可以有以下值
+        c: 清空暂存数据
+        card: 删除使用中的人物卡(慎用)
+        talent: 其他任意技能名
+        该命令支持多个参数混合使用, 可以一次指定多个技能名, 使用空格隔开"""
 
 help_messages = Help_messages()
+
+def help_message(args: str):
+    if args in help_messages.__dict__.keys():
+        return help_messages.__dict__[args]
+    else:
+        return help_messages.main
 
 temporary_madness = [
     "1) 失忆: 调查员会发现自己身处于一个安全的地点却没有任何来到这里的记忆。例如, 调查员前一刻还在家中吃着早饭, 下一刻就已经直面着不知名的怪物。这将会持续1D10轮。",

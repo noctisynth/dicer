@@ -116,7 +116,7 @@ attrs_dict: Dict[str, List[str]] = {
 }
 
 
-def set_handler(message, args: str):
+def set_handler(message, args):
     if not args:
         if cache_cards.get(message):
             card_data = cache_cards.get(message)
@@ -124,16 +124,16 @@ def set_handler(message, args: str):
             inv = Investigator().load(card_data)
             return "[Oracle] 成功从缓存保存人物卡属性: \n" + inv.output()
         else:
-            return "[Oracle] 未找到缓存数据, 请先使用coc指令生成角色"
+            return "[Oracle] 未找到缓存数据, 请先使用coc指令进行车卡生成角色卡."
     else:
-        args = args.split(" ")
-        args = list(filter(None, args))
         if cards.get(message):
             card_data = cards.get(message)
             inv = Investigator().load(card_data)
         else:
-            return "[Oracle] 未找到已保存数据, 请先使用空白set指令保存角色数据"
-        if len(args) >= 2:
+            return "[Oracle] 未找到已保存数据, 请先使用空白set指令保存角色数据."
+        if len(args) % 2 != 0:
+            return "[Oracle] 参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量, 因为我无法连接到OpenAI, 这使得我无法使用 GPT-4 作为神经网络引擎, 我使用 TensorFlow 作为替代.\n此外, 这看起来不像是来源于我的错误."
+        elif len(args) == 2:
             for attr, alias in attrs_dict.items():
                 if args[0] in alias:
                     if attr in ["名字", "性别"]:
@@ -150,11 +150,49 @@ def set_handler(message, args: str):
             try:
                 inv.skills[args[0]] = int(args[1])
                 cards.update(message, inv.__dict__)
-                return "[Oracle] 设置调查员 %s 技能为: %s" % (args[0], args[1])
+                return "[Oracle] 设置调查员 %s 技能为: %s." % (args[0], args[1])
             except ValueError:
-                return "[Oracle] [Oracle] 请输入正整数技能数据."
+                return "[Oracle] 请输入正整数技能数据."
+        elif len(args) > 2:
+            reply = []
+            li = []
+            sub_li = []
+            for arg in args:
+                index = args.index(arg)
+                if index % 2 == 0:
+                    sub_li.append(arg)
+                elif index % 2 == 1:
+                    sub_li.append(arg)
+                    li.append(sub_li)
+                    sub_li = []
+                else:
+                    return "[Oracle] 参数错误, 可能是 Python 解释器的错误, 请检查该服务的 Python 版本, 我无法解析到我当前承载的服务器状态, 因为开发者并未给我提供 API 接口.\n此外, 这看起来不像是来源于我的错误."
+            for sub_li in li:
+                for attr, alias in attrs_dict.items():
+                    if sub_li[0] in alias:
+                        if attr in ["名字", "性别"]:
+                            if attr == "性别" and not sub_li[1] in ["男", "女"]:
+                                return "[Oracle] 欧若可拒绝将调查员性别将设置为 {sex}, 这是对物种的侮辱.".format(sex=sub_li[1])
+                            inv.__dict__[alias[0]] = sub_li[1]
+                        else:
+                            try:
+                                inv.__dict__[alias[0]] = int(sub_li[1])
+                            except ValueError:
+                                reply.append("基础数据 %s 要求正整数数据, 但你传入了 %s." % (sub_li[0], sub_li[1]))
+                        cards.update(message, inv.__dict__)
+                        reply.append("设置调查员基础数据 %s 为: %s" % (attr, sub_li[1]))
+                try:
+                    inv.skills[sub_li[0]] = int(sub_li[1])
+                    cards.update(message, inv.__dict__)
+                    reply.append("设置调查员 %s 技能为: %s." % (sub_li[0], sub_li[1]))
+                except ValueError:
+                    reply.append("技能 %s 要求正整数数据, 但你传入了 %s." % (sub_li[0], sub_li[1]))
+            rep = "[Oracle]\n"
+            for r in reply:
+                rep += r + "\n"
+            return rep.rstrip("\n")
         else:
-            return "[Oracle] 参数错误, 可能是由于传输的数据数量错误."
+            return "[Oracle] 参数错误, 可能是由于传输的数据数量错误, 此外, 这看起来不像是来源于我的错误."
 
 
 def show_handler(message, args):
@@ -193,7 +231,7 @@ def show_handler(message, args):
     else:
         r.append("[Oracle] 参数异常.")
     if not r:
-        r.append("[Oracle] 无保存/暂存信息")
+        r.append("[Oracle] 未查询到保存或暂存信息.")
     return r
 
 
@@ -240,7 +278,7 @@ def sa_handler(message, args: str):
     if not args:
         return help_messages.sa
     elif not cards.get(message):
-        return "[Oracle] 请先使用`.set`指令保存人物卡后再使用快速检定功能。"
+        return "[Oracle] 请先使用`.set`指令保存人物卡后再使用快速检定功能."
     for attr, alias in attrs_dict.items():
         if args in alias:
             arg = alias[0]

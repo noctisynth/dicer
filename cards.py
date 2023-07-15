@@ -2,6 +2,7 @@ from typing import Dict, List, Optional
 from investigator import Investigator
 from messages import help_messages
 from botpy import logging, BotAPI
+from pathlib import Path
 
 import diro
 
@@ -13,7 +14,8 @@ except ModuleNotFoundError:
 import os
 import re
 
-_cachepath = os.path.join("data", "coc_cards.json")
+current_dir = Path(__file__).resolve().parent
+_cachepath = current_dir / "data" / "coc_cards.json"
 _log = logging.get_logger()
 
 def expr(d: diro.Diro, anum: Optional[int]) -> str:
@@ -168,6 +170,7 @@ def set_handler(message, args):
                 else:
                     return "[Oracle] 参数错误, 可能是 Python 解释器的错误, 请检查该服务的 Python 版本, 我无法解析到我当前承载的服务器状态, 因为开发者并未给我提供 API 接口.\n此外, 这看起来不像是来源于我的错误."
             for sub_li in li:
+                has_set = False
                 for attr, alias in attrs_dict.items():
                     if sub_li[0] in alias:
                         if attr in ["名字", "性别"]:
@@ -179,8 +182,12 @@ def set_handler(message, args):
                                 inv.__dict__[alias[0]] = int(sub_li[1])
                             except ValueError:
                                 reply.append("基础数据 %s 要求正整数数据, 但你传入了 %s." % (sub_li[0], sub_li[1]))
+                                continue
                         cards.update(message, inv.__dict__)
                         reply.append("设置调查员基础数据 %s 为: %s" % (attr, sub_li[1]))
+                        has_set = True
+                if has_set:
+                    continue
                 try:
                     inv.skills[sub_li[0]] = int(sub_li[1])
                     cards.update(message, inv.__dict__)

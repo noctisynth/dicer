@@ -7,9 +7,9 @@ from madness import ti, li
 from investigator import Investigator
 from san_check import sc
 from cards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
+from decorator import Commands
 
 from botpy import logging, BotAPI
-from botpy.ext.command_util import Commands
 from botpy.message import Message
 from botpy.ext.cog_yaml import read
 
@@ -18,8 +18,10 @@ test_config = read(os.path.join(os.path.dirname(__file__), "config.yaml"))
 _log = logging.get_logger()
 
 def format_msg(message, begin=None):
-    msg = format_str(message, begin=begin).split(" ")
-    msg = list(filter(None, msg))
+    pattern = r'([\u4e00-\u9fff]+|\d+)'
+    msg = format_str(message, begin=begin)
+    msg = re.findall(pattern, msg)
+    msg = [x.strip() for x in msg if x.strip()]
     return msg
 
 def format_str(message, begin=None):
@@ -140,13 +142,12 @@ async def licommandhandler(api, message: Message, params=None):
 @Commands(name=(".sc"))
 async def schandler(api, message: Message, params=None):
     args = format_str(message, begin=".sc")
-    args = args.strip(".sc")
     await message.reply(content=sc(args, message))
 
 
 @Commands(name=(".set"))
 async def sethandler(api, message: Message, params=None):
-    args = format_str(message, begin=".set")
+    args = format_msg(message, begin=".set")
     await message.reply(content=set_handler(message, args))
 
 

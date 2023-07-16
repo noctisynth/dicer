@@ -31,12 +31,10 @@ def format_msg(message, begin=None):
     msg = format_str(message, begin=begin).split(" ")
     outer = []
     for m in msg:
-        m = re.split(r'([\u4e00-\u9fff]+|\d+)', m)
+        m = re.split(r'(\d+)|([a-zA-Z]+)|([\u4e00-\u9fa5]+)', m)
         m = list(filter(None, m))
         outer += m
-    msg = outer
-    _log.debug(msg)
-    msg = list(filter(None, msg))
+    msg = list(filter(None, outer))
     _log.debug(msg)
     return msg
 

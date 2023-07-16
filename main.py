@@ -10,7 +10,7 @@ from madness import ti, li
 from investigator import Investigator
 from san_check import sc
 from cards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
-from decorator import Commands, translate_punctuation
+from decorators import Commands, translate_punctuation
 from messages import help_message, version
 
 import os
@@ -259,7 +259,7 @@ def reload_module(module_name):
             "sa_handler",
             "del_handler"
         ],
-        "decorator": [
+        "decorators": [
             "Commands",
             "translate_punctuation"
         ],

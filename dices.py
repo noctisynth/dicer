@@ -55,20 +55,21 @@ def dam(args, message):
         d = Dice().parse("1d6").roll()
         card["hp"] -= d.total
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
-    if cards["hp"] <= 0:
-        cards["hp"] = 0
-        r += f", 调查员 {cards['name']} 已死亡."
+    if card["hp"] <= 0:
+        card["hp"] = 0
+        r += f", 调查员 {card['name']} 已死亡."
     elif max_hp * 0.8 <= card["hp"] < max_hp:
-        r += f", 调查员 {cards['name']} 具有轻微伤."
-    elif max_hp * 0.6 <= cards["hp"] <= max_hp * 0.8:
-        r += f", 调查员 {cards['name']} 进入轻伤状态."
-    elif max_hp * 0.2 <= cards["hp"] <= max_hp * 0.6:
-        r += f", 调查员 {cards['name']} 身负重伤."
+        r += f", 调查员 {card['name']} 具有轻微伤."
+    elif max_hp * 0.6 <= card["hp"] <= max_hp * 0.8:
+        r += f", 调查员 {card['name']} 进入轻伤状态."
+    elif max_hp * 0.2 <= card["hp"] <= max_hp * 0.6:
+        r += f", 调查员 {card['name']} 身负重伤."
     elif max_hp * 0.2 >= card["hp"]:
-        r += f", 调查员 {cards['name']} 濒死."
+        r += f", 调查员 {card['name']} 濒死."
     else:
         r += "."
     cards.update(message, card)
+    return r
         
 
 def en(args, message):

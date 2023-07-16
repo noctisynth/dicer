@@ -1,3 +1,7 @@
 @echo off
-echo QQÆµµÀ¡¾Å·Èô¿É÷»Äï¡¿£ºhttps://pd.qq.com/s/gp2ua1q09
+echo QQÆµï¿½ï¿½ï¿½ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¡¿ï¿½ï¿½https://pd.qq.com/s/gp2ua1q09
+
+:run
 python main.py
+timeout /T 3
+goto run

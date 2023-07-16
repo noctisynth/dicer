@@ -58,16 +58,36 @@ async def testhandler(api, message: Message, params=None):
     _log.debug("发送消息:" + str(message.content))
     _log.debug(message.__repr__())
     msg = format_msg(message)
+    if not msg:
+        msg = "[]"
     await message.reply(content=str(msg))
     return True
 
 @Commands(name=(".debug"))
-async def testhandler(api, message: Message, params=None):
+async def debughandler(api, message: Message, params=None):
     global DEBUG
-    DEBUG = True
-    _log.setLevel(_logging.DEBUG)
-    _log.info("[cocdicer] 输出等级设置为 DEBUG.")
-    await message.reply(content="[Oracle] 输出等级设置为DEBUG.")
+    args = format_msg(message, begin=".debug")
+    if args:
+        print(args)
+        if args[0] == "off":
+            DEBUG = False
+            _log.setLevel(_logging.INFO)
+            _log.info("[cocdicer] 输出等级设置为 INFO.")
+            await message.reply(content="[Oracle] DEBUG 模式已关闭.")
+            return True
+    else:
+        DEBUG = True
+        _log.setLevel(_logging.DEBUG)
+        _log.info("[cocdicer] 输出等级设置为 DEBUG.")
+        await message.reply(content="[Oracle] DEBUG 模式已启动.")
+        return True
+    if args[0] == "on":
+        DEBUG = True
+        _log.setLevel(_logging.DEBUG)
+        _log.info("[cocdicer] 输出等级设置为 DEBUG.")
+        await message.reply(content="[Oracle] DEBUG 模式已启动.")
+    else:
+        await message.reply(content="[Oracle] 错误, 我无法解析你的指令.")
     return True
 
 @Commands(name=(".coc", ".gen"))
@@ -201,6 +221,10 @@ async def versionhandler(api, message: Message, params=None):
 
 class OracleClient(botpy.Client):
     async def on_ready(self):
+        global DEBUG
+        if DEBUG:
+            _log.setLevel(_logging.DEBUG)
+            _log.info("[cocdicer] DEBUG 模式已启动.")
         if not current_dir / "data":
             _log.info("[cocdicer] 数据文件夹未建立, 建立它.")
             os.makedirs("data")
@@ -213,6 +237,7 @@ class OracleClient(botpy.Client):
     async def on_at_message_create(self, message: Message):
         handlers = [
             testhandler,
+            debughandler,
             rdhelphandler,
             stcommandhandler,
             enhandler,

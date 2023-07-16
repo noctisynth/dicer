@@ -208,6 +208,7 @@ def show_handler(message, args):
             inv = Investigator().load(card_data)
             data = "[Oracle] 使用中人物卡: \n" 
             data += inv.output() + "\n"
+            data += inv.skills_output()
             r.append(data)
         if cache_cards.get(message):
             card_data = cache_cards.get(message)

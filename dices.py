@@ -46,6 +46,8 @@ def at(args):
 
 def dam(args, message):
     card = cards.get(message)
+    if not card:
+        return "[Oracle] 未找到缓存数据, 请先使用`.coc`指令进行车卡生成角色卡并`.set`进行保存."
     max_hp = card["con"] + card["siz"]
     try:
         arg = int(args[0])

@@ -1,9 +1,9 @@
 from typing import Dict, List
 from investigator import Investigator
-from messages import help_messages
+from cocmessages import help_messages
 from botpy import logging
 from pathlib import Path
-from dicer import Dice
+from dicer import Dice, expr
 
 try:
     import ujson as json
@@ -11,35 +11,11 @@ except ModuleNotFoundError:
     import json
 
 current_dir = Path(__file__).resolve().parent
-_cachepath = current_dir / "data" / "coc_cards.json"
+_cachepath = current_dir / "data" / "scp_cards.json"
 _log = logging.get_logger()
-
-def expr(d, anum):
-    d.roll()
-    result = d.calc()
-    s = f"{d}={(d.detail_expr())}={result}"
-    _log.debug(d.detail_expr())
-    if anum:
-        s += "\n"
-        if result == 100:
-            s += "大失败！"
-        elif anum < 50 and result > 95:
-            s += f"{result}>95 大失败！"
-        elif result == 1:
-            s += "大成功！"
-        elif result <= anum // 5:
-            s += f"检定值{anum} {result}≤{anum//5} 极难成功"
-        elif result <= anum // 2:
-            s += f"检定值{anum} {result}≤{anum//2} 困难成功"
-        elif result <= anum:
-            s += f"检定值{anum} {result}≤{anum} 成功"
-        else:
-            s += f"检定值{anum} {result}>{anum} 失败"
-    return s
 
 def get_group_id(message):
     return "oracle"
-
 
 class Cards():
     def __init__(self):
@@ -226,14 +202,6 @@ def show_handler(message, args):
             d = inv.output() + "\n"
             d += inv.skills_output()
             r.append(d)
-    #elif re.search(r"\[cq:at,qq=\d+\]", args):
-    #    qid = re.search(r"\[cq:at,qq=\d+\]", args).group()[10:-1]
-    #    if cards.get(message, qid=qid):
-    #        card_data = cards.get(message, qid=qid)
-    #        inv = Investigator().load(card_data)
-    #        r.append("[Oracle] 查询到人物卡: \n" + inv.output())
-    #        if args[0] == "s":
-    #            r.append(inv.skills_output())
     else:
         r.append("[Oracle] 参数异常.")
     if not r:

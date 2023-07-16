@@ -1,5 +1,9 @@
+from botpy import logging
+
 import re
 import random
+
+_log = logging.get_logger()
 
 class Dice:
     def __init__(self, roll_string=""):
@@ -60,6 +64,29 @@ class Dice:
     
     def __str__(self):
         return self.db
+
+def expr(d, anum):
+    d.roll()
+    result = d.calc()
+    s = f"{d}={(d.detail_expr())}={result}"
+    _log.debug(d.detail_expr())
+    if anum:
+        s += "\n"
+        if result == 100:
+            s += "大失败！"
+        elif anum < 50 and result > 95:
+            s += f"{result}>95 大失败！"
+        elif result == 1:
+            s += "大成功！"
+        elif result <= anum // 5:
+            s += f"检定值{anum} {result}≤{anum//5} 极难成功"
+        elif result <= anum // 2:
+            s += f"检定值{anum} {result}≤{anum//2} 困难成功"
+        elif result <= anum:
+            s += f"检定值{anum} {result}≤{anum} 成功"
+        else:
+            s += f"检定值{anum} {result}>{anum} 失败"
+    return s
 
 if __name__ == "__main__":
     try:

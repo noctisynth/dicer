@@ -1,17 +1,16 @@
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from botpy import logging, BotAPI
+from botpy import logging
 from botpy.message import Message
 from botpy.ext.cog_yaml import read
 from pathlib import Path
 
-from dices import st, en, rd0, ra, at, dam
-from madness import ti, li
 from investigator import Investigator
-from san_check import sc
-from cards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
+from agent import Agent
+from cocutils import sc, st, at, dam, en, rd0, ra, ti, li
+from coccards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
 from decorators import Commands, translate_punctuation
-from messages import help_message, version
+from cocmessages import help_message, version
 
 import os
 import re
@@ -90,9 +89,9 @@ async def debughandler(api, message: Message, params=None):
         await message.reply(content="[Oracle] 错误, 我无法解析你的指令.")
     return True
 
-@Commands(name=(".coc", ".gen"))
+@Commands(name=(".coc"))
 async def cochandler(api, message: Message, params=None):
-    args = format_msg(message, begin=(".coc", ".gen"))
+    args = format_msg(message, begin=".coc")
     if len(args) > 1:
         _log.info("指令错误, 驳回.")
         await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
@@ -109,6 +108,27 @@ async def cochandler(api, message: Message, params=None):
     if 15 <= args < 90:
         cache_cards.update(message, inv.__dict__, save=False)
         await message.reply(content=str(inv.output()))
+    return True
+
+@Commands(name=(".scp"))
+async def scphandler(api, message: Message, params=None):
+    args = format_msg(message, begin=".scp")
+    if len(args) > 1:
+        _log.info("指令错误, 驳回.")
+        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
+        return False
+    try:
+        if len(args) == 0:
+            raise ValueError
+        args = int(args[0])
+    except ValueError:
+        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
+        args = 20
+    agt = Agent()
+    await message.reply(content=agt.age_check(args))
+    if 15 <= args < 90:
+        scp_cache_cards.update(message, agt.__dict__, save=False)
+        await message.reply(content=str(agt.output()))
     return True
 
 @Commands(name=(".show", ".display"))

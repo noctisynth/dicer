@@ -1,26 +1,63 @@
-import random
-
-from typing import Optional
-from messages import help_messages, help_message
-from cards import cards, attrs_dict, Investigator, expr
-from dicer import Dice
+from cocmessages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
+from coccards import cards
 from botpy import logging
+from dicer import Dice
+from typing import Optional
+from coccards import cards, attrs_dict, Investigator, expr
+
+import random
 
 _log = logging.get_logger()
 
-class Mylist(list):
-    def next(self, index: int):
-        if index < self.__len__()-1:
-            return self[index+1]
+def sc(arg, event):
+    reply = []
+    try:
+        args = arg.split(" ")
+        args = list(filter(None, args))
+        using_card = False
+        s_and_f = args[0].split("/")
+        success = Dice().parse(s_and_f[0])
+        success.roll()
+        success = success.calc()
+        failure = Dice().parse(s_and_f[1])
+        failure.roll()
+        failure = failure.calc()
+        if len(args) > 1:
+            card = {"san": int(args[1]), "name": "未指定调查员"}
+            reply.append("[Oracle] 用户指定了应当检定的 SAN 值, 这会使得本次检定不会被记录.")
+            using_card = False
         else:
-            return ""
-
-def dhr(t, o):
-    if t == 0 and o == 0:
-        return 100
-    else:
-        return t*10+o
-
+            card = cards.get(event)
+            using_card = True
+        r = Dice().roll().calc()
+        s = f"[Oracle] 调查员: {card['name']}\n"
+        s += f"检定精神状态: {card['san']}\n"
+        s += f"理智检定值: {r}, "
+        if r <= card["san"]:
+            down = success
+            s += "检定成功.\n"
+        else:
+            down = failure
+            s += "检定失败.\n"
+        s += f"{card['name']} 理智降低了 {down} 点, "
+        if down >= card["san"]:
+            s += "陷入了永久性疯狂.\n"
+        elif down >= (card["san"] // 5):
+            s += "陷入了不定性疯狂.\n"
+        elif down >= 5:
+            s += "陷入了临时性疯狂.\n"
+        else:
+            s += "未受到严重影响.\n"
+        card["san"] -= down
+        if card["san"] <= 0:
+            card["san"] = 0
+        s += f"当前 {card['name']} 的 SAN 值为: {card['san']}"
+        reply.append(s)
+        if using_card:
+            cards.update(event, card)
+        return reply
+    except:
+        return help_messages.sc
 
 def st():
     result = random.randint(1, 20)
@@ -75,21 +112,6 @@ def dam(args, message):
         r += "."
     cards.update(message, card)
     return r
-        
-
-def en(args, message):
-    try:
-        arg = int(args[1])
-    except ValueError:
-        return help_messages.en
-    check = random.randint(1, 100)
-    if check > arg or check > 95:
-        plus = random.randint(1, 10)
-        r = "判定值%d, 判定成功, 技能成长%d+%d=%d" % (check, arg, plus, arg+plus)
-        return r + "\n温馨提示: 如果技能提高到90%或更高, 增加2D6理智点数。"
-    else:
-        return "判定值%d, 判定失败, 技能无成长。" % check
-
 
 def rd0(arg: str) -> str:
     _log.debug(str(arg))
@@ -163,4 +185,54 @@ def ra(args, event):
         r += expr(d, anum)
     return r
 
-    
+def ti():
+    i = random.randint(1, 10)
+    r = "临时疯狂判定1D10=%d\n" % i
+    r += temporary_madness[i-1]
+    if i == 9:
+        j = random.randint(1, 100)
+        r += "\n恐惧症状为：\n"
+        r += phobias[j-1]
+    elif i == 10:
+        j = random.randint(1, 100)
+        r += "\n狂躁症状为：\n"
+        r += manias[j-1]
+    r += "\n该症状将会持续1D10=%d" % random.randint(1, 10)
+    return r
+
+def li():
+    i = random.randint(1, 10)
+    r = "总结疯狂判定1D10=%d\n" % i
+    r += madness_end[i-1]
+    if i in [2, 3, 6, 9, 10]:
+        r += "\n调查员将在1D10=%d小时后醒来" % random.randint(1, 10)
+    if i == 9:
+        j = random.randint(1, 100)
+        r += "\n恐惧症状为：\n"
+        r += phobias[j-1]
+    elif i == 10:
+        j = random.randint(1, 100)
+        r += "\n狂躁症状为：\n"
+        r += manias[j-1]
+    return r
+
+
+# 未验证指令
+def dhr(t, o):
+    if t == 0 and o == 0:
+        return 100
+    else:
+        return t*10+o
+
+def en(args, message):
+    try:
+        arg = int(args[1])
+    except ValueError:
+        return help_messages.en
+    check = random.randint(1, 100)
+    if check > arg or check > 95:
+        plus = random.randint(1, 10)
+        r = "判定值%d, 判定成功, 技能成长%d+%d=%d" % (check, arg, plus, arg+plus)
+        return r + "\n温馨提示: 如果技能提高到90%或更高, 增加2D6理智点数。"
+    else:
+        return "判定值%d, 判定失败, 技能无成长。" % check

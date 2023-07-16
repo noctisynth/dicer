@@ -1,6 +1,6 @@
-version = "2.3.2alpha15"
+version = "2.4.0alpha16"
 
-class Help_messages():
+class Coc_Help_Messages():
     def __init__(self):
         self.main = f"""欧若可骰娘 Version {version}
 此骰娘基于腾讯QQ机器人(botpy)搭建, \
@@ -10,6 +10,7 @@ class Help_messages():
 
 .help 帮助信息
 .coc  进行车卡, 完成coc角色作成
+.scp  进行车卡, 完成scp角色作成
 .r    投掷指令 例如:
             .r 10 100 (10D100)
         d   制定骰子面数
@@ -79,7 +80,7 @@ class Help_messages():
         talent: 其他任意技能名
         该命令支持多个参数混合使用, 可以一次指定多个技能名, 使用空格隔开"""
 
-help_messages = Help_messages()
+help_messages = Coc_Help_Messages()
 
 def help_message(args: str):
     if args in help_messages.__dict__.keys():

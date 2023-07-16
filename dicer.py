@@ -57,6 +57,9 @@ class Dice:
     
     def get_total(self):
         return self.total
+    
+    def __str__(self):
+        return self.db
 
 if __name__ == "__main__":
     try:

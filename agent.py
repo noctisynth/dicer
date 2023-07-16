@@ -30,7 +30,7 @@ class Agent(object):
         }
         attr = prop
         total = 20 - len(prop)
-        dice = Dice("1d8")
+        dice = Dice("1d8", explode=True)
         for _ in range(total):
             name = random.choice(list(prop.keys()))
             prop[name] += 1
@@ -47,7 +47,7 @@ class Agent(object):
         if self.age != 20:
             return
         if age < 15:
-            return "[scpdicer] 年龄过小, 无法担当基金会特工."
+            return "[scpdicer] 年龄过小, 无法担任基金会特工."
         elif age >= 90:
             return "该特工已经被清理, 他(或者她)年龄过大, 显然是一个需要被清理的异常."
         self.age = age

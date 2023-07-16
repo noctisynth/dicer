@@ -6,13 +6,14 @@ import random
 _log = logging.get_logger()
 
 class Dice:
-    def __init__(self, roll_string=""):
+    def __init__(self, roll_string="", explode=False):
         self.roll_string = roll_string
-        self.parse(roll_string=self.roll_string)
+        self.parse(roll_string=self.roll_string, explode=explode)
         self.results = []
         self.total = 0
 
-    def parse(self, roll_string=""):
+    def parse(self, roll_string="", explode=False):
+        self.explode = explode
         if roll_string:
             self.roll_string = roll_string
         
@@ -46,7 +47,20 @@ class Dice:
             self.results = 0
             self.total = 0
             return self
-        self.results = [random.randint(1, self.b) for _ in range(self.a)]
+        self.results = []
+        for _ in range(self.a):
+            result = random.randint(1, self.b)
+            if self.explode and self.b == 8:
+                result2 = random.randint(1, 10)
+                result += result2
+                if result2 == 10:
+                    result3 = random.randint(1, 12)
+                    result += result3
+                    if result3 == 12:
+                        result4 = random.randint(1, 20)
+                        result += result4
+            self.results += [result]
+
         self.total = sum(self.results) + self.x
         return self
 

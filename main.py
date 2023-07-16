@@ -9,6 +9,7 @@ from investigator import Investigator
 from agent import Agent
 from cocutils import sc, st, at, dam, en, rd0, ra, ti, li
 from coccards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
+from scpcards import _scp_cachepath, scp_cards, scp_cache_cards, scp_set_handler, scp_show_handler, scp_del_handler
 from decorators import Commands, translate_punctuation
 from cocmessages import help_message, version
 
@@ -110,35 +111,13 @@ async def cochandler(api, message: Message, params=None):
         await message.reply(content=str(inv.output()))
     return True
 
-@Commands(name=(".scp"))
-async def scphandler(api, message: Message, params=None):
-    args = format_msg(message, begin=".scp")
-    if len(args) > 1:
-        _log.info("指令错误, 驳回.")
-        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-        return False
-    try:
-        if len(args) == 0:
-            raise ValueError
-        args = int(args[0])
-    except ValueError:
-        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-        args = 20
-    agt = Agent()
-    await message.reply(content=agt.age_check(args))
-    if 15 <= args < 90:
-        scp_cache_cards.update(message, agt.__dict__, save=False)
-        await message.reply(content=str(agt.output()))
-    return True
-
-@Commands(name=(".show", ".display"))
+@Commands(name=(".show"))
 async def showhandler(api, message: Message, params=None):
     args = format_msg(message, begin=(".show", ".display"))
     sh = show_handler(message, args)
     for msg in sh:
         await message.reply(content=str(msg))
     return True
-
 
 @Commands(name=(".help", ".h"))
 async def rdhelphandler(api, message: Message, params=None):
@@ -214,7 +193,6 @@ async def schandler(api, message: Message, params=None):
     else:
         await message.reply(content=scrs)
 
-
 @Commands(name=(".set"))
 async def sethandler(api, message: Message, params=None):
     args = format_msg(message, begin=".set")
@@ -233,6 +211,50 @@ async def delhandler(api, message: Message, params=None):
         await message.reply(content=msg)
     return True
 
+@Commands(name=(".scp"))
+async def scp_handler(api, message: Message, params=None):
+    args = format_msg(message, begin=".scp")
+    if len(args) > 1:
+        _log.info("指令错误, 驳回.")
+        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
+        return False
+    try:
+        if len(args) == 0:
+            raise ValueError
+        args = int(args[0])
+    except ValueError:
+        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
+        args = 20
+    agt = Agent()
+    agt.age_check(args)
+    agt.init()
+    
+    if 15 <= args < 90:
+        scp_cache_cards.update(message, agt.__dict__, save=False)
+        await message.reply(content=str(agt.output()))
+    return True
+
+@Commands(name=(".sdel", ".sdelete"))
+async def scp_delhandler(api, message: Message, params=None):
+    args = format_str(message, begin=(".sdel", ".sdelete"))
+    for msg in scp_del_handler(message, args):
+        await message.reply(content=msg)
+    return True
+
+@Commands(name=(".sshow"))
+async def showhandler(api, message: Message, params=None):
+    args = format_msg(message, begin=".sshow")
+    sh = scp_show_handler(message, args)
+    for msg in sh:
+        await message.reply(content=str(msg))
+    return True
+
+@Commands(name=(".sset"))
+async def scp_sethandler(api, message: Message, params=None):
+    args = format_msg(message, begin=".sset")
+    await message.reply(content=scp_set_handler(message, args))
+    return True
+
 @Commands(name=(".version", ".v"))
 async def versionhandler(api, message: Message, params=None):
     args = format_str(message, begin=(".version", ".v"))
@@ -249,15 +271,23 @@ class OracleClient(botpy.Client):
             _log.info("[cocdicer] 数据文件夹未建立, 建立它.")
             os.makedirs("data")
         if not os.path.exists(_cachepath):
-            _log.info("[cocdicer] 存储文件未建立, 建立它.")
+            _log.info("[cocdicer] COC存储文件未建立, 建立它.")
             with open(_cachepath, "w", encoding="utf-8") as f:
                 f.write("{}")
+        if not os.path.exists(_scp_cachepath):
+            _log.info("[cocdicer] SCP存储文件未建立, 建立它.")
+            with open(_scp_cachepath, "w", encoding="utf-8") as f:
+                f.write("{}")
         cards.load()
+        scp_cards.load()
 
     async def on_at_message_create(self, message: Message):
         handlers = [
             testhandler,
             debughandler,
+            scp_handler,
+            scp_sethandler,
+            scp_delhandler,
             rdhelphandler,
             stcommandhandler,
             enhandler,
@@ -298,8 +328,7 @@ class FileModifiedHandler(FileSystemEventHandler):
 
 def reload_module(module_name):
     modules = {
-        "cards": [
-            "expr",
+        "coccards": [
             "_cachepath",
             "cards",
             "cache_cards",
@@ -308,22 +337,32 @@ def reload_module(module_name):
             "sa_handler",
             "del_handler"
         ],
+        "scpcards": [
+            "_scp_cachepath",
+            "scp_cards",
+            "scp_cache_cards",
+            "scp_set_handler",
+            "scp_show_handler",
+            "scp_del_handler"
+        ],
         "decorators": [
             "Commands",
             "translate_punctuation"
         ],
-        "san_check": ["sc"],
         "investigator": ["Investigator"],
-        "dices": [
+        "agent": ["Agent"],
+        "cocutils": [
+            "sc",
             "st",
             "en",
             "rd0",
             "ra",
             "at",
-            "dam"
+            "dam",
+            "ti",
+            "li"
         ],
-        "madness": ["ti", "li"],
-        "messages": [
+        "cocmessages": [
             "help_message",
             "version"
         ]
@@ -336,7 +375,7 @@ def reload_module(module_name):
             im = importlib.reload(tmodule)
             for func in funcs:
                 globals()[func] = eval(f"im.{func}")
-                if func == "cards":
+                if "cards" in func:
                     _log.info("[cocdicer] 人物卡模块被修改, 重新加载.")
                     globals()[func].load()
             _log.info(f"[cocdicer] 负载模块重载完成.")

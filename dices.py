@@ -41,11 +41,11 @@ def st():
     return "D20=%d: 命中了%s" % (result, rstr)
 
 def at(args):
-    if not args:
-        d = Dice().parse(args[0]).roll()
+    if args:
+        d = Dice().parse(args).roll()
     else:
         d = Dice().parse("1d6").roll()
-    return "[Oracle] 投掷 1D6={d}\n造成了 {d}点 伤害.".format(d=d.calc())
+    return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
 
 def dam(args, message):
     card = cards.get(message)

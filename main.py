@@ -127,7 +127,7 @@ async def attackhandler(api, message: Message, params=None):
 
 @Commands(name=(".dam"))
 async def damhandler(api, message: Message, params=None):
-    args = format_msg(message, begin=(".dam", ".damage"))
+    args = format_str(message, begin=(".dam", ".damage"))
     await message.reply(content=dam(args, message))
     return True
 
@@ -255,6 +255,7 @@ class FileModifiedHandler(FileSystemEventHandler):
 def reload_module(module_name):
     modules = {
         "cards": [
+            "expr",
             "_cachepath",
             "cards",
             "cache_cards",

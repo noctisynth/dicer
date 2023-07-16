@@ -4,8 +4,7 @@ import random
 class Dice:
     def __init__(self, roll_string=""):
         self.roll_string = roll_string
-        self.parse(self.roll_string)
-        self.db = self.roll_string.upper()
+        self.parse(roll_string=self.roll_string)
         self.results = []
         self.total = 0
 
@@ -17,6 +16,7 @@ class Dice:
             self.a = 1
             self.b = 100
             self.x = 0
+            self.db = f"{self.a}D{self.b}"
             return self
 
         pattern = r'(\d+)d(\d+)([+\-]\d+)?'
@@ -26,11 +26,13 @@ class Dice:
             self.a = int(match.group(1))
             self.b = int(match.group(2))
             self.x = int(match.group(3)) if match.group(3) else 0
+            self.db = f"{self.a}D{self.b}"
         else:
             try:
                 self.a = 1
                 self.b = int(self.roll_string)
                 self.x = 0
+                self.db = f"{self.a}D{self.b}"
             except:
                 return "[ChatGPT] Invalid roll string format. Use aDb+x format, where a, b, and x are integers."
         return self
@@ -58,10 +60,8 @@ class Dice:
 
 if __name__ == "__main__":
     try:
-        roll_string = "2d4"
-        dice = Dice()
-        dice.parse(roll_string=roll_string)
-        dice.roll()
-        print(f"{roll_string}={dice.get_total()}={dice.calc()}")
+        roll_string = "1d6"
+        dice = Dice().parse("1d6").roll()
+        print(f"{roll_string}={dice.detail_expr()}={dice.calc()}")
     except ValueError as e:
         print(e)

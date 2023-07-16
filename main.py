@@ -34,7 +34,8 @@ def format_msg(message, begin=None):
         m = re.split(r'(\d+)|([a-zA-Z]+)|([\u4e00-\u9fa5]+)', m)
         m = list(filter(None, m))
         outer += m
-    msg = list(filter(None, outer))
+    msg = outer
+    msg = list(filter(None, msg))
     _log.debug(msg)
     return msg
 

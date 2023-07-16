@@ -1,4 +1,4 @@
-version = "2.2.1alpha6"
+version = "2.2.2alpha7"
 
 class Help_messages():
     def __init__(self):

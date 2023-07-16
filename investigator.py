@@ -29,7 +29,9 @@ class Investigator(object):
         self.edu = randattr(2, 6)
         self.luc = randattr()
         self.san = self.pow
+        self.hp = self.lp_max()
         self.skills = {}
+        self.tools = {}
 
     def body_build(self) -> int:
         build = self.str + self.con
@@ -151,7 +153,7 @@ class Investigator(object):
         data += "力量: %d 体质: %d 体型: %d\n" % (self.str, self.con, self.siz)
         data += "敏捷: %d 外貌: %d 智力: %d\n" % (self.dex, self.app, self.int) 
         data += "意志: %d 教育: %d 幸运: %d\n" % (self.pow, self.edu, self.luc)
-        data += "生命值: %d 移动速度: %d SAN: %d\n" % (self.lp_max(), self.mov(), self.san)
+        data += "生命值: %d 移动速度: %d SAN: %d\n" % (self.hp, self.mov(), self.san)
         data += "DB: %s" % self.db()
         return data
 

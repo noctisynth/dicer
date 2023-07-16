@@ -1,27 +1,24 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 from investigator import Investigator
 from messages import help_messages
-from botpy import logging, BotAPI
+from botpy import logging
 from pathlib import Path
-
-import diro
+from dicer import Dice
 
 try:
     import ujson as json
 except ModuleNotFoundError:
     import json
 
-import os
-import re
-
 current_dir = Path(__file__).resolve().parent
 _cachepath = current_dir / "data" / "coc_cards.json"
 _log = logging.get_logger()
 
-def expr(d: diro.Diro, anum: Optional[int]) -> str:
+def expr(d, anum):
     d.roll()
     result = d.calc()
     s = f"{d}={(d.detail_expr())}={result}"
+    _log.debug(d.detail_expr())
     if anum:
         s += "\n"
         if result == 100:
@@ -115,6 +112,7 @@ attrs_dict: Dict[str, List[str]] = {
     "教育": ["edu", "教育"],
     "幸运": ["luc", "幸运"],
     "理智": ["san", "理智"],
+    "生命": ["hp", "生命"]
 }
 
 
@@ -295,7 +293,7 @@ def sa_handler(message, args: str):
     if not arg:
         return f"[Oracle] 错误: 目标参数不在 {attrs_dict} 之内."
     card_data = cards.get(message)
-    dices = diro.parse("")
+    dices = Dice()
     try:
         data = card_data[arg]
         if arg != "名字":

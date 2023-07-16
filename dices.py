@@ -1,10 +1,12 @@
-# 参考[OlivaDiceDocs](https://oliva.dicer.wiki/userdoc)实现的nonebot2骰娘插件
 import random
+
 from typing import Optional
-import diro
-from messages import help_messages
+from messages import help_messages, help_message
 from cards import cards, attrs_dict, Investigator, expr
-from messages import help_messages
+from dicer import Dice
+from botpy import logging
+
+_log = logging.get_logger()
 
 class Mylist(list):
     def next(self, index: int):
@@ -38,10 +40,40 @@ def st():
         rstr = "头部"
     return "D20=%d: 命中了%s" % (result, rstr)
 
+def at(args):
+    d = Dice().parse("1d6").roll()
+    return "[Oracle] 投掷 1D6={d}\n造成了 {d}点 伤害.".format(d=d.calc())
 
-def en(arg: str) -> str:
+def dam(args, message):
+    card = cards.get(message)
+    max_hp = cards["con"] + cards["siz"]
     try:
-        arg = int(arg)
+        arg = int(args[0])
+        card["hp"] -= arg
+        r = f"[Orcale] {card['name']} 失去了 {arg}点 生命"
+    except:
+        d = Dice().parse("1d6").roll()
+        card["hp"] -= d.total
+        r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
+    if cards["hp"] <= 0:
+        cards["hp"] = 0
+        r += f", 调查员 {cards['name']} 已死亡."
+    elif max_hp * 0.8 <= card["hp"] < max_hp:
+        r += f", 调查员 {cards['name']} 具有轻微伤."
+    elif max_hp * 0.6 <= cards["hp"] <= max_hp * 0.8:
+        r += f", 调查员 {cards['name']} 进入轻伤状态."
+    elif max_hp * 0.2 <= cards["hp"] <= max_hp * 0.6:
+        r += f", 调查员 {cards['name']} 身负重伤."
+    elif max_hp * 0.2 >= card["hp"]:
+        r += f", 调查员 {cards['name']} 濒死."
+    else:
+        r += "."
+    cards.update(message, card)
+        
+
+def en(args, message):
+    try:
+        arg = int(args[1])
     except ValueError:
         return help_messages.en
     check = random.randint(1, 100)
@@ -54,10 +86,14 @@ def en(arg: str) -> str:
 
 
 def rd0(arg: str) -> str:
+    _log.debug(str(arg))
     args = arg.lower().split(" ")
     d_str = args.pop(0).split("#")
+    _log.debug(str(d_str))
     try:
-        d = diro.parse(d_str.pop(0))
+        parse = d_str.pop(0)
+        d = Dice().parse(parse)
+        _log.debug(str(parse))
         time = 1
         if len(d_str) > 0:
             try:
@@ -102,7 +138,7 @@ def ra(args, event):
     else:
         t = args[-1]
 
-    d = diro.parse("")
+    d = Dice()
     time = 1
     if len(args) > 0:
         try:

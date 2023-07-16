@@ -1,4 +1,4 @@
-version = "2.2.0alpha3"
+version = "2.2.0alpha4"
 
 class Help_messages():
     def __init__(self):
@@ -50,8 +50,8 @@ class Help_messages():
         bp  奖励骰与惩罚骰, 但是遗憾的是, 该指令的算法无效
         +/- 附加计算指令, 遗憾的是, 该指令的算法无效"""
         self.sc = """.sc [int: success]/[int: failure] [int: SAN]   疯狂检定
-        success: 判定成功降低san值, 不支持或xDy语法(x与y为数字);
-        failure: 判定失败降低san值, 支持语法如上;
+        success: 判定成功降低san值, 支持aDb语法(a、b与x为数字)
+        failure: 判定失败降低san值, 支持aDb语法(a、b与x为数字)
         SAN: 当前SAN值, 缺省该参数则会自动使用该用户已保存的人物卡数据."""
         self.set = """.set [str: name] [(num or str): data]
         name: 属性名称

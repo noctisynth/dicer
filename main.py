@@ -5,7 +5,7 @@ from botpy.message import Message
 from botpy.ext.cog_yaml import read
 from pathlib import Path
 
-from dices import st, en, rd0, ra
+from dices import st, en, rd0, ra, at, dam
 from madness import ti, li
 from investigator import Investigator
 from san_check import sc
@@ -118,35 +118,32 @@ async def stcommandhandler(api, message: Message, params=None):
     return True
 
 
+@Commands(name=(".at"))
+async def attackhandler(api, message: Message, params=None):
+    await message.reply(content=at())
+    return True
+
+
+@Commands(name=(".dam"))
+async def damhandler(api, message: Message, params=None):
+    args = format_msg(message, begin=(".dam", ".damage"))
+    await message.reply(content=dam(args, message))
+    return True
+
+
 @Commands(name=(".en"))
 async def enhandler(api, message: Message, params=None):
     args = format_str(message, begin=".en")
-    await message.reply(content="错误: 此功能正在开发中, 暂时无法正常使用.")
-    # await message.reply(content=en(args))
+    await message.reply(content=en(args, message))
     return True
 
 
 @Commands(name=(".ra"))
 async def rahandler(api, message: Message, params=None):
     args = format_msg(message, begin=".ra")
-    args = list(filter(None, args))
     await message.reply(content=ra(args, message))
     return True
-    
 
-#@Commands(name=(".rh"))
-#async def rhcommandhandler(api, message: Message, params=None):
-#    """
-#    args = str(event.get_message())[3:].strip()
-#    uid = event.get_user_id()
-#    if args and not("." in args):
-#        print("get here")
-#        if isinstance(bot, V12Bot):
-#            from nonebot.adapters.onebot.v12 import  MessageSegment
-#            await bot.send_message(detail_type="private", user_id=uid, message=[MessageSegment.text(rd0(args))])
-#        elif isinstance(bot, V11Bot):
-#            await bot.send_private_msg(user_id=uid, message=rd0(args))
-#    """
 
 @Commands(name=(".r"))
 async def rdcommandhandler(api, message: Message, params=None):
@@ -170,7 +167,12 @@ async def licommandhandler(api, message: Message, params=None):
 @Commands(name=(".sc"))
 async def schandler(api, message: Message, params=None):
     args = format_str(message, begin=".sc")
-    await message.reply(content=sc(args, message))
+    scrs = sc(args, message)
+    if isinstance(scrs, list):
+        for scr in scrs:
+            await message.reply(content=scr)
+    else:
+        await message.reply(content=scrs)
 
 
 @Commands(name=(".set"))
@@ -199,7 +201,7 @@ async def versionhandler(api, message: Message, params=None):
 
 class OracleClient(botpy.Client):
     async def on_ready(self):
-        if not os.path.exists("data"):
+        if not current_dir / "data":
             _log.info("[cocdicer] 数据文件夹未建立, 建立它.")
             os.makedirs("data")
         if not os.path.exists(_cachepath):
@@ -214,7 +216,8 @@ class OracleClient(botpy.Client):
             rdhelphandler,
             stcommandhandler,
             enhandler,
-            #rhcommandhandler,
+            attackhandler,
+            damhandler,
             rahandler,
             rdcommandhandler,
             cochandler,
@@ -269,7 +272,9 @@ def reload_module(module_name):
             "st",
             "en",
             "rd0",
-            "ra"
+            "ra",
+            "at",
+            "dam"
         ],
         "madness": ["ti", "li"],
         "messages": [
@@ -277,9 +282,9 @@ def reload_module(module_name):
             "version"
         ]
     }
-    _log.info(f"[cocdicer] 模块 {module_name} 被修改了, 重新加载负载模块.")
     for module in modules:
         if module_name == module:
+            _log.info(f"[cocdicer] 模块 {module_name} 被修改了, 重新加载负载模块.")
             funcs = modules[module]
             tmodule = sys.modules[module_name]
             im = importlib.reload(tmodule)
@@ -288,8 +293,8 @@ def reload_module(module_name):
                 if func == "cards":
                     _log.info("[cocdicer] 人物卡模块被修改, 重新加载.")
                     globals()[func].load()
+            _log.info(f"[cocdicer] 负载模块重载完成.")
             break
-    _log.info(f"[cocdicer] 负载模块重载完成.")
 
 def monitor_folder(folder_path, target=None):
     thread = threading.Thread(target=target)

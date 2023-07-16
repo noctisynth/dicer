@@ -120,14 +120,14 @@ async def stcommandhandler(api, message: Message, params=None):
 
 @Commands(name=(".at"))
 async def attackhandler(api, message: Message, params=None):
-    args = format_msg(message, begin=(".at", ".attack"))
+    args = format_str(message, begin=(".at", ".attack"))
     await message.reply(content=at(args))
     return True
 
 
 @Commands(name=(".dam"))
 async def damhandler(api, message: Message, params=None):
-    args = format_str(message, begin=(".dam", ".damage"))
+    args = format_msg(message, begin=(".dam", ".damage"))
     await message.reply(content=dam(args, message))
     return True
 

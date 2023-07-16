@@ -46,7 +46,7 @@ def at(args):
 
 def dam(args, message):
     card = cards.get(message)
-    max_hp = cards["con"] + cards["siz"]
+    max_hp = card["con"] + card["siz"]
     try:
         arg = int(args[0])
         card["hp"] -= arg

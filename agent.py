@@ -43,7 +43,7 @@ class Agent(object):
 
         self.__dict__.update(attr)
 
-    def age_check(self, age=20) -> str:
+    def age_check(self, age=20):
         if self.age != 20:
             return
         if age < 15:
@@ -58,7 +58,7 @@ class Agent(object):
         data += "强度: %d 命运: %d\n" % (self.str, self.fte)
         data += "感知: %d 魅力: %d\n" % (self.per, self.chr) 
         data += "灵巧: %d 情报: %d\n" % (self.dex, self.int)
-        data += "健康: %d 意志: %d\n" % (self.hth, self.wil)
+        data += "健康: %d 意志: %d" % (self.hth, self.wil)
         return data
 
     def skills_output(self) -> str:

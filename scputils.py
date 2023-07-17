@@ -67,7 +67,7 @@ def sra(args, event):
         return "错误: 参数过多(最多2需要但%d给予)." % len(args)
     
     if len(args) == 2:
-        difficulty = args[1]
+        difficulty = int(args[1])
     else:
         difficulty = 12
 

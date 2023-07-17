@@ -10,6 +10,7 @@ from agent import Agent
 from cocutils import sc, st, at, dam, en, rd0, ra, ti, li
 from coccards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
 from scpcards import _scp_cachepath, scp_cards, scp_cache_cards, scp_set_handler, scp_show_handler, scp_del_handler
+from scputils import sra
 from decorators import Commands, translate_punctuation
 from cocmessages import help_message, version
 
@@ -241,6 +242,12 @@ async def scp_delhandler(api, message: Message, params=None):
         await message.reply(content=msg)
     return True
 
+@Commands(name=(".sra"))
+async def scp_rahandler(api, message: Message, params=None):
+    args = format_msg(message, begin=".sra")
+    await message.reply(content=sra(args, message))
+    return True
+
 @Commands(name=(".sshow"))
 async def showhandler(api, message: Message, params=None):
     args = format_msg(message, begin=".sshow")
@@ -288,6 +295,7 @@ class OracleClient(botpy.Client):
             scp_handler,
             scp_sethandler,
             scp_delhandler,
+            scp_rahandler,
             rdhelphandler,
             stcommandhandler,
             enhandler,
@@ -361,6 +369,9 @@ def reload_module(module_name):
             "dam",
             "ti",
             "li"
+        ],
+        "scputils": [
+            "sra",
         ],
         "cocmessages": [
             "help_message",

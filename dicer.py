@@ -8,9 +8,11 @@ _log = logging.get_logger()
 class Dice:
     def __init__(self, roll_string="", explode=False):
         self.roll_string = roll_string
+        self.dices = []
         self.parse(roll_string=self.roll_string, explode=explode)
         self.results = []
         self.total = 0
+        self.great = False
 
     def parse(self, roll_string="", explode=False):
         self.explode = explode
@@ -22,6 +24,7 @@ class Dice:
             self.b = 100
             self.x = 0
             self.db = f"{self.a}D{self.b}"
+            self.dices += [f"D{self.b}"] * self.a
             return self
 
         pattern = r'(\d+)d(\d+)([+\-]\d+)?'
@@ -32,12 +35,14 @@ class Dice:
             self.b = int(match.group(2))
             self.x = int(match.group(3)) if match.group(3) else 0
             self.db = f"{self.a}D{self.b}"
+            self.dices += [f"D{self.b}"] * self.a
         else:
             try:
                 self.a = 1
                 self.b = int(self.roll_string)
                 self.x = 0
                 self.db = f"{self.a}D{self.b}"
+                self.dices += [f"D{self.b}"] * self.a
             except:
                 return "[ChatGPT] Invalid roll string format. Use aDb+x format, where a, b, and x are integers."
         return self
@@ -55,20 +60,25 @@ class Dice:
             if self.explode and self.b == 8:
                 if result == 1:
                     result -= 1
+                self.dices.append("D10")
                 result2 = random.randint(1, 10)
                 if result2 == 1:
                     result -= 1
                 result += result2
                 if result2 == 10:
+                    self.dices.append("D12")
                     result3 = random.randint(1, 12)
                     if result3 == 1:
                         result -= 1
                     result += result3
                     if result3 == 12:
+                        self.dices.append("D20")
                         result4 = random.randint(1, 20)
                         if result4 == 1:
                             result -= 1
                         result += result4
+                        if result4 == 20:
+                            self.great = True
             self.results += [result]
 
         self.total = sum(self.results) + self.x
@@ -111,6 +121,32 @@ def expr(d, anum):
         else:
             s += f"检定值{anum} {result}>{anum} 失败"
     return s
+
+def scp_doc(result, difficulty, agent=None, great=False):
+    if not agent:
+        agent = "该特工"
+    if difficulty > 25:
+        return f"检定结果: 致命失败.\n检定结论: {agent} 在试图挑战数学、挑战科学、挑战真理, 尝试达成一个不可能事件, {agent} 毫无疑问获得了 致命失败."
+    r = f"事件难度: {difficulty}\n"
+    r += f"检定数据: {result}\n"
+    if great:
+        r += "检定结果: 关键成功.\n"
+        if result <= difficulty:
+            r += "检定结论: 有时候, 一次普通的成功或许会大幅度的牵扯到整个未来."
+        else:
+            r += "检定结论: 被 Administrator 所眷顾的人, 毫无疑问这是一次完美的成功."
+    elif result > difficulty:
+        r += "检定结果: 成功.\n"
+        r += "检定结论: 命运常常给予人们无声的嗤笑, 一次成功当然是好事, 但也要警惕这是否是步入深渊的开始."
+    elif result < (difficulty/2):
+        r += "检定结果: 致命失败.\n"
+        r += "检定结论: 努力或许的确有用处, 但是努力只是提高运气的一种手段. 在低劣的运气面前, 任何努力都是没有用的."
+    elif result < difficulty:
+        r += "检定结果: 失败.\n"
+        r += "检定结论: 小心, 错误的决定或许会让你步入深渊."
+    else:
+        r += "请重新检定."
+    return r
 
 if __name__ == "__main__":
     try:

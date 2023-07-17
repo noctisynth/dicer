@@ -50,14 +50,24 @@ class Dice:
         self.results = []
         for _ in range(self.a):
             result = random.randint(1, self.b)
+            if result == 1:
+                result -= 1
             if self.explode and self.b == 8:
+                if result == 1:
+                    result -= 1
                 result2 = random.randint(1, 10)
+                if result2 == 1:
+                    result -= 1
                 result += result2
                 if result2 == 10:
                     result3 = random.randint(1, 12)
+                    if result3 == 1:
+                        result -= 1
                     result += result3
                     if result3 == 12:
                         result4 = random.randint(1, 20)
+                        if result4 == 1:
+                            result -= 1
                         result += result4
             self.results += [result]
 

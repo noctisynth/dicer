@@ -14,6 +14,7 @@ class Agent(object):
         self.chr = 0
         self.int = 0
         self.wil = 0
+        self.dices = {}
         self.skills = {}
         self.tools = {}
 
@@ -28,20 +29,31 @@ class Agent(object):
             "int": 1,
             "wil": 1
         }
-        attr = prop
+        attr = {
+            "str": 1,
+            "hth": 1,
+            "per": 1,
+            "dex": 1,
+            "fte": 1,
+            "chr": 1,
+            "int": 1,
+            "wil": 1
+        }
         total = 20 - len(prop)
-        dice = Dice("1d8", explode=True)
         for _ in range(total):
             name = random.choice(list(prop.keys()))
             prop[name] += 1
 
         for p in prop.keys():
             num = prop[p]
-            attr[p] = 0
-            for i in range(num):
-                attr[p] += dice.roll().total
+            dice = Dice(f"{num}d8", explode=True)
+            dice.roll()
+            prop[p] = dice.total
+            attr[p] = dice.dices
 
-        self.__dict__.update(attr)
+        self.dices = attr
+        print(attr)
+        self.__dict__.update(prop)
 
     def age_check(self, age=20):
         if self.age != 20:

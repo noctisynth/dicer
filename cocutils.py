@@ -1,9 +1,8 @@
 from cocmessages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
-from coccards import cards
 from botpy import logging
-from dicer import Dice
+from dicer import Dice, expr
 from typing import Optional
-from coccards import cards, attrs_dict, Investigator, expr
+from coccards import cards, attrs_dict, Investigator
 
 import random
 

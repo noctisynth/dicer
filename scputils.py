@@ -81,11 +81,14 @@ def sra(args, event):
             dices: list = eval("inv.dices['{prop}']".format(prop=alias[0]))
             is_base = True
             break
+    is_skill = False
     if not is_base:
         for skill in inv.skills:
             if args[0] == skill:
                 v = inv.skills[skill]
                 break
+    if not is_base and not is_skill:
+        return "错误: 没有这个数据或技能."
     result = 0
     all_dices = []
     if len(dices) > 4:

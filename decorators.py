@@ -5,6 +5,8 @@ from typing import Union
 from botpy import BotAPI
 from botpy.message import Message
 
+import re
+
 def translate_punctuation(string):
     punctuation_mapping = {
         '，': ',',
@@ -31,13 +33,17 @@ def translate_punctuation(string):
 class Commands:
     def __init__(self, name: Union[tuple, str]):
         self.commands = name
+        self.regex = "[<](.*?)[>]"
 
     def __call__(self, func):
         @wraps(func)
         async def decorated(*args, **kwargs):
-            api = kwargs["api"]
-            message = kwargs["message"]
-            content = translate_punctuation(message.content)
+            api: BotAPI = kwargs["api"]
+            message: Message = kwargs["message"]
+            content = re.sub(self.regex, "", translate_punctuation(message.content.lower())).strip(" ")
+            if content.startswith("/"):
+                content = "." + content[1:]
+            message.content = content
             if isinstance(self.commands, tuple):
                 for command in self.commands:
                     if command in content:

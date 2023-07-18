@@ -3,6 +3,7 @@ from watchdog.events import FileSystemEventHandler
 from botpy import logging
 from botpy.message import Message
 from botpy.ext.cog_yaml import read
+from botpy.types.message import MarkdownPayload
 from pathlib import Path
 
 from investigator import Investigator
@@ -61,6 +62,10 @@ async def testhandler(api, message: Message, params=None):
     msg = format_msg(message)
     if not msg:
         msg = "[]"
+    if msg[-1] == "markdown":
+        mp = MarkdownPayload(content="#Markdown 消息测试")
+        await api.post_message(channel_id=message.channel_id, msg_id=message.id, markdown=mp)
+        return True
     await message.reply(content=str(msg))
     return True
 
@@ -69,7 +74,7 @@ async def debughandler(api, message: Message, params=None):
     global DEBUG
     args = format_msg(message, begin=".debug")
     if args:
-        print(args)
+        _log.debug(args)
         if args[0] == "off":
             DEBUG = False
             _log.setLevel(_logging.INFO)
@@ -269,27 +274,7 @@ async def versionhandler(api, message: Message, params=None):
     return True
 
 class OracleClient(botpy.Client):
-    async def on_ready(self):
-        global DEBUG
-        if DEBUG:
-            _log.setLevel(_logging.DEBUG)
-            _log.info("[cocdicer] DEBUG 模式已启动.")
-        if not current_dir / "data":
-            _log.info("[cocdicer] 数据文件夹未建立, 建立它.")
-            os.makedirs("data")
-        if not os.path.exists(_cachepath):
-            _log.info("[cocdicer] COC存储文件未建立, 建立它.")
-            with open(_cachepath, "w", encoding="utf-8") as f:
-                f.write("{}")
-        if not os.path.exists(_scp_cachepath):
-            _log.info("[cocdicer] SCP存储文件未建立, 建立它.")
-            with open(_scp_cachepath, "w", encoding="utf-8") as f:
-                f.write("{}")
-        cards.load()
-        scp_cards.load()
-
-    async def on_at_message_create(self, message: Message):
-        handlers = [
+    handlers = [
             testhandler,
             debughandler,
             scp_handler,
@@ -314,7 +299,34 @@ class OracleClient(botpy.Client):
             sahandler,
             versionhandler
         ]
-        for handler in handlers:
+    async def on_ready(self):
+        global DEBUG
+        if DEBUG:
+            _log.setLevel(_logging.DEBUG)
+            _log.info("[cocdicer] DEBUG 模式已启动.")
+        if not current_dir / "data":
+            _log.info("[cocdicer] 数据文件夹未建立, 建立它.")
+            os.makedirs("data")
+        if not os.path.exists(_cachepath):
+            _log.info("[cocdicer] COC存储文件未建立, 建立它.")
+            with open(_cachepath, "w", encoding="utf-8") as f:
+                f.write("{}")
+        if not os.path.exists(_scp_cachepath):
+            _log.info("[cocdicer] SCP存储文件未建立, 建立它.")
+            with open(_scp_cachepath, "w", encoding="utf-8") as f:
+                f.write("{}")
+        cards.load()
+        scp_cards.load()
+
+    async def on_at_message_create(self, message: Message):
+        for handler in self.handlers:
+            if await handler(api=self.api, message=message, params=None):
+                return
+    
+    async def on_message_create(self, message: Message):
+        if message.mentions:
+            return
+        for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
                 return
 
@@ -428,7 +440,7 @@ def monitor_folder(folder_path, target=None):
         exit()
 
 def main():
-    intents = botpy.Intents(public_guild_messages=True)
+    intents = botpy.Intents.all()
     client = OracleClient(intents=intents)
     run = lambda: client.run(appid=config["appid"], token=config["token"])
     monitor_folder(current_dir, target=run)

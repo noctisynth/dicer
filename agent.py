@@ -52,7 +52,6 @@ class Agent(object):
             attr[p] = dice.dices
 
         self.dices = attr
-        print(attr)
         self.__dict__.update(prop)
 
     def age_check(self, age=20):

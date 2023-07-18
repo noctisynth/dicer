@@ -89,7 +89,7 @@ def sra(args, event):
                 break
     if not is_base and not is_skill:
         return "错误: 没有这个数据或技能."
-    result = 0
+    
     all_dices = []
     if len(dices) > 4:
         while True:
@@ -101,12 +101,16 @@ def sra(args, event):
     elif len(dices) <= 4:
         all_dices = dices
     
+    results = []
     great = False
     for dice in all_dices:
         dice = Dice("1"+dice.lower()).roll()
-        result += dice.total
+        results.append(dice.total)
         if dice.great == True:
             great = True
+    result = max(results)
+    results.remove(result)
+    result += max(results)
     r = scp_doc(result, difficulty, agent=inv.name, great=great)
     return r
 

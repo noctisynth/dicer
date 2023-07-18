@@ -249,7 +249,7 @@ async def scp_rahandler(api, message: Message, params=None):
     return True
 
 @Commands(name=(".sshow"))
-async def showhandler(api, message: Message, params=None):
+async def scp_showhandler(api, message: Message, params=None):
     args = format_msg(message, begin=".sshow")
     sh = scp_show_handler(message, args)
     for msg in sh:
@@ -296,6 +296,7 @@ class OracleClient(botpy.Client):
             scp_sethandler,
             scp_delhandler,
             scp_rahandler,
+            scp_showhandler,
             rdhelphandler,
             stcommandhandler,
             enhandler,

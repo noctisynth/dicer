@@ -1,5 +1,5 @@
 import random
-from dicer import Dice
+from utils.dicer import Dice
 
 class Agent(object):
     def __init__(self) -> None:

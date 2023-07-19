@@ -1,18 +1,18 @@
 from typing import Dict, List
-from investigator import Investigator
-from cocmessages import help_messages
+from coc.investigator import Investigator
+from utils.messages import help_messages
 from botpy import logging
 from pathlib import Path
-from dicer import Dice, expr
+from utils.dicer import Dice, expr
+from utils.utils import _coc_cachepath as _cachepath, logger as _log
 
 try:
     import ujson as json
 except ModuleNotFoundError:
     import json
 
-current_dir = Path(__file__).resolve().parent
-_cachepath = current_dir / "data" / "coc_cards.json"
-_log = logging.get_logger()
+
+
 
 def get_group_id(message):
     return "oracle"

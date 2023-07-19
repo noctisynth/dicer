@@ -1,18 +1,14 @@
 from typing import Dict, List
-from agent import Agent
-from cocmessages import help_messages
-from botpy import logging
+from scp.agent import Agent
+from utils.messages import help_messages
+from utils.utils import logger as _log, _scp_cachepath
 from pathlib import Path
-from dicer import Dice, expr
+from utils.dicer import Dice, expr
 
 try:
     import ujson as json
 except ModuleNotFoundError:
     import json
-
-current_dir = Path(__file__).resolve().parent
-_scp_cachepath = current_dir / "data" / "scp_cards.json"
-_log = logging.get_logger()
 
 def get_group_id(message):
     return "oracle"

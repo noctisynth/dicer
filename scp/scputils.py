@@ -1,8 +1,8 @@
-from cocmessages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
+from utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
 from botpy import logging
-from dicer import Dice, scp_doc
+from utils.dicer import Dice, scp_doc
 from typing import Optional
-from scpcards import scp_cards, attrs_dict, Agent
+from scp.scpcards import scp_cards, attrs_dict, Agent
 
 import random
 

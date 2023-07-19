@@ -6,14 +6,15 @@ from botpy.ext.cog_yaml import read
 from botpy.types.message import MarkdownPayload
 from pathlib import Path
 
-from investigator import Investigator
-from agent import Agent
-from cocutils import sc, st, at, dam, en, rd0, ra, ti, li
-from coccards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
-from scpcards import _scp_cachepath, scp_cards, scp_cache_cards, scp_set_handler, scp_show_handler, scp_del_handler
-from scputils import sra
-from decorators import Commands, translate_punctuation
-from cocmessages import help_message, version
+from coc.investigator import Investigator
+from scp.agent import Agent
+from coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li
+from coc.coccards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
+from scp.scpcards import _scp_cachepath, scp_cards, scp_cache_cards, scp_set_handler, scp_show_handler, scp_del_handler
+from scp.scputils import sra
+from utils.decorators import Commands, translate_punctuation
+from utils.messages import help_message, version
+from utils.utils import logger as _log
 
 import os
 import re
@@ -27,7 +28,6 @@ import logging as _logging
 DEBUG = False
 config = read(os.path.join(os.path.dirname(__file__), "config.yaml"))
 current_dir = Path(__file__).resolve().parent
-_log = logging.get_logger()
 
 def format_msg(message, begin=None):
     msg = format_str(message, begin=begin).split(" ")

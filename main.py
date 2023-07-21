@@ -24,6 +24,9 @@ import threading
 import time
 import importlib
 import logging as _logging
+import main
+import types
+import asyncio
 
 DEBUG = False
 config = read(os.path.join(os.path.dirname(__file__), "config.yaml"))
@@ -349,7 +352,33 @@ class FileModifiedHandler(FileSystemEventHandler):
 
 def reload_module(module_name):
     modules = {
-        "coccards": [
+        "main": [
+            testhandler,
+            debughandler,
+            scp_handler,
+            scp_sethandler,
+            scp_delhandler,
+            scp_rahandler,
+            scp_showhandler,
+            rdhelphandler,
+            stcommandhandler,
+            enhandler,
+            attackhandler,
+            damhandler,
+            rahandler,
+            rdcommandhandler,
+            cochandler,
+            ticommandhandler,
+            licommandhandler,
+            schandler,
+            delhandler,
+            sethandler,
+            showhandler,
+            sahandler,
+            versionhandler,
+            "reload_module"
+        ],
+        "coc.coccards": [
             "_cachepath",
             "cards",
             "cache_cards",
@@ -358,7 +387,7 @@ def reload_module(module_name):
             "sa_handler",
             "del_handler"
         ],
-        "scpcards": [
+        "scp.scpcards": [
             "_scp_cachepath",
             "scp_cards",
             "scp_cache_cards",
@@ -366,13 +395,13 @@ def reload_module(module_name):
             "scp_show_handler",
             "scp_del_handler"
         ],
-        "decorators": [
+        "utils.decorators": [
             "Commands",
             "translate_punctuation"
         ],
-        "investigator": ["Investigator"],
-        "agent": ["Agent"],
-        "cocutils": [
+        "coc.investigator": ["Investigator"],
+        "scp.agent": ["Agent"],
+        "coc.cocutils": [
             "sc",
             "st",
             "en",
@@ -383,23 +412,27 @@ def reload_module(module_name):
             "ti",
             "li"
         ],
-        "scputils": [
+        "scp.scputils": [
             "sra",
         ],
-        "cocmessages": [
+        "utils.messages": [
             "help_message",
             "version"
         ]
     }
     for module in modules:
-        if module_name == module:
+        if module_name in module:
             _log.info(f"[cocdicer] 模块 {module_name} 被修改了, 重新加载负载模块.")
             funcs = modules[module]
-            tmodule = sys.modules[module_name]
+            tmodule = sys.modules[module]
             im = importlib.reload(tmodule)
             for func in funcs:
-                globals()[func] = eval(f"im.{func}")
-                if "cards" in func:
+                print(func)
+                if type(func) == types.FunctionType:
+                    globals()[func.__name__] = func
+                else:
+                    globals()[func] = eval(f"im.{func}")
+                if "cards" in str(func) and not "cache" in str(func):
                     _log.info("[cocdicer] 人物卡模块被修改, 重新加载.")
                     globals()[func].load()
             _log.info(f"[cocdicer] 负载模块重载完成.")
@@ -423,8 +456,7 @@ def monitor_folder(folder_path, target=None):
             if event_handler.is_modified:
                 event_handler.is_modified = False
                 module = event_handler.modified_module
-                if module != "main":
-                    reload_module(module)
+                reload_module(module)
                 if target != None:
                     if thread.is_alive():
                         continue
@@ -439,11 +471,19 @@ def monitor_folder(folder_path, target=None):
         _log.info("[cocdicer] 用户要求结束线程.")
         exit()
 
-def main():
+async def start():
     intents = botpy.Intents.all()
     client = OracleClient(intents=intents)
-    run = lambda: client.run(appid=config["appid"], token=config["token"])
+    run = lambda: client.start(appid=config["appid"], token=config["token"])
     monitor_folder(current_dir, target=run)
+
+def main():
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(start())
+        loop.close()
+    except KeyboardInterrupt:
+        return
 
 if __name__ == "__main__":
     main()

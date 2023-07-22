@@ -1,10 +1,8 @@
 from typing import Dict, List
 from utils.utils import logger as _log, _scp_cachepath
 from utils.utils import get_group_id
-try:
-    import ujson as json
-except ModuleNotFoundError:
-    import json
+
+import json
 
 class Cards():
     def __init__(self):

@@ -2,7 +2,8 @@ from utils.messages import help_messages, temporary_madness, madness_end, phobia
 from botpy import logging
 from utils.dicer import Dice, expr
 from typing import Optional
-from coc.coccards import cards, attrs_dict, Investigator
+from coc.coccards import cards, attrs_dict
+from coc.investigator import Investigator
 
 import random
 

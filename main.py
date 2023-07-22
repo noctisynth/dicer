@@ -9,12 +9,13 @@ from pathlib import Path
 from coc.investigator import Investigator
 from scp.agent import Agent
 from coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li
-from coc.coccards import _cachepath, cards, cache_cards, set_handler, show_handler, sa_handler, del_handler
-from scp.scpcards import _scp_cachepath, scp_cards, scp_cache_cards, scp_set_handler, scp_show_handler, scp_del_handler
+from coc.coccards import cards, cache_cards,  sa_handler
+from scp.scpcards import scp_cards, scp_cache_cards
 from scp.scputils import sra
 from utils.decorators import Commands, translate_punctuation
 from utils.messages import help_message, version
-from utils.utils import logger as _log
+from utils.utils import logger as _log, _coc_cachepath as _cachepath, _scp_cachepath
+from utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
 
 import os
 import re
@@ -31,6 +32,7 @@ import asyncio
 DEBUG = False
 config = read(os.path.join(os.path.dirname(__file__), "config.yaml"))
 current_dir = Path(__file__).resolve().parent
+mode = "scp"
 
 def format_msg(message, begin=None):
     msg = format_str(message, begin=begin).split(" ")
@@ -123,9 +125,55 @@ async def cochandler(api, message: Message, params=None):
 @Commands(name=(".show"))
 async def showhandler(api, message: Message, params=None):
     args = format_msg(message, begin=(".show", ".display"))
-    sh = show_handler(message, args)
+    if not args:
+        if mode == "scp":
+            sh = scp_show_handler(message, args)
+        elif mode == "coc":
+            sh = show_handler(message, args)
+        else:
+            await message.reply(content="未知的跑团模式.")
+            return True
+        for msg in sh:
+            await message.reply(content=str(msg))
+        return True
+    if args[0] in ["s", "scp"]:
+        args.remove(args[0])
+        sh = scp_show_handler(message, args)
+    elif args[0] in ["c", "coc"]:
+        args.remove(args[0])
+        sh = show_handler(message, args)
+    else:
+        if mode == "scp":
+            sh = scp_show_handler(message, args)
+        elif mode == "coc":
+            sh = show_handler(message, args)
+        else:
+            await message.reply(content="未知的跑团模式.")
+            return True
     for msg in sh:
         await message.reply(content=str(msg))
+    return True
+
+@Commands(name=(".set"))
+async def sethandler(api, message: Message, params=None):
+    args = format_msg(message, begin=".set")
+    if not args:
+        args.append(mode)
+    if args[0] in ["s", "scp"]:
+        args.remove(args[0])
+        sh = scp_set_handler(message, args)
+    elif args[0] in ["c", "coc"]:
+        args.remove(args[0])
+        sh = set_handler(message, args)
+    else:
+        if mode == "scp":
+            sh = scp_set_handler(message, args)
+        elif mode == "coc":
+            sh = set_handler(message, args)
+        else:
+            await message.reply(content="未知的跑团模式.")
+            return True
+    await message.reply(content=sh)
     return True
 
 @Commands(name=(".help", ".h"))
@@ -138,6 +186,25 @@ async def rdhelphandler(api, message: Message, params=None):
     await message.reply(content=help_message(arg))
     return True
 
+@Commands(name=(".mode", ".m"))
+async def modehandler(api, message: Message, params=None):
+    global mode
+    args = format_msg(message, begin=(".mode", ".m"))
+    if args:
+        if args[0] == "coc":
+            mode = "coc"
+            await message.reply(content="[Oracle] 已切换到COC跑团模式.")
+            return True
+        elif args[0] == "scp":
+            mode = "scp"
+            await message.reply(content="[Oracle] 已切换到SCP跑团模式.")
+            return True
+        else:
+            await message.reply(content="[Oracle] 未知的跑团模式, 忽略.")
+            return True
+    else:
+        await message.reply(content=help_message("mode"))
+    return True
 
 @Commands(name=(".st"))
 async def stcommandhandler(api, message: Message, params=None):
@@ -202,12 +269,6 @@ async def schandler(api, message: Message, params=None):
     else:
         await message.reply(content=scrs)
 
-@Commands(name=(".set"))
-async def sethandler(api, message: Message, params=None):
-    args = format_msg(message, begin=".set")
-    await message.reply(content=set_handler(message, args))
-    return True
-
 @Commands(name=(".sa"))
 async def sahandler(api, message: Message, params=None):
     args = format_str(message, begin=".sa")
@@ -256,20 +317,6 @@ async def scp_rahandler(api, message: Message, params=None):
     await message.reply(content=sra(args, message))
     return True
 
-@Commands(name=(".sshow"))
-async def scp_showhandler(api, message: Message, params=None):
-    args = format_msg(message, begin=".sshow")
-    sh = scp_show_handler(message, args)
-    for msg in sh:
-        await message.reply(content=str(msg))
-    return True
-
-@Commands(name=(".sset"))
-async def scp_sethandler(api, message: Message, params=None):
-    args = format_msg(message, begin=".sset")
-    await message.reply(content=scp_set_handler(message, args))
-    return True
-
 @Commands(name=(".version", ".v"))
 async def versionhandler(api, message: Message, params=None):
     args = format_str(message, begin=(".version", ".v"))
@@ -279,12 +326,11 @@ async def versionhandler(api, message: Message, params=None):
 class OracleClient(botpy.Client):
     handlers = [
             testhandler,
+            modehandler,
             debughandler,
             scp_handler,
-            scp_sethandler,
             scp_delhandler,
             scp_rahandler,
-            scp_showhandler,
             rdhelphandler,
             stcommandhandler,
             enhandler,
@@ -356,10 +402,8 @@ def reload_module(module_name):
             testhandler,
             debughandler,
             scp_handler,
-            scp_sethandler,
             scp_delhandler,
             scp_rahandler,
-            scp_showhandler,
             rdhelphandler,
             stcommandhandler,
             enhandler,
@@ -427,7 +471,6 @@ def reload_module(module_name):
             tmodule = sys.modules[module]
             im = importlib.reload(tmodule)
             for func in funcs:
-                print(func)
                 if type(func) == types.FunctionType:
                     globals()[func.__name__] = func
                 else:
@@ -471,12 +514,13 @@ def monitor_folder(folder_path, target=None):
         _log.info("[cocdicer] 用户要求结束线程.")
         exit()
 
-async def start():
+def main():
     intents = botpy.Intents.all()
     client = OracleClient(intents=intents)
-    run = lambda: client.start(appid=config["appid"], token=config["token"])
+    run = lambda: client.run(appid=config["appid"], token=config["token"])
     monitor_folder(current_dir, target=run)
 
+"""
 def main():
     try:
         loop = asyncio.get_event_loop()
@@ -484,6 +528,7 @@ def main():
         loop.close()
     except KeyboardInterrupt:
         return
+"""
 
 if __name__ == "__main__":
     main()

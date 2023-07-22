@@ -1,18 +1,20 @@
-version = "2.4.6alpha3"
+version = "2.5.0beta1"
 
 class Coc_Help_Messages():
     def __init__(self):
         self.main = f"""欧若可骰娘 Version {version}
 此骰娘基于腾讯QQ机器人(botpy)搭建, \
-由欧若可(Oracle, 基于GPT-4及Google TensorFlow)提供神经网络算法支持.
+由欧若可(Oracle)提供部分算法支持.
 最终版本由未知访客团队(Unknow Visitor, 原左旋联盟)完成.
 感谢 灵冬-老孙 提供相关技术支持.
 
 .help 帮助信息
 .coc  进行车卡, 完成coc角色作成
 .scp  进行车卡, 完成scp角色作成
+.mode 切换当前跑团模式
 .r    投掷指令 例如:
             .r 10 100 (10D100)
+            .r 10d100 (10D100)
         d   制定骰子面数
         a   检定
             .ra [str: 数据名] 例如:
@@ -23,6 +25,8 @@ class Coc_Help_Messages():
         #   多轮检定
         bp  奖励骰&惩罚骰 - 无效算法
         +/- 附加计算 - 无效算法
+.sra  基金会特工标准检定
+.dam  计算调查员或特工受到的伤害
 .sc   疯狂检定
 .st   射击命中判定
 .ti   临时疯狂症状
@@ -31,12 +35,12 @@ class Coc_Help_Messages():
 .set  角色卡设定
         .set [str: 数据名] [int: 数据]
 .show 角色卡查询
-.sa   快速检定
+.sa   COC快速检定
 .del  删除数据
         .del c  删除临时数据
         .del card 删除存储数据
 输入`.help [指令名]`获取该指令的详细信息
-注: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 结果小于 10 则检定通过.
+注: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
 """
         self.r = """.r[a#d]    投掷指令 例如:
             .r 10 100 (10D100)

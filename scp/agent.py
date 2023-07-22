@@ -14,6 +14,9 @@ class Agent(object):
         self.chr = 0
         self.int = 0
         self.wil = 0
+        self.hp_max = 0
+        self.hp = 0
+        self.enp = 0
         self.dices = {}
         self.skills = {}
         self.tools = {}
@@ -53,6 +56,26 @@ class Agent(object):
 
         self.dices = attr
         self.__dict__.update(prop)
+        self.reset_hp()
+        self.reset_enp()
+
+    def reset_hp(self):
+        base = 10
+        for d in self.dices["hth"]:
+            if d == "D8":
+                base += 3
+            elif d == "D10":
+                base += 6
+            elif d == "D12":
+                base += 16
+        return base
+    
+    def reset_enp(self):
+        base = 1
+        for d in self.dices["wil"]:
+            if d == "D10":
+                base += 1
+        return base
 
     def age_check(self, age=20):
         if self.age != 20:
@@ -70,6 +93,8 @@ class Agent(object):
         data += "感知: %d 魅力: %d\n" % (self.per, self.chr) 
         data += "灵巧: %d 情报: %d\n" % (self.dex, self.int)
         data += "健康: %d 意志: %d" % (self.hth, self.wil)
+        data += "激励点: %d" % (self.enp)
+        data += "生命: %d/%d" % (self.hp, self.hp_max)
         return data
 
     def skills_output(self) -> str:

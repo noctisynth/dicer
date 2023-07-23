@@ -8,7 +8,7 @@
 
 ## 安装教程
 
-###1. 安装 Python 环境
+### 1. 安装 Python 环境
 #### Windows 系统
 [Python NPM镜像源国内下载](https://registry.npmmirror.com/-/binary/python/3.11.4/python-3.11.4-amd64.exe)
 注意，在安装过程中，请注意选择将 Python 加入环境变量(Path)中.

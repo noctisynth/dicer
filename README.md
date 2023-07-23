@@ -25,7 +25,7 @@ yum install python3 -y
 
 打开系统终端(Windows 中打开 cmd.exe 或 Powershell), 输入`python -V`和`pip -V`, 显示版本信息即代表安装成功.
 
-###2. 安装依赖库
+### 2. 安装依赖库
 首先升级 pip 到最新版:
 ```
 python -m pip install --upgrade pip
@@ -35,7 +35,7 @@ pip install wheel setuptools --upgrade
 其次安装 CocDicer 所需要的依赖库, 在终端中键入:
 `pip install watchdog qq-botpy`
 
-###3. 配置 QQBot
+### 3. 配置 QQBot
 打开根目录的 config.yaml 文件, 将其中的`appid`和`token`改成腾讯[QQ 开放平台](https://q.qq.com/)中创建 QQ 机器人所得到的 BotAppId 和 机器人令牌, 在终端中执行命令:
 ```
 python main.py

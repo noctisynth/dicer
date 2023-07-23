@@ -10,8 +10,9 @@
 
 ### 1. 安装 Python 环境
 #### Windows 系统
-[Python3.11.4](https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe) 官方下载地址. 
-[Python3.11.4](https://registry.npmmirror.com/-/binary/python/3.11.4/python-3.11.4-amd64.exe) NPM镜像源国内下载地址. 
+[Python3.11.4 官方下载地址](https://www.python.org/ftp/python/3.11.4/python-3.11.4-amd64.exe) , 由于 python.org 在国内的访问速度问题, 该下载地址可能会耗时较长.
+
+[Python3.11.4 NPM镜像源](https://registry.npmmirror.com/-/binary/python/3.11.4/python-3.11.4-amd64.exe) 国内下载地址. 
 
 注意，在安装过程中，请注意选择将 Python 加入环境变量(Path)中.
 

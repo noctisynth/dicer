@@ -8,24 +8,24 @@
 
 ## 安装教程
 
-1.  安装 Python 环境
-### Windows 系统
+###1. 安装 Python 环境
+#### Windows 系统
 [Python NPM镜像源国内下载](https://registry.npmmirror.com/-/binary/python/3.11.4/python-3.11.4-amd64.exe)
 注意，在安装过程中，请注意选择将 Python 加入环境变量(Path)中.
 
-### Ubuntu/Debian/Kali Linux
+#### Ubuntu/Debian/Kali Linux
 ```
 apt install python3 -y
 ```
 
-### CentOS
+#### CentOS
 ```
 yum install python3 -y
 ```
 
 打开系统终端(Windows 中打开 cmd.exe 或 Powershell), 输入`python -V`和`pip -V`, 显示版本信息即代表安装成功.
 
-2.  安装依赖库
+###2. 安装依赖库
 首先升级 pip 到最新版:
 ```
 python -m pip install --upgrade pip
@@ -35,7 +35,7 @@ pip install wheel setuptools --upgrade
 其次安装 CocDicer 所需要的依赖库, 在终端中键入:
 `pip install watchdog qq-botpy`
 
-3.  配置 QQBot
+###3. 配置 QQBot
 打开根目录的 config.yaml 文件, 将其中的`appid`和`token`改成腾讯[QQ 开放平台](https://q.qq.com/)中创建 QQ 机器人所得到的 BotAppId 和 机器人令牌, 在终端中执行命令:
 ```
 python main.py

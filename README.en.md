@@ -42,9 +42,9 @@ pip install watchdog qq-botpy
 
 ### 3. Configure QQBot
 Open the config.yaml file in the root directory, change the 'appid' and 'token' in it to the BotAppId and bot token obtained by creating QQ bot in Tencent [QQ Open Platform](https://q.qq.com/), and run the command in the terminal:
-` ` `
+```
 python main.py
-` ` `
+```
 
 Please note that before executing the instructions, configure your robot according to the QQ Open platform, and open and create QQ channels.
 

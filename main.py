@@ -379,20 +379,30 @@ class OracleClient(botpy.Client):
         scp_cards.load()
 
     async def on_at_message_create(self, message: Message):
+        is_command = False
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
                 isbot = "玩家" if message.author.bot == False else "机器人"
                 _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
-                return
+                is_command = True
+                break
+        valid = message.content.startswith(".") and len(message.content) >= 2
+        if not is_command and valid:
+            await message.reply(content="[Oracle] 不是合格的指令, 请检查你的输入.")
     
     async def on_message_create(self, message: Message):
+        is_command = False
         if message.mentions:
             return
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
                 isbot = "玩家" if message.author.bot == False else "机器人"
                 _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
-                return
+                is_command = True
+                break
+        valid = message.content.startswith(".") and len(message.content) >= 2
+        if not is_command and valid:
+            await message.reply(content="[Oracle] 不是合格的指令, 请检查你的输入.")
 
 class FileModifiedHandler(FileSystemEventHandler):
     def __init__(self):

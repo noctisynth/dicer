@@ -1,4 +1,4 @@
-version = "2.5.0beta1"
+version = "2.5.0 Stable"
 
 class Coc_Help_Messages():
     def __init__(self):

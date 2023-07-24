@@ -77,12 +77,16 @@ class Coc_Help_Messages():
             .sa 力量 快速检定力量"""
         self.en = ".en skill_level\n" \
             "skill_level: 需要成长的技能当前等级。"
-        self.del_ = """.del [c|card|str: talent]
+        self.del_ = """.[s]del [c|card|str: talent]
         删除数据, args可以有以下值
         c: 清空暂存数据
         card: 删除使用中的人物卡(慎用)
         talent: 其他任意技能名
         该命令支持多个参数混合使用, 可以一次指定多个技能名, 使用空格隔开"""
+        self.mode = """.mode [str: mode]
+        切换跑团模式 例如:
+            .mode coc 切换到COC跑团模式
+        """
 
 help_messages = Coc_Help_Messages()
 

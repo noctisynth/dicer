@@ -114,10 +114,8 @@ def dam(args, message):
     return r
 
 def rd0(arg: str) -> str:
-    _log.debug(str(arg))
     args = arg.lower().split(" ")
     d_str = args.pop(0).split("#")
-    _log.debug(str(d_str))
     try:
         parse = d_str.pop(0)
         d = Dice().parse(parse)

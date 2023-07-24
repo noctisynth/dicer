@@ -141,6 +141,8 @@ def rd0(arg: str) -> str:
         return help_messages.r
 
 def ra(args, event):
+    if len(args) == 0:
+        return help_message("ra")
     if len(args) > 2:
         return "错误: 参数过多(2需要 %d给予)." % len(args)
 

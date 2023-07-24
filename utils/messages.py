@@ -42,7 +42,9 @@ class Coc_Help_Messages():
         .del card 删除存储数据
 输入`.help [指令名]`获取该指令的详细信息
 注: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
-"""
+
+欧若可骰娘 版本 {version}, 未知访客版权所有.
+Copyright © 2011-2023 Unknown Visitor. All Rights Reserved."""
         self.r = """.r[a#d]    投掷指令 例如:
             .r 10 100 (10D100)
         d   制定骰子面数

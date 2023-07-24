@@ -201,14 +201,18 @@ async def modehandler(api, message: Message, params=None):
             return True
         else:
             await message.reply(content="[Oracle] 未知的跑团模式, 忽略.")
+            await message.reply(content=help_message("mode"))
             return True
     else:
-        await message.reply(content=help_message("mode"))
+        await message.reply(content=f"[Oracle] 当前的跑团模式为 {mode}.")
     return True
 
 @Commands(name=(".st"))
 async def stcommandhandler(api, message: Message, params=None):
-    await message.reply(content=st())
+    try:
+        await message.reply(content=st())
+    except:
+        await message.reply(content=help_message("st"))
     return True
 
 
@@ -243,20 +247,27 @@ async def rahandler(api, message: Message, params=None):
 @Commands(name=(".r"))
 async def rdcommandhandler(api, message: Message, params=None):
     args = format_str(message, begin=".r")
-    args = args.strip(".r")
-    if args and not("." in args):
+    try:
         await message.reply(content=rd0(args))
+    except:
+        await message.reply(content=help_message("r"))
     return True
 
 
 @Commands(name=(".ti"))
 async def ticommandhandler(api, message: Message, params=None):
-    await message.reply(content=ti())
+    try:
+        await message.reply(content=ti())
+    except:
+        await message.reply(content=help_message("ti"))
 
 
 @Commands(name=(".li"))
 async def licommandhandler(api, message: Message, params=None):
-    await message.reply(content=li())
+    try:
+        await message.reply(content=li())
+    except:
+        await message.reply(content=help_message("li"))
 
 
 @Commands(name=(".sc"))

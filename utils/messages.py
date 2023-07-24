@@ -1,4 +1,4 @@
-version = "2.5.0 Stable"
+version = "2.5.1 稳定版"
 
 class Coc_Help_Messages():
     def __init__(self):
@@ -26,7 +26,8 @@ class Coc_Help_Messages():
         bp  奖励骰&惩罚骰 - 无效算法
         +/- 附加计算 - 无效算法
 .sra  基金会特工标准检定
-.dam  计算调查员或特工受到的伤害
+.dam  调查员或特工承伤检定
+.at   调查员或特工伤害检定
 .sc   疯狂检定
 .st   射击命中判定
 .ti   临时疯狂症状
@@ -71,10 +72,14 @@ class Coc_Help_Messages():
         目前仅支持查询自身人物卡.
             .show skill 查看自身人物卡技能
             .show all 查询所有存储的人物卡"""
-        self.sa = """.sa [str: name]    快速检定
+        self.ra = """.ra [str: name]    快速检定
         name: 属性名称 例如:
-            .sa 幸运 快速检定幸运
-            .sa 力量 快速检定力量"""
+            .ra 幸运 快速检定幸运
+            .ra 力量 快速检定力量"""
+        self.sra = """.sra [str: name]    SCP标准检定
+        name: 属性名称 例如:
+            .sra 命运 检定命运属性
+            .sra 健康 检定健康属性"""
         self.en = ".en skill_level\n" \
             "skill_level: 需要成长的技能当前等级。"
         self.del_ = """.[s]del [c|card|str: talent]

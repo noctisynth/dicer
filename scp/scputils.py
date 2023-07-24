@@ -25,7 +25,7 @@ def st():
         rstr = "左臂"
     elif result < 21:
         rstr = "头部"
-    return "D20=%d: 命中了%s" % (result, rstr)
+    return "[Oracle] 命中了%s" % (rstr)
 
 def at(args):
     if args:
@@ -64,8 +64,10 @@ def dam(args, message):
     return r
 
 def sra(args, event):
+    if len(args) == 0:
+        return help_message("sra")
     if len(args) > 2:
-        return "错误: 参数过多(最多2需要但%d给予)." % len(args)
+        return "[Oracle] 错误: 参数过多(最多2需要但%d给予)." % len(args)
     
     if len(args) == 2:
         difficulty = int(args[1])
@@ -74,7 +76,7 @@ def sra(args, event):
 
     card_data = scp_cards.get(event)
     if not card_data:
-        return "在执行参数检定前, 请先完成`.scp`车卡并`.sset`保存."
+        return "[Oracle] 在执行参数检定前, 请先完成`.scp`车卡并执行`.set`保存."
     inv = Agent().load(card_data)
     is_base = False
     for attr, alias in attrs_dict.items():
@@ -89,7 +91,7 @@ def sra(args, event):
                 v = inv.skills[skill]
                 break
     if not is_base and not is_skill:
-        return "错误: 没有这个数据或技能."
+        return "[Oracle] 错误: 没有这个数据或技能."
     
     all_dices = []
     if len(dices) > 4:
@@ -134,4 +136,4 @@ def en(args, message):
         r = "判定值%d, 判定成功, 技能成长%d+%d=%d" % (check, arg, plus, arg+plus)
         return r + "\n温馨提示: 如果技能提高到90%或更高, 增加2D6理智点数。"
     else:
-        return "判定值%d, 判定失败, 技能无成长。" % check
+        return "[Oracle] 判定值%d, 判定失败, 技能无成长。" % check

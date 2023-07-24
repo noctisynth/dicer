@@ -341,7 +341,7 @@ async def chathandler(api, message: Message, params=None):
 @Commands(name=(".version", ".v"))
 async def versionhandler(api, message: Message, params=None):
     args = format_str(message, begin=(".version", ".v"))
-    await message.reply(content=f"欧若可骰娘 Version {version}")
+    await message.reply(content=f"欧若可骰娘 版本 {version}, ©未知访客 版权所有.")
     return True
 
 class OracleClient(botpy.Client):

@@ -393,6 +393,8 @@ class OracleClient(botpy.Client):
     async def on_at_message_create(self, message: Message):
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
+                isbot = "玩家" if message.author.bot == False else "机器人"
+                _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
                 return
     
     async def on_message_create(self, message: Message):
@@ -400,6 +402,8 @@ class OracleClient(botpy.Client):
             return
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
+                isbot = "玩家" if message.author.bot == False else "机器人"
+                _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
                 return
 
 class FileModifiedHandler(FileSystemEventHandler):

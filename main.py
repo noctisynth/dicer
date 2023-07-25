@@ -16,6 +16,7 @@ from utils.decorators import Commands, translate_punctuation
 from utils.messages import help_message, version
 from utils.utils import logger as _log, _coc_cachepath as _cachepath, _scp_cachepath
 from utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
+from utils.chat import chat
 
 import os
 import re
@@ -317,6 +318,15 @@ async def scp_rahandler(api, message: Message, params=None):
     await message.reply(content=sra(args, message))
     return True
 
+@Commands(name=(".chat"))
+async def chathandler(api, message: Message, params=None):
+    args = format_str(message, begin=".chat")
+    if not args:
+        await message.reply(content="[Oracle] 空消息是不被允许的.")
+        return True
+    await message.reply(content=chat(args))
+    return True
+
 @Commands(name=(".version", ".v"))
 async def versionhandler(api, message: Message, params=None):
     args = format_str(message, begin=(".version", ".v"))
@@ -326,6 +336,7 @@ async def versionhandler(api, message: Message, params=None):
 class OracleClient(botpy.Client):
     handlers = [
             testhandler,
+            chathandler,
             modehandler,
             debughandler,
             scp_handler,
@@ -348,6 +359,7 @@ class OracleClient(botpy.Client):
             sahandler,
             versionhandler
         ]
+
     async def on_ready(self):
         global DEBUG
         if DEBUG:

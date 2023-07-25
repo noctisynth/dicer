@@ -1,4 +1,4 @@
-from utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
+from utils.messages import help_messages, help_message
 from botpy import logging
 from utils.dicer import Dice, scp_doc
 from typing import Optional
@@ -39,25 +39,37 @@ def scp_dam(args, message):
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.scp`指令进行车卡生成角色卡并`.set`进行保存."
     max_hp = card["hp_max"]
-    try:
-        arg = int(args[0])
-        card["hp"] -= arg
-        r = f"[Orcale] {card['name']} 失去了 {arg}点 生命"
-    except:
+    if len(args) == 1:
+        if not args[0] in ["check", "c"]:
+            arg = int(args[0])
+            card["hp"] -= arg
+            r = f"[Orcale] {card['name']} 失去了 {arg}点 生命"
+        else:
+            r = "检查特工状态"
+    elif len(args) == 0:
         d = Dice().parse("1d6").roll()
         card["hp"] -= d.total
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
+    elif len(args) == 3:
+        if args[1] != "d":
+            r = "[Oracle] 未知的指令格式."
+        else:
+            d = Dice().parse(f"{args[0]}{args[1]}{args[2]}").roll()
+            card["hp"] -= d.total
+            r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
     if card["hp"] <= 0:
         card["hp"] = 0
-        r += f", 调查员 {card['name']} 已死亡."
-    elif max_hp * 0.8 <= card["hp"] < max_hp:
-        r += f", 调查员 {card['name']} 具有轻微伤."
-    elif max_hp * 0.6 <= card["hp"] <= max_hp * 0.8:
-        r += f", 调查员 {card['name']} 进入轻伤状态."
-    elif max_hp * 0.2 <= card["hp"] <= max_hp * 0.6:
-        r += f", 调查员 {card['name']} 身负重伤."
+        r += f", 特工 {card['name']} 已死亡."
+    elif (max_hp * 0.8 <= card["hp"]) and (card["hp"] < max_hp):
+        r += f", 特工 {card['name']} 具有轻微伤势."
+    elif (max_hp * 0.6 <= card["hp"]) and (card['hp'] <= max_hp * 0.8):
+        r += f", 特工 {card['name']} 具有轻微伤."
+    elif (max_hp * 0.4 <= card["hp"]) and (card["hp"] <= max_hp * 0.6):
+        r += f", 特工 {card['name']} 具有轻伤."
+    elif (max_hp * 0.2 <= card["hp"]) and (card["hp"] <= max_hp * 0.4):
+        r += f", 特工 {card['name']} 身负重伤."
     elif max_hp * 0.2 >= card["hp"]:
-        r += f", 调查员 {card['name']} 濒死."
+        r += f", 特工 {card['name']} 濒死."
     else:
         r += "."
     scp_cards.update(message, card)

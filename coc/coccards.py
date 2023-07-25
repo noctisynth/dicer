@@ -3,10 +3,7 @@ from utils.messages import help_messages
 from utils.dicer import Dice, expr
 from utils.utils import _coc_cachepath as _cachepath, logger as _log, get_group_id
 
-try:
-    import ujson as json
-except ModuleNotFoundError:
-    import json
+import json
 
 class Cards():
     def __init__(self):

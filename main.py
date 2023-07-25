@@ -202,14 +202,18 @@ async def modehandler(api, message: Message, params=None):
             return True
         else:
             await message.reply(content="[Oracle] 未知的跑团模式, 忽略.")
+            await message.reply(content=help_message("mode"))
             return True
     else:
-        await message.reply(content=help_message("mode"))
+        await message.reply(content=f"[Oracle] 当前的跑团模式为 {mode}.")
     return True
 
 @Commands(name=(".st"))
 async def stcommandhandler(api, message: Message, params=None):
-    await message.reply(content=st())
+    try:
+        await message.reply(content=st())
+    except:
+        await message.reply(content=help_message("st"))
     return True
 
 
@@ -244,20 +248,27 @@ async def rahandler(api, message: Message, params=None):
 @Commands(name=(".r"))
 async def rdcommandhandler(api, message: Message, params=None):
     args = format_str(message, begin=".r")
-    args = args.strip(".r")
-    if args and not("." in args):
+    try:
         await message.reply(content=rd0(args))
+    except:
+        await message.reply(content=help_message("r"))
     return True
 
 
 @Commands(name=(".ti"))
 async def ticommandhandler(api, message: Message, params=None):
-    await message.reply(content=ti())
+    try:
+        await message.reply(content=ti())
+    except:
+        await message.reply(content=help_message("ti"))
 
 
 @Commands(name=(".li"))
 async def licommandhandler(api, message: Message, params=None):
-    await message.reply(content=li())
+    try:
+        await message.reply(content=li())
+    except:
+        await message.reply(content=help_message("li"))
 
 
 @Commands(name=(".sc"))
@@ -330,7 +341,7 @@ async def chathandler(api, message: Message, params=None):
 @Commands(name=(".version", ".v"))
 async def versionhandler(api, message: Message, params=None):
     args = format_str(message, begin=(".version", ".v"))
-    await message.reply(content=f"欧若可骰娘 Version {version}")
+    await message.reply(content=f"欧若可骰娘 版本 {version}, 未知访客版权所有.\nCopyright © 2011-2023 Unknown Visitor. All Rights Reserved.")
     return True
 
 class OracleClient(botpy.Client):
@@ -380,16 +391,30 @@ class OracleClient(botpy.Client):
         scp_cards.load()
 
     async def on_at_message_create(self, message: Message):
+        is_command = False
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
-                return
+                isbot = "玩家" if message.author.bot == False else "机器人"
+                _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
+                is_command = True
+                break
+        valid = message.content.startswith(".") and len(message.content) >= 2
+        if not is_command and valid:
+            await message.reply(content="[Oracle] 不是合格的指令, 请检查你的输入.")
     
     async def on_message_create(self, message: Message):
+        is_command = False
         if message.mentions:
             return
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
-                return
+                isbot = "玩家" if message.author.bot == False else "机器人"
+                _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
+                is_command = True
+                break
+        valid = message.content.startswith(".") and len(message.content) >= 2
+        if not is_command and valid:
+            await message.reply(content="[Oracle] 不是合格的指令, 请检查你的输入.")
 
 class FileModifiedHandler(FileSystemEventHandler):
     def __init__(self):

@@ -1,4 +1,4 @@
-version = "2.5.0beta1"
+version = "2.5.1 稳定版"
 
 class Coc_Help_Messages():
     def __init__(self):
@@ -26,7 +26,8 @@ class Coc_Help_Messages():
         bp  奖励骰&惩罚骰 - 无效算法
         +/- 附加计算 - 无效算法
 .sra  基金会特工标准检定
-.dam  计算调查员或特工受到的伤害
+.dam  调查员或特工承伤检定
+.at   调查员或特工伤害检定
 .sc   疯狂检定
 .st   射击命中判定
 .ti   临时疯狂症状
@@ -41,7 +42,9 @@ class Coc_Help_Messages():
         .del card 删除存储数据
 输入`.help [指令名]`获取该指令的详细信息
 注: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
-"""
+
+欧若可骰娘 版本 {version}, 未知访客版权所有.
+Copyright © 2011-2023 Unknown Visitor. All Rights Reserved."""
         self.r = """.r[a#d]    投掷指令 例如:
             .r 10 100 (10D100)
         d   制定骰子面数
@@ -71,18 +74,26 @@ class Coc_Help_Messages():
         目前仅支持查询自身人物卡.
             .show skill 查看自身人物卡技能
             .show all 查询所有存储的人物卡"""
-        self.sa = """.sa [str: name]    快速检定
+        self.ra = """.ra [str: name]    快速检定
         name: 属性名称 例如:
-            .sa 幸运 快速检定幸运
-            .sa 力量 快速检定力量"""
+            .ra 幸运 快速检定幸运
+            .ra 力量 快速检定力量"""
+        self.sra = """.sra [str: name]    SCP标准检定
+        name: 属性名称 例如:
+            .sra 命运 检定命运属性
+            .sra 健康 检定健康属性"""
         self.en = ".en skill_level\n" \
             "skill_level: 需要成长的技能当前等级。"
-        self.del_ = """.del [c|card|str: talent]
+        self.del_ = """.[s]del [c|card|str: talent]
         删除数据, args可以有以下值
         c: 清空暂存数据
         card: 删除使用中的人物卡(慎用)
         talent: 其他任意技能名
         该命令支持多个参数混合使用, 可以一次指定多个技能名, 使用空格隔开"""
+        self.mode = """.mode [str: mode]
+        切换跑团模式 例如:
+            .mode coc 切换到COC跑团模式
+        """
 
 help_messages = Coc_Help_Messages()
 

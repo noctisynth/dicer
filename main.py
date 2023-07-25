@@ -11,7 +11,7 @@ from scp.agent import Agent
 from coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li
 from coc.coccards import cards, cache_cards,  sa_handler
 from scp.scpcards import scp_cards, scp_cache_cards
-from scp.scputils import sra
+from scp.scputils import sra, scp_dam
 from utils.decorators import Commands, translate_punctuation
 from utils.messages import help_message, version
 from utils.utils import logger as _log, _coc_cachepath as _cachepath, _scp_cachepath
@@ -227,9 +227,15 @@ async def attackhandler(api, message: Message, params=None):
 @Commands(name=(".dam"))
 async def damhandler(api, message: Message, params=None):
     args = format_msg(message, begin=(".dam", ".damage"))
-    await message.reply(content=dam(args, message))
+    if mode == "scp":
+        sd = scp_dam(args, message)
+    elif mode == "coc":
+        sd = dam(args, message)
+    else:
+        await message.reply(content="未知的跑团模式.")
+        return True
+    await message.reply(content=sd)
     return True
-
 
 @Commands(name=(".en"))
 async def enhandler(api, message: Message, params=None):

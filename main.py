@@ -9,12 +9,12 @@ from pathlib import Path
 from coc.investigator import Investigator
 from scp.agent import Agent
 from coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li
-from coc.coccards import cards, cache_cards,  sa_handler
+from coc.coccards import cards, cache_cards, sa_handler
 from scp.scpcards import scp_cards, scp_cache_cards
 from scp.scputils import sra, scp_dam
 from utils.decorators import Commands, translate_punctuation
 from utils.messages import help_message, version
-from utils.utils import logger as _log, _coc_cachepath as _cachepath, _scp_cachepath
+from utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid
 from utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
 from utils.chat import chat
 
@@ -28,7 +28,6 @@ import importlib
 import logging as _logging
 import main
 import types
-import asyncio
 
 DEBUG = False
 config = read(os.path.join(os.path.dirname(__file__), "config.yaml"))
@@ -63,6 +62,9 @@ def format_str(message, begin=None):
 
 @Commands(name=(".test"))
 async def testhandler(api, message: Message, params=None):
+    if not is_super_user(message):
+        await message.reply(content="[Oracle] 权限不足, 拒绝执行指令.")
+        return True
     _log.debug("发送消息:" + str(message.content))
     _log.debug(message.__repr__())
     msg = format_msg(message)
@@ -79,6 +81,9 @@ async def testhandler(api, message: Message, params=None):
 async def debughandler(api, message: Message, params=None):
     global DEBUG
     args = format_msg(message, begin=".debug")
+    if not is_super_user(message):
+        await message.reply(content="[Oracle] 权限不足, 拒绝执行指令.")
+        return True
     if args:
         _log.debug(args)
         if args[0] == "off":
@@ -102,6 +107,31 @@ async def debughandler(api, message: Message, params=None):
         await message.reply(content="[Oracle] 错误, 我无法解析你的指令.")
     return True
 
+@Commands(name=(".su", ".sudo"))
+async def superuser_handler(api, message: Message, params=None):
+    args = format_str(message, begin=(".su", ".sudo"))
+    arg = list(filter(None, args.split(" ")))
+    if len(arg) >= 1:
+        if arg[0].lower() == "exit":
+            if not rm_super_user(message):
+                await message.reply(content="[Oracle] 你还不是超级管理员, 无法撤销超级管理员身份.")
+                return True
+            await message.reply(content="[Oracle] 你已撤销超级管理员身份.")
+            return True
+    if is_super_user(message):
+        await message.reply(content="[Oracle] 你已经是超级管理员.")
+        return True
+    if not args:
+        _log.critical(f"超级令牌: {su_uuid}")
+        await message.reply(content="[Oracle] 启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
+    else:
+        if not args == su_uuid:
+            await message.reply(content="[Oracle] 鉴权失败!")
+        else:
+            add_super_user(message)
+            await message.reply(content="[Oracle] 你取得了管理员权限.")
+    return True
+    
 @Commands(name=(".coc"))
 async def cochandler(api, message: Message, params=None):
     args = format_msg(message, begin=".coc")
@@ -267,6 +297,7 @@ async def ticommandhandler(api, message: Message, params=None):
         await message.reply(content=ti())
     except:
         await message.reply(content=help_message("ti"))
+    return True
 
 
 @Commands(name=(".li"))
@@ -275,6 +306,7 @@ async def licommandhandler(api, message: Message, params=None):
         await message.reply(content=li())
     except:
         await message.reply(content=help_message("li"))
+    return True
 
 
 @Commands(name=(".sc"))
@@ -286,6 +318,7 @@ async def schandler(api, message: Message, params=None):
             await message.reply(content=scr)
     else:
         await message.reply(content=scrs)
+    return True
 
 @Commands(name=(".sa"))
 async def sahandler(api, message: Message, params=None):
@@ -305,7 +338,7 @@ async def scp_handler(api, message: Message, params=None):
     if len(args) > 1:
         _log.info("指令错误, 驳回.")
         await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-        return False
+        return True
     try:
         if len(args) == 0:
             raise ValueError
@@ -352,29 +385,30 @@ async def versionhandler(api, message: Message, params=None):
 
 class OracleClient(botpy.Client):
     handlers = [
-            testhandler,
-            chathandler,
-            modehandler,
-            debughandler,
-            scp_handler,
-            scp_delhandler,
-            scp_rahandler,
-            rdhelphandler,
-            stcommandhandler,
-            enhandler,
-            attackhandler,
-            damhandler,
-            rahandler,
-            rdcommandhandler,
-            cochandler,
-            ticommandhandler,
-            licommandhandler,
-            schandler,
-            delhandler,
-            sethandler,
-            showhandler,
-            sahandler,
-            versionhandler
+        superuser_handler,
+        testhandler,
+        chathandler,
+        modehandler,
+        debughandler,
+        scp_handler,
+        scp_delhandler,
+        scp_rahandler,
+        rdhelphandler,
+        stcommandhandler,
+        enhandler,
+        attackhandler,
+        damhandler,
+        rahandler,
+        rdcommandhandler,
+        cochandler,
+        ticommandhandler,
+        licommandhandler,
+        schandler,
+        delhandler,
+        sethandler,
+        showhandler,
+        sahandler,
+        versionhandler
         ]
 
     async def on_ready(self):
@@ -382,17 +416,7 @@ class OracleClient(botpy.Client):
         if DEBUG:
             _log.setLevel(_logging.DEBUG)
             _log.info("[cocdicer] DEBUG 模式已启动.")
-        if not current_dir / "data":
-            _log.info("[cocdicer] 数据文件夹未建立, 建立它.")
-            os.makedirs("data")
-        if not os.path.exists(_cachepath):
-            _log.info("[cocdicer] COC存储文件未建立, 建立它.")
-            with open(_cachepath, "w", encoding="utf-8") as f:
-                f.write("{}")
-        if not os.path.exists(_scp_cachepath):
-            _log.info("[cocdicer] SCP存储文件未建立, 建立它.")
-            with open(_scp_cachepath, "w", encoding="utf-8") as f:
-                f.write("{}")
+        init()
         cards.load()
         scp_cards.load()
 
@@ -442,6 +466,7 @@ class FileModifiedHandler(FileSystemEventHandler):
 def reload_module(module_name):
     modules = {
         "main": [
+            superuser_handler,
             testhandler,
             debughandler,
             scp_handler,

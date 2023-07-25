@@ -34,11 +34,11 @@ def at(args):
         d = Dice().parse("1d6").roll()
     return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
 
-def dam(args, message):
+def scp_dam(args, message):
     card = scp_cards.get(message)
     if not card:
-        return "[Oracle] 未找到缓存数据, 请先使用`.coc`指令进行车卡生成角色卡并`.set`进行保存."
-    max_hp = card["con"] + card["siz"]
+        return "[Oracle] 未找到缓存数据, 请先使用`.scp`指令进行车卡生成角色卡并`.set`进行保存."
+    max_hp = card["hp_max"]
     try:
         arg = int(args[0])
         card["hp"] -= arg

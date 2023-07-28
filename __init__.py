@@ -347,6 +347,8 @@ if package == "nonebot2":
     @rcommand.handle()
     async def rdcommandhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_str(event.get_message(), begin=".r")
+        if not args:
+            await matcher.send(rd0(args))
         if args[0] == "b":
             args = args[1:]
             await matcher.send(rb(args))

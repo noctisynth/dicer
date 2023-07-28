@@ -1,10 +1,12 @@
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 from botpy.message import Message
 from botpy.ext.cog_yaml import read
 from botpy.types.message import MarkdownPayload
 from botpy.api import BotAPI
+from botpy.logging import get_logger
 from pathlib import Path
+
+from utils.settings import set_package
+package = set_package("qqguild")
 
 from coc.investigator import Investigator
 from scp.agent import Agent
@@ -14,34 +16,26 @@ from scp.scpcards import scp_cards, scp_cache_cards
 from scp.scputils import sra, scp_dam
 from utils.decorators import Commands
 from utils.messages import help_message, version
-from utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str
+from utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers
 from utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
 from utils.chat import chat
-from utils.settings import set_package, package
 
-import os
-import sys
 import botpy
-import threading
-import time
-import importlib
-import logging as _logging
-import main
-import types
+import logging
 
 DEBUG = False
-config = read(os.path.join(os.path.dirname(__file__), "config.yaml"))
 current_dir = Path(__file__).resolve().parent
+config = read(current_dir / "config.yaml")
 mode = "scp"
-package = set_package("qqguild")
+get_logger().setLevel(logging.CRITICAL)
 
 @Commands(name=(".test"))
 async def testhandler(api: BotAPI, message: Message, params=None):
     if not is_super_user(message):
         await message.reply(content="[Oracle] 权限不足, 拒绝执行指令.")
         return True
-    _log.debug("发送消息:" + str(message.content))
-    _log.debug(message.__repr__())
+    logger.debug("发送消息:" + str(message.content))
+    logger.debug(message.__repr__())
     msg = format_msg(message)
     if not msg:
         msg = "[]"
@@ -61,23 +55,23 @@ async def debughandler(api: BotAPI, message: Message, params=None):
         return True
 
     if args:
-        _log.debug(args)
+        logger.debug(args)
         if args[0] == "off":
             DEBUG = False
-            _log.setLevel(_logging.INFO)
-            _log.info("[cocdicer] 输出等级设置为 INFO.")
+            logger.setLevel(logging.INFO)
+            logger.info("[cocdicer] 输出等级设置为 INFO.")
             await message.reply(content="[Oracle] DEBUG 模式已关闭.")
             return True
     else:
         DEBUG = True
-        _log.setLevel(_logging.DEBUG)
-        _log.info("[cocdicer] 输出等级设置为 DEBUG.")
+        logger.setLevel(logging.DEBUG)
+        logger.info("[cocdicer] 输出等级设置为 DEBUG.")
         await message.reply(content="[Oracle] DEBUG 模式已启动.")
         return True
     if args[0] == "on":
         DEBUG = True
-        _log.setLevel(_logging.DEBUG)
-        _log.info("[cocdicer] 输出等级设置为 DEBUG.")
+        logger.setLevel(logging.DEBUG)
+        logger.info("[cocdicer] 输出等级设置为 DEBUG.")
         await message.reply(content="[Oracle] DEBUG 模式已启动.")
     else:
         await message.reply(content="[Oracle] 错误, 我无法解析你的指令.")
@@ -101,7 +95,7 @@ async def superuser_handler(api: BotAPI, message: Message, params=None):
         return True
 
     if not args:
-        _log.critical(f"超级令牌: {su_uuid}")
+        logger.critical(f"超级令牌: {su_uuid}")
         await message.reply(content="[Oracle] 启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
     else:
         if not args == su_uuid:
@@ -115,7 +109,7 @@ async def superuser_handler(api: BotAPI, message: Message, params=None):
 async def cochandler(api: BotAPI, message: Message, params=None):
     args = format_msg(message, begin=".coc")
     if len(args) > 1:
-        _log.info("指令错误, 驳回.")
+        logger.info("指令错误, 驳回.")
         await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
         return False
 
@@ -346,7 +340,7 @@ async def delhandler(api: BotAPI, message: Message, params=None):
 async def scp_handler(api: BotAPI, message: Message, params=None):
     args = format_msg(message, begin=".scp")
     if len(args) > 1:
-        _log.info("指令错误, 驳回.")
+        logger.info("指令错误, 驳回.")
         await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
         return True
 
@@ -396,48 +390,25 @@ async def versionhandler(api: BotAPI, message: Message, params=None):
     return True
 
 class OracleClient(botpy.Client):
-    handlers = [
-        superuser_handler,
-        testhandler,
-        chathandler,
-        modehandler,
-        debughandler,
-        scp_handler,
-        scp_delhandler,
-        scp_rahandler,
-        rdhelphandler,
-        stcommandhandler,
-        enhandler,
-        attackhandler,
-        damhandler,
-        rahandler,
-        rdcommandhandler,
-        cochandler,
-        ticommandhandler,
-        licommandhandler,
-        schandler,
-        delhandler,
-        sethandler,
-        showhandler,
-        sahandler,
-        versionhandler
-        ]
+    handlers = get_handlers(__import__(__name__))
 
     async def on_ready(self):
         global DEBUG
         if DEBUG:
-            _log.setLevel(_logging.DEBUG)
-            _log.info("[cocdicer] DEBUG 模式已启动.")
+            get_logger().setLevel(logging.DEBUG)
+            logger.level("debug")
+            logger.info("[cocdicer] DEBUG 模式已启动.")
         init()
         cards.load()
         scp_cards.load()
+        logger.info("机器人启动成功, 将进行心跳维持链接.")
 
     async def on_at_message_create(self, message: Message):
         is_command = False
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
                 isbot = "玩家" if message.author.bot == False else "机器人"
-                _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
+                logger.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
                 is_command = True
                 break
         valid = message.content.startswith(".") and len(message.content) >= 2
@@ -451,164 +422,19 @@ class OracleClient(botpy.Client):
         for handler in self.handlers:
             if await handler(api=self.api, message=message, params=None):
                 isbot = "玩家" if message.author.bot == False else "机器人"
-                _log.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
+                logger.info(f"[dicer] 执行指令: {message.content} 指令来源: {message.channel_id} : {message.author.id} : {message.author.username} : {isbot}")
                 is_command = True
                 break
         valid = message.content.startswith(".") and len(message.content) >= 2
         if not is_command and valid:
             await message.reply(content="[Oracle] 不是合格的指令, 请检查你的输入.")
 
-class FileModifiedHandler(FileSystemEventHandler):
-    def __init__(self):
-        super(FileModifiedHandler, self).__init__()
-        self.is_modified = False
-        self.modified_module = None
-
-    def on_modified(self, event):
-        if not event.is_directory:
-            path = os.path.basename(event.src_path)
-            split = path.split(".")
-            module = split[0]
-            if len(split) == 1:
-                return
-            if split[1] == "py":
-                self.is_modified = True
-                self.modified_module = module
-
-def reload_module(module_name):
-    modules = {
-        "main": [
-            superuser_handler,
-            testhandler,
-            debughandler,
-            scp_handler,
-            scp_delhandler,
-            scp_rahandler,
-            rdhelphandler,
-            stcommandhandler,
-            enhandler,
-            attackhandler,
-            damhandler,
-            rahandler,
-            rdcommandhandler,
-            cochandler,
-            ticommandhandler,
-            licommandhandler,
-            schandler,
-            delhandler,
-            sethandler,
-            showhandler,
-            sahandler,
-            versionhandler,
-            "reload_module"
-        ],
-        "coc.coccards": [
-            "_cachepath",
-            "cards",
-            "cache_cards",
-            "set_handler",
-            "show_handler",
-            "sa_handler",
-            "del_handler"
-        ],
-        "scp.scpcards": [
-            "_scp_cachepath",
-            "scp_cards",
-            "scp_cache_cards",
-            "scp_set_handler",
-            "scp_show_handler",
-            "scp_del_handler"
-        ],
-        "utils.decorators": [
-            "Commands",
-            "translate_punctuation"
-        ],
-        "coc.investigator": ["Investigator"],
-        "scp.agent": ["Agent"],
-        "coc.cocutils": [
-            "sc",
-            "st",
-            "en",
-            "rd0",
-            "ra",
-            "at",
-            "dam",
-            "ti",
-            "li"
-        ],
-        "scp.scputils": [
-            "sra",
-        ],
-        "utils.messages": [
-            "help_message",
-            "version"
-        ]
-    }
-    for module in modules:
-        if module_name in module:
-            _log.info(f"[cocdicer] 模块 {module_name} 被修改了, 重新加载负载模块.")
-            funcs = modules[module]
-            tmodule = sys.modules[module]
-            im = importlib.reload(tmodule)
-            for func in funcs:
-                if type(func) == types.FunctionType:
-                    globals()[func.__name__] = func
-                else:
-                    globals()[func] = eval(f"im.{func}")
-                if "cards" in str(func) and not "cache" in str(func):
-                    _log.info("[cocdicer] 人物卡模块被修改, 重新加载.")
-                    globals()[func].load()
-            _log.info(f"[cocdicer] 负载模块重载完成.")
-            break
-
-def monitor_folder(folder_path, target=None):
-    thread = threading.Thread(target=target)
-    thread.daemon = True
-
-    event_handler = FileModifiedHandler()
-    observer = Observer()
-    observer.schedule(event_handler, folder_path, recursive=True)
-    observer.start()
-    _log.info("[cocdicer] 文件监视器已启动.")
-
-    thread.start()
-    _log.info("[cocdicer] QQBot信息监视器已启动.")
-
-    try:
-        while True:
-            if event_handler.is_modified:
-                event_handler.is_modified = False
-                module = event_handler.modified_module
-                reload_module(module)
-                if target != None:
-                    if thread.is_alive():
-                        continue
-                    _log.info("[cocdicer] 主线程已终止, 重启中.")
-                    thread = threading.Thread(target=target)
-                    thread.daemon = True
-                    thread.start()
-                else:
-                    raise ValueError("监视线程未传入.")
-            time.sleep(0.1)
-    except KeyboardInterrupt as kbi:
-        _log.info("[cocdicer] 用户要求结束线程.")
-        exit()
-
 def main():
     intents = botpy.Intents.all()
     client = OracleClient(intents=intents)
     run = lambda: client.run(appid=config["appid"], token=config["token"])
-    monitor_folder(current_dir, target=run)
-
-"""
-def main():
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(start())
-        loop.close()
-    except KeyboardInterrupt:
-        return
-"""
+    logger.info("启动`QQGuild`机器人服务中...")
+    run()
 
 if __name__ == "__main__":
     main()

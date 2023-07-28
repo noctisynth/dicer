@@ -77,14 +77,14 @@ def format_str(message, begin=None):
     _log.debug(msg)
     return msg
 
-def get_handlers(main):
-    TARGET_DECORATOR = 'Commands'
+def get_handlers(main, target="Commands"):
+    TARGET_DECORATOR = target
     commands_functions = []
 
-    for name, obj in inspect.getmembers(main):
-        if inspect.isfunction(obj):
-            decorators = [dec.id for dec in ast.walk(ast.parse(inspect.getsource(obj))) if isinstance(dec, ast.Name)]
-            if TARGET_DECORATOR in decorators:
+    for name, obj in vars(main).items():
+        if inspect.isfunction(obj) and hasattr(obj, '__annotations__'):
+            annotations = obj.__annotations__
+            if annotations.get('message') is Message:
                 commands_functions.append(name)
 
     return commands_functions

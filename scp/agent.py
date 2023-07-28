@@ -1,5 +1,8 @@
 import random
-from utils.dicer import Dice
+try:
+    from ..utils.dicer import Dice
+except ImportError:
+    from utils.dicer import Dice
 
 class Agent(object):
     def __init__(self) -> None:

@@ -1,13 +1,19 @@
-from utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
-from botpy import logging
-from utils.dicer import Dice, expr
 from typing import Optional
-from coc.coccards import cards, attrs_dict
-from coc.investigator import Investigator
+try:
+    from ..utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
+    from ..utils.dicer import Dice, expr
+    from ..utils.utils import _log
+    from .coccards import cards, attrs_dict
+    from .investigator import Investigator
+except ImportError:
+    from utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
+    from utils.dicer import Dice, expr
+    from utils.utils import _log
+    from coc.coccards import cards, attrs_dict
+    from coc.investigator import Investigator
 
 import random
-
-_log = logging.get_logger()
+import re
 
 def sc(arg, event):
     reply = []
@@ -144,14 +150,14 @@ def ra(args, event):
     if len(args) == 0:
         return help_message("ra")
     if len(args) > 2:
-        return "错误: 参数过多(2需要 %d给予)." % len(args)
+        return "[Oracle] 错误: 参数过多(2需要 %d给予)." % len(args)
 
     card_data = cards.get(event)
     if not card_data:
-        return "在执行参数检定前, 请先完成车卡并保存."
+        return "[Oracle] 在执行参数检定前, 请先完成车卡并保存."
     inv = Investigator().load(card_data)
     is_base = False
-    for attr, alias in attrs_dict.items():
+    for _, alias in attrs_dict.items():
         if args[0] in alias:
             v = int(eval("inv.{prop}".format(prop=alias[0])))
             is_base = True
@@ -161,11 +167,10 @@ def ra(args, event):
             if args[0] == skill:
                 v = inv.skills[skill]
                 break
-    if len(args) == 1:
-        t = 100
-    else:
-        t = args[-1]
-
+            else:
+                v = False
+    if not v:
+        return "[Oracle] 未知的参数或技能."
     d = Dice()
     time = 1
     if len(args) > 0:
@@ -191,11 +196,11 @@ def ti():
     r += temporary_madness[i-1]
     if i == 9:
         j = random.randint(1, 100)
-        r += "\n恐惧症状为：\n"
+        r += "\n恐惧症状为: \n"
         r += phobias[j-1]
     elif i == 10:
         j = random.randint(1, 100)
-        r += "\n狂躁症状为：\n"
+        r += "\n狂躁症状为: \n"
         r += manias[j-1]
     r += "\n该症状将会持续1D10=%d" % random.randint(1, 10)
     return r
@@ -208,14 +213,57 @@ def li():
         r += "\n调查员将在1D10=%d小时后醒来" % random.randint(1, 10)
     if i == 9:
         j = random.randint(1, 100)
-        r += "\n恐惧症状为：\n"
+        r += "\n恐惧症状为: \n"
         r += phobias[j-1]
     elif i == 10:
         j = random.randint(1, 100)
-        r += "\n狂躁症状为：\n"
+        r += "\n狂躁症状为: \n"
         r += manias[j-1]
     return r
 
+def rb(args):
+    if args:
+        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
+    else:
+        match = None
+    ten = []
+    if match:
+        t = int(match[1]) if match[1] else 1
+        reason = f"由于 {match[2]}:\n" if match[2] else ""
+    else:
+        reason = ""
+        t = 1
+    for _ in range(t):
+        _ = Dice("1d10").roll().calc()
+        _ = _ if _ != 10 else 0
+        ten.append(_)
+    result = Dice("1d100").roll().calc()
+    ten.append(result//10)
+    ften = min(ten)
+    ten.remove(result//10)
+    return f"{reason}奖励骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
+
+def rp(args):
+    if args:
+        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
+    else:
+        match = None
+    ten = []
+    if match:
+        t = int(match[1]) if match[1] else 1
+        reason = f"由于 {match[2]}:\n" if match[2] else ""
+    else:
+        reason = ""
+        t = 1
+    for _ in range(t):
+        _ = Dice("1d10").roll().calc()
+        _ = _ if _ != 10 else 0
+        ten.append(_)
+    result = Dice("1d100").roll().calc()
+    ten.append(result//10)
+    ften = max(ten)
+    ten.remove(result//10)
+    return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
 # 未验证指令
 def dhr(t, o):

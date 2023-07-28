@@ -2,9 +2,6 @@
 from functools import wraps
 from typing import Union
 
-from botpy import BotAPI
-from botpy.message import Message
-
 import re
 
 def translate_punctuation(string):
@@ -38,8 +35,8 @@ class Commands:
     def __call__(self, func):
         @wraps(func)
         async def decorated(*args, **kwargs):
-            api: BotAPI = kwargs["api"]
-            message: Message = kwargs["message"]
+            api = kwargs["api"]
+            message = kwargs["message"]
             content = re.sub(self.regex, "", translate_punctuation(message.content.lower())).strip(" ")
             if content.startswith("/"):
                 content = "." + content[1:]

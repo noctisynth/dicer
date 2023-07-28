@@ -1,6 +1,10 @@
 from typing import Dict, List
-from utils.utils import logger as _log, _scp_cachepath
-from utils.utils import get_group_id
+try:
+    from ..utils.utils import logger as _log, _scp_cachepath
+    from ..utils.utils import get_group_id, get_user_id
+except ImportError:
+    from utils.utils import logger as _log, _scp_cachepath
+    from utils.utils import get_group_id, get_user_id
 
 import json
 
@@ -26,7 +30,7 @@ class Cards():
         if not self.data.get(group_id):
             self.data[group_id] = {}
         self.data[group_id].update(
-            {qid if qid else eval(str(message.author))["id"]: inv_dict}
+            {qid if qid else get_user_id(message): inv_dict}
             )
         if save:
             self.save()
@@ -34,16 +38,16 @@ class Cards():
     def get(self, message, qid=""):
         group_id = get_group_id(message)
         if self.data.get(group_id):
-            if self.data[group_id].get(qid if qid else eval(str(message.author))["id"]):
-                return self.data[group_id].get(qid if qid else eval(str(message.author))["id"])
+            if self.data[group_id].get(qid if qid else get_user_id(message)):
+                return self.data[group_id].get(qid if qid else get_user_id(message))
         else:
             return None
 
     def delete(self, message, qid: str = "", save: bool = True) -> bool:
         if self.get(message, qid=qid):
-            if self.data[get_group_id(message)].get(qid if qid else eval(str(message.author))["id"]):
+            if self.data[get_group_id(message)].get(qid if qid else get_user_id(message)):
                 self.data[get_group_id(message)].pop(
-                    qid if qid else eval(str(message.author))["id"])
+                    qid if qid else get_user_id(message))
             if save:
                 self.save()
             return True

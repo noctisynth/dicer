@@ -1,4 +1,4 @@
-version = "2.5.2 CoolQ稳定版"
+version = "3.0.0 稳定版"
 
 class Help_Messages():
     def __init__(self):

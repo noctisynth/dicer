@@ -26,12 +26,12 @@ QQ 频道机器人仅支持在 QQ频道 中运行, 你需要创建一个 QQ频�
 
 #### Ubuntu/Debian/Kali Linux
 ```sh
-apt install python3 -y
+apt install python3 python3-pip -y
 ```
 
 #### CentOS
 ```sh
-yum install python3 -y
+yum install python3 python3-devel python3-pip -y
 ```
 
 打开系统终端(Windows 中打开 cmd.exe 或 Powershell), 输入`python -V`和`pip -V`, 显示版本信息即代表安装成功.
@@ -45,13 +45,21 @@ pip install wheel setuptools --upgrade
 
 如果你使用 QQ频道模式, 你需要安装 Dicer 所需要的依赖库, 在终端中键入:
 ```sh
-pip install watchdog qq-botpy
+pip install watchdog qq-botpy loguru
 ```
 
 如果你使用 Nonebot2 模式, 你需要安装 Nonebot2:
 ```sh
 pip install nb-cli
 ```
+
+如果你同时部署这两者, 你可以直接采取:
+```sh
+pip install -r requirements.txt
+```
+
+这会安装 Dicer 所需要的所有依赖库.
+
 对于 Nonebot2 与 Go-CQHTTP 的配置和使用, 这里不进行过多赘述.
 
 ### 3. 配置 QQBot
@@ -84,6 +92,9 @@ nb run --reload
 ```
 
 ## 使用
+你可以在部署完成后, 在相应的 QQ 群或者 QQ 频道发送消息`.help`来查看使用方法.
+
+目前已兼容 COC 跑团与 SCP 跑团的大部分指令.
 
 ## 声明
 此项目由 Apache-2.0 协议开源, 使用代码时, 请注意遵照开源协议.

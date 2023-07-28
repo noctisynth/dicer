@@ -17,7 +17,6 @@ from .utils.utils import logger as _log, init, is_super_user, add_super_user, rm
 from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
 from .utils.chat import chat
 
-
 import logging
 import nonebot
 import sys

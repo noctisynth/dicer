@@ -1,6 +1,6 @@
 version = "2.5.2 CoolQ稳定版"
 
-class Coc_Help_Messages():
+class Help_Messages():
     def __init__(self):
         self.main = f"""欧若可骰娘 Version {version}
 此骰娘基于腾讯QQ机器人(botpy)搭建, \
@@ -95,7 +95,7 @@ Copyright © 2011-2023 Unknown Visitor. All Rights Reserved."""
         切换跑团模式 例如:
             .mode coc 切换到COC跑团模式"""
 
-help_messages = Coc_Help_Messages()
+help_messages = Help_Messages()
 
 def help_message(args: str):
     if args in help_messages.__dict__.keys():

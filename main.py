@@ -22,12 +22,18 @@ from utils.chat import chat
 
 import botpy
 import logging
+import sys
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
 config = read(current_dir / "config.yaml")
 mode = "scp"
 get_logger().setLevel(logging.CRITICAL)
+logger.remove()
+logger.add(
+    sys.stdout,
+    level = "INFO"
+)
 
 @Commands(name=(".test"))
 async def testhandler(api: BotAPI, message: Message, params=None):
@@ -58,19 +64,34 @@ async def debughandler(api: BotAPI, message: Message, params=None):
         logger.debug(args)
         if args[0] == "off":
             DEBUG = False
-            logger.setLevel(logging.INFO)
+            get_logger().setLevel(logging.INFO)
+            logger.remove()
+            logger.add(
+                sys.stdout,
+                level = "INFO"
+            )
             logger.info("[cocdicer] 输出等级设置为 INFO.")
             await message.reply(content="[Oracle] DEBUG 模式已关闭.")
             return True
     else:
         DEBUG = True
-        logger.setLevel(logging.DEBUG)
+        get_logger().setLevel(logging.DEBUG)
+        logger.remove()
+        logger.add(
+            sys.stdout,
+            level = "INFO"
+        )
         logger.info("[cocdicer] 输出等级设置为 DEBUG.")
         await message.reply(content="[Oracle] DEBUG 模式已启动.")
         return True
     if args[0] == "on":
         DEBUG = True
-        logger.setLevel(logging.DEBUG)
+        get_logger().setLevel(logging.DEBUG)
+        logger.remove()
+        logger.add(
+            sys.stdout,
+            level = "INFO"
+        )
         logger.info("[cocdicer] 输出等级设置为 DEBUG.")
         await message.reply(content="[Oracle] DEBUG 模式已启动.")
     else:
@@ -396,8 +417,12 @@ class OracleClient(botpy.Client):
         global DEBUG
         if DEBUG:
             get_logger().setLevel(logging.DEBUG)
-            logger.level("debug")
-            logger.info("[cocdicer] DEBUG 模式已启动.")
+            logger.remove()
+            logger.add(
+                sys.stdout,
+                level = "DEBUG"
+            )
+            logger.info("DEBUG 模式已启动.")
         init()
         cards.load()
         scp_cards.load()

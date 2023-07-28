@@ -50,6 +50,7 @@ def monitor_folder(folder_path, target=None):
     observer.schedule(event_handler, folder_path, recursive=True)
     observer.start()
     logger.info("文件监视器已启动, `QQGuild`机器人已开启热重载模式.")
+    logger.info(f"监视目录: {folder_path}")
 
     thread.start()
     logger.info("开始启动`QQGuild`机器人...")

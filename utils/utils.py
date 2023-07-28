@@ -25,7 +25,6 @@ import os
 import uuid
 import re
 import inspect
-import ast
 
 current_dir = Path(__file__).resolve().parent
 _coc_cachepath = current_dir.parent / "data" / "coc_cards.json"
@@ -63,9 +62,10 @@ def format_msg(message, begin=None):
     _log.debug(msg)
     return msg
 
-def format_str(message, begin=None):
+def format_str(message: Union[Message, str], begin=None):
     regex = "[<](.*?)[>]"
-    msg = re.sub("\s+", " ", re.sub(regex, "", str(message.content).lower())).strip(" ")
+    content = message.content if isinstance(message, Message) else message
+    msg = re.sub("\s+", " ", re.sub(regex, "", str(content).lower())).strip(" ")
     msg = translate_punctuation(msg)
     _log.debug(msg)
     if begin:
@@ -81,11 +81,11 @@ def get_handlers(main, target="Commands"):
     TARGET_DECORATOR = target
     commands_functions = []
 
-    for name, obj in vars(main).items():
+    for _, obj in vars(main).items():
         if inspect.isfunction(obj) and hasattr(obj, '__annotations__'):
             annotations = obj.__annotations__
             if annotations.get('message') is Message:
-                commands_functions.append(name)
+                commands_functions.append(obj)
 
     return commands_functions
 

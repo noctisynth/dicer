@@ -10,8 +10,8 @@ class Help_Messages():
 
 .help 帮助信息
 .su   进行超级管理员鉴权
-.coc  进行车卡, 完成coc角色作成
-.scp  进行车卡, 完成scp角色作成
+.coc  进行车卡, 完成 COC 角色作成
+.scp  进行车卡, 完成 SCP 角色作成
 .mode 切换当前跑团模式
 .r    投掷指令 例如:
             .r 10 100 (10D100)

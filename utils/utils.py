@@ -1,15 +1,36 @@
 from pathlib import Path
-from botpy import logging
+from loguru import logger
+from typing import Union
+
+try:
+    from utils.decorators import translate_punctuation
+    from utils.settings import package
+except ImportError:
+    from .decorators import translate_punctuation
+    from .settings import package
+
+if package == "nonebot2":
+    from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+    class Message:
+        pass
+elif package == "qqguild":
+    from botpy.message import Message
+    class MessageEvent:
+        pass
+    class GroupMessageEvent:
+        pass
 
 import json
 import os
 import uuid
+import re
+import inspect
+import ast
 
 current_dir = Path(__file__).resolve().parent
 _coc_cachepath = current_dir.parent / "data" / "coc_cards.json"
 _scp_cachepath = current_dir.parent / "data" / "scp_cards.json"
 _super_user = current_dir.parent / "data" / "super_user.json"
-logger = logging.get_logger()
 _log = logger
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
 
@@ -30,8 +51,58 @@ def init():
         with open(_super_user, "w", encoding="utf-8") as f:
             f.write("{}")
 
-def get_group_id(message):
-    return message.channel_id
+def format_msg(message, begin=None):
+    msg = format_str(message, begin=begin).split(" ")
+    outer = []
+    for m in msg:
+        m = re.split(r'(\d+)|([a-zA-Z]+)|([\u4e00-\u9fa5]+)', m)
+        m = list(filter(None, m))
+        outer += m
+    msg = outer
+    msg = list(filter(None, msg))
+    _log.debug(msg)
+    return msg
+
+def format_str(message, begin=None):
+    regex = "[<](.*?)[>]"
+    msg = re.sub("\s+", " ", re.sub(regex, "", str(message.content).lower())).strip(" ")
+    msg = translate_punctuation(msg)
+    _log.debug(msg)
+    if begin:
+        if isinstance(begin, list) or isinstance(begin, tuple):
+            for b in begin:
+                msg = msg.replace(b, "").lstrip(" ")
+        else:
+            msg = msg.replace(begin, "").lstrip(" ")
+    _log.debug(msg)
+    return msg
+
+def get_handlers(main):
+    TARGET_DECORATOR = 'Commands'
+    commands_functions = []
+
+    for name, obj in inspect.getmembers(main):
+        if inspect.isfunction(obj):
+            decorators = [dec.id for dec in ast.walk(ast.parse(inspect.getsource(obj))) if isinstance(dec, ast.Name)]
+            if TARGET_DECORATOR in decorators:
+                commands_functions.append(name)
+
+    return commands_functions
+
+def get_group_id(event):
+    try:
+        if package == "nonebot2":
+            return str(event.group_id)
+        elif package == "qqguild":
+            return 
+    except KeyError:
+        return "0"
+
+def get_user_id(event: Union[Message, MessageEvent, GroupMessageEvent]):
+    if isinstance(event, Message):
+        return eval(str(event.author))["id"]
+    else:
+        return str(event.get_user_id())
 
 def add_super_user(message):
     with open(_super_user, "w+") as _su:
@@ -40,7 +111,7 @@ def add_super_user(message):
             sudos = {}
         else:
             sudos = json.loads(sr)
-        sudos[message.author.id] = ""
+        sudos[get_user_id(message)] = ""
         _su.write(json.dumps(sudos))
     return True
 
@@ -51,7 +122,7 @@ def rm_super_user(message):
         return False
     sudos = json.loads(sr)
     try:
-        sudos.pop(message.author.id)
+        sudos.pop(get_user_id(message))
     except KeyError:
         return False
     _su = open(_super_user, "w")
@@ -67,7 +138,7 @@ def is_super_user(message):
         else:
             sudos = json.loads(sr)
     for sudo in sudos.keys():
-        if message.author.id == sudo:
+        if get_user_id(message) == sudo:
             su = True
             break
     return su

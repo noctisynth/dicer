@@ -1,4 +1,4 @@
-version = "2.5.2 稳定版"
+version = "2.5.2 CoolQ稳定版"
 
 class Coc_Help_Messages():
     def __init__(self):
@@ -9,6 +9,7 @@ class Coc_Help_Messages():
 感谢 灵冬-老孙 提供相关技术支持.
 
 .help 帮助信息
+.su   进行超级管理员鉴权
 .coc  进行车卡, 完成coc角色作成
 .scp  进行车卡, 完成scp角色作成
 .mode 切换当前跑团模式
@@ -92,8 +93,7 @@ Copyright © 2011-2023 Unknown Visitor. All Rights Reserved."""
         该命令支持多个参数混合使用, 可以一次指定多个技能名, 使用空格隔开"""
         self.mode = """.mode [str: mode]
         切换跑团模式 例如:
-            .mode coc 切换到COC跑团模式
-        """
+            .mode coc 切换到COC跑团模式"""
 
 help_messages = Coc_Help_Messages()
 

@@ -1,9 +1,8 @@
-from botpy import logging
-
+import logging
 import re
 import random
 
-_log = logging.get_logger()
+_log = logging.getLogger()
 
 class Dice:
     def __init__(self, roll_string="", explode=False):
@@ -27,13 +26,14 @@ class Dice:
             self.dices += [f"D{self.b}"] * self.a
             return self
 
-        pattern = r'(\d+)d(\d+)([+\-]\d+)?'
+        pattern = r'(\d+)d(\d+)([+\-])?(\d+)?'
         match = re.match(pattern, self.roll_string)
 
         if match:
             self.a = int(match.group(1))
             self.b = int(match.group(2))
-            self.x = int(match.group(3)) if match.group(3) else 0
+            self.method = match.group(3) if match.group(3) else "+"
+            self.x = int(match.group(4)) if match.group(4) else 0
             self.db = f"{self.a}D{self.b}"
             self.dices += [f"D{self.b}"] * self.a
         else:
@@ -81,7 +81,10 @@ class Dice:
                             self.great = True
             self.results += [result]
 
-        self.total = sum(self.results) + self.x
+        if self.method == "+":
+            self.total = sum(self.results) + self.x
+        else:
+            self.total = sum(self.results) - self.x
         return self
 
     def detail_expr(self):

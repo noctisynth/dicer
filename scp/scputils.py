@@ -1,13 +1,15 @@
-from utils.messages import help_messages, help_message
-from botpy import logging
-from utils.dicer import Dice, scp_doc
-from typing import Optional
-from scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict
-from scp.agent import Agent
+try:
+    from ..utils.messages import help_messages, help_message
+    from ..utils.dicer import Dice, scp_doc
+    from .scpcards import scp_cards, scp_attrs_dict as attrs_dict
+    from .agent import Agent
+except ImportError:
+    from utils.messages import help_messages, help_message
+    from utils.dicer import Dice, scp_doc
+    from scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict
+    from scp.agent import Agent
 
 import random
-
-_log = logging.get_logger()
 
 def st():
     result = random.randint(1, 20)

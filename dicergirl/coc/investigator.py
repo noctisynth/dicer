@@ -1,18 +1,15 @@
 import random
 
-
 build_dict = {64: -2, 84: -1, 124: 0, 164: 1,
               204: 2, 284: 3, 364: 4, 444: 5, 524: 6}
 db_dict = {-2: "-2", -1: "-1", 0: "0", 1: "1d4",
            2: "1d6", 3: "2d6", 4: "3d6", 5: "4d6", 6: "5d6"}
-
 
 def randattr(time: int = 3, ex: int = 0):
     r = 0
     for _ in range(time):
         r += random.randint(1, 6)
     return (r+ex)*5
-
 
 class Investigator(object):
     def __init__(self) -> None:
@@ -147,14 +144,14 @@ class Investigator(object):
             self.edu_ups(4)
             return "外貌-25, 力量、体型、敏捷合计降低80, 教育增强判定四次"
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         data = "姓名: %s\n" % self.name
         data += "性别: %s 年龄: %d\n" % (self.sex, self.age)
         data += "力量: %d 体质: %d 体型: %d\n" % (self.str, self.con, self.siz)
-        data += "敏捷: %d 外貌: %d 智力: %d\n" % (self.dex, self.app, self.int) 
+        data += "敏捷: %d 外貌: %d 智力: %d\n" % (self.dex, self.app, self.int)
         data += "意志: %d 教育: %d 幸运: %d\n" % (self.pow, self.edu, self.luc)
-        data += "生命值: %d 移动速度: %d SAN: %d\n" % (self.hp, self.mov(), self.san)
-        data += "DB: %s" % self.db()
+        data += "DB: %d 移动速度: %d SAN: %d\n" % (self.db(), self.mov(), self.san)
+        data += "生命值: %s/%s" % (self.hp, self.lp_max())
         return data
 
     def skills_output(self) -> str:

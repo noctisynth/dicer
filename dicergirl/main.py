@@ -13,7 +13,7 @@ from scp.agent import Agent
 from coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
 from coc.coccards import cards, cache_cards, sa_handler
 from scp.scpcards import scp_cards, scp_cache_cards
-from scp.scputils import sra, scp_dam
+from scp.scputils import sra, scp_dam, at as sat
 from utils.decorators import Commands
 from utils.messages import help_message, version
 from utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers
@@ -252,7 +252,10 @@ async def stcommandhandler(api: BotAPI, message: Message, params=None):
 @Commands(name=(".at"))
 async def attackhandler(api: BotAPI, message: Message, params=None):
     args = format_str(message, begin=(".at", ".attack"))
-    await message.reply(content=at(args))
+    if mode == "coc":
+        await message.reply(content=at(args, message))
+    elif mode == "scp":
+        await message.reply(content=sat(args, message))
     return True
 
 
@@ -353,8 +356,12 @@ async def sahandler(api: BotAPI, message: Message, params=None):
 @Commands(name=(".del", ".delete"))
 async def delhandler(api: BotAPI, message: Message, params=None):
     args = format_str(message, begin=(".del", ".delete"))
-    for msg in del_handler(message, args):
-        await message.reply(content=msg)
+    if mode == "coc":
+        for msg in del_handler(message, args):
+            await message.reply(content=msg)
+    elif mode == "scp":
+        for msg in scp_del_handler(message, args):
+            await message.reply(content=msg)
     return True
 
 @Commands(name=(".scp"))
@@ -380,13 +387,6 @@ async def scp_handler(api: BotAPI, message: Message, params=None):
     if 15 <= args and args < 90:
         scp_cache_cards.update(message, agt.__dict__, save=False)
         await message.reply(content=str(agt.output()))
-    return True
-
-@Commands(name=(".sdel", ".sdelete"))
-async def scp_delhandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=(".sdel", ".sdelete"))
-    for msg in scp_del_handler(message, args):
-        await message.reply(content=msg)
     return True
 
 @Commands(name=(".sra"))

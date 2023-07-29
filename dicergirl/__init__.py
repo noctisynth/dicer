@@ -9,7 +9,7 @@ from .scp.agent import Agent
 from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
 from .coc.coccards import cards, cache_cards, sa_handler
 from .scp.scpcards import scp_cards, scp_cache_cards
-from .scp.scputils import sra, scp_dam
+from .scp.scputils import sra, scp_dam, at as sat
 from .utils.messages import help_message, version
 from .utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str
 from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
@@ -60,7 +60,6 @@ if package == "nonebot2":
     sacommand = on_startswith(".sa", priority=2, block=True)
     delcommand = on_startswith(".del", priority=2, block=True)# | on_startswith(".delete", priority=2, block=True)
     scpcommand = on_startswith(".scp", priority=1, block=True)
-    sdelcommand = on_startswith(".sdel", priority=2, block=True)# | on_startswith(".sdelete", priority=2, block=True)
     scpracommand = on_startswith(".sra", priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith(".version", priority=2, block=True)# | on_startswith(".v", priority=2, block=True)
@@ -302,7 +301,10 @@ if package == "nonebot2":
     @attackcommand.handle()
     async def attackhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_str(event.get_message(), begin=(".at", ".attack"))
-        await matcher.send(at(args))
+        if mode == "coc":
+            await matcher.send(at(args, event))
+        elif mode == "scp":
+            await matcher.send(sat(args, event))
 
 
     @damcommand.handle()
@@ -398,10 +400,13 @@ if package == "nonebot2":
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_str(event.get_message(), begin=(".del", ".delete"))
-        for msg in del_handler(event, args):
-            await matcher.send(msg)
+        if mode == "coc":
+            for msg in del_handler(event, args):
+                await matcher.send(msg)
+        elif mode == "scp":
+            for msg in scp_del_handler(event, args):
+                await matcher.send(msg)
         return
-
 
     @scpcommand.handle()
     async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
@@ -426,15 +431,6 @@ if package == "nonebot2":
         if 15 <= args and args < 90:
             scp_cache_cards.update(event, agt.__dict__, save=False)
             await matcher.send(str(agt.output()))
-
-
-    @sdelcommand.handle()
-    async def scp_delhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=(".sdel", ".sdelete"))
-        for msg in scp_del_handler(event, args):
-            await matcher.send(msg)
-        return
-
 
     @scpracommand.handle()
     async def scp_rahandler(matcher: Matcher, event: GroupMessageEvent):

@@ -32,6 +32,7 @@ _scp_cachepath = current_dir.parent / "data" / "scp_cards.json"
 _super_user = current_dir.parent / "data" / "super_user.json"
 _log = logger
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
+version = "3.0.0 稳定版"
 
 def init():
     if not current_dir / "data":

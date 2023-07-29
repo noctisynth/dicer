@@ -1,3 +1,5 @@
+from dicergirl.utils.utils import version
+
 import setuptools
 
 with open("README.md", encoding="utf-8") as f:
@@ -5,7 +7,7 @@ with open("README.md", encoding="utf-8") as f:
 
 setuptools.setup(
     name = "dicergirl",
-    version = "3.0.0",
+    version = version,
     author = "Night Resurgent <fu050409@163.com>",
     author_email = "fu050409@163.com",
     description = "跑团骰娘机器人欧若可, 支持 QQ频道 及 Nonebot2 部署.",
@@ -27,7 +29,8 @@ setuptools.setup(
         'nonebot2',
         'qq-botpy',
         'watchdog',
-        'loguru'
+        'loguru',
+        'openai'
     ],
     python_requires=">=3",
 )

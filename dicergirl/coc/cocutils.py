@@ -83,12 +83,16 @@ def st():
         rstr = "头部"
     return "D20=%d: 命中了%s" % (result, rstr)
 
-def at(args):
+def at(args, event):
+    inv = Investigator().load(cards.get(event))
+
     if args:
         d = Dice().parse(args).roll()
     else:
         d = Dice().parse("1d6").roll()
-    return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
+    db = Dice(inv.db()).roll()
+
+    return f"[Oracle] 投掷 {d.db}+{db.db}=({d.total}+{db.total})\n造成了 {d.total+db.total}点 伤害."
 
 def dam(args, message):
     card = cards.get(message)
@@ -106,11 +110,11 @@ def dam(args, message):
     if card["hp"] <= 0:
         card["hp"] = 0
         r += f", 调查员 {card['name']} 已死亡."
-    elif max_hp * 0.8 <= card["hp"] < max_hp:
+    elif max_hp * 0.8 <= card["hp"] and card["hp"] < max_hp:
         r += f", 调查员 {card['name']} 具有轻微伤."
-    elif max_hp * 0.6 <= card["hp"] <= max_hp * 0.8:
+    elif max_hp * 0.6 <= card["hp"] and card["hp"] <= max_hp * 0.8:
         r += f", 调查员 {card['name']} 进入轻伤状态."
-    elif max_hp * 0.2 <= card["hp"] <= max_hp * 0.6:
+    elif max_hp * 0.2 <= card["hp"] and card["hp"] <= max_hp * 0.6:
         r += f", 调查员 {card['name']} 身负重伤."
     elif max_hp * 0.2 >= card["hp"]:
         r += f", 调查员 {card['name']} 濒死."

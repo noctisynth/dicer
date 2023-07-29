@@ -16,7 +16,7 @@ from scp.scpcards import scp_cards, scp_cache_cards
 from scp.scputils import sra, scp_dam, at as sat
 from utils.decorators import Commands
 from utils.messages import help_message, version
-from utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers
+from utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config
 from utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
 from utils.chat import chat
 
@@ -26,7 +26,7 @@ import sys
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
-config = read(current_dir / "config.yaml")
+config = get_config()
 mode = "scp"
 get_logger().setLevel(logging.CRITICAL)
 logger.remove()

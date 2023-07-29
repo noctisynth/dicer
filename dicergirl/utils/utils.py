@@ -4,10 +4,10 @@ from typing import Union
 
 try:
     from utils.decorators import translate_punctuation
-    from utils.settings import package
+    from utils.settings import package, setconfig, getconfig
 except ImportError:
     from .decorators import translate_punctuation
-    from .settings import package
+    from .settings import package, setconfig, getconfig
 
 if package == "nonebot2":
     from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
@@ -25,7 +25,6 @@ import os
 import uuid
 import re
 import inspect
-import yaml
 
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
@@ -35,11 +34,11 @@ _scp_cachepath = data_dir / "scp_cards.json"
 _super_user = data_dir / "super_user.json"
 _log = logger
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
-version = "3.0.1"
+version = "3.0.2"
 
 def init():
     if not dicer_girl_dir.exists():
-        _log.info("Dicer Girl 数据文件夹未建立, 建立它.")
+        _log.info("Dicer Girl 文件夹未建立, 建立它.")
         dicer_girl_dir.mkdir()
     if not data_dir.exists():
         _log.info("Dicer Girl 数据文件夹未建立, 建立它.")
@@ -56,6 +55,12 @@ def init():
         _log.info("[cocdicer] 超级用户存储文件未建立, 建立它.")
         with open(_super_user, "w", encoding="utf-8") as f:
             f.write("{}")
+
+def set_config(appid, token):
+    return setconfig(appid, token, path=dicer_girl_dir, filename="config.yaml")
+
+def get_config() -> dict:
+    return getconfig(path=dicer_girl_dir, filename="config.yaml")
 
 def format_msg(message, begin=None):
     msg = format_str(message, begin=begin).split(" ")
@@ -84,8 +89,7 @@ def format_str(message: Union[Message, str], begin=None):
     _log.debug(msg)
     return msg
 
-def get_handlers(main, target="Commands"):
-    TARGET_DECORATOR = target
+def get_handlers(main):
     commands_functions = []
 
     for _, obj in vars(main).items():

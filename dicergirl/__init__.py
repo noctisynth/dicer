@@ -25,6 +25,7 @@ mode = "scp"
 
 try:
     driver = nonebot.get_driver()
+    set_package("nonebot2")
 except ValueError:
     utilless = True
 else:

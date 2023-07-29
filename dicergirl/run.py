@@ -76,6 +76,7 @@ def monitor_folder(folder_path, target=None):
         sys.exit()
 
 def run():
+    sys.path.insert(0, str(current_dir))
     runpy.run_module(MODULE_TO_RELOAD, run_name="__main__", alter_sys=True)
  
 def main():

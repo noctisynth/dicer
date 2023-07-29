@@ -7,13 +7,13 @@ try:
     from ..scp.agent import Agent
     from ..scp.scpcards import scp_cache_cards, scp_cards, scp_attrs_dict
 except ImportError:
-    from utils.utils import _coc_cachepath, _scp_cachepath, logger as _log, get_group_id
-    from utils.dicer import Dice, expr
-    from utils.messages import help_messages
-    from coc.investigator import Investigator
-    from coc.coccards import cache_cards, cards, attrs_dict
-    from scp.agent import Agent
-    from scp.scpcards import scp_cache_cards, scp_cards, scp_attrs_dict
+    from dicergirl.utils.utils import _coc_cachepath, _scp_cachepath, logger as _log, get_group_id
+    from dicergirl.utils.dicer import Dice, expr
+    from dicergirl.utils.messages import help_messages
+    from dicergirl.coc.investigator import Investigator
+    from dicergirl.coc.coccards import cache_cards, cards, attrs_dict
+    from dicergirl.scp.agent import Agent
+    from dicergirl.scp.scpcards import scp_cache_cards, scp_cards, scp_attrs_dict
 
 def set_handler(message, args):
     if not args:

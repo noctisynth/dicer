@@ -1,7 +1,7 @@
 try:
     from .utils import version
 except ImportError:
-    from utils.utils import version
+    from dicergirl.utils.utils import version
 
 class Help_Messages():
     def __init__(self):

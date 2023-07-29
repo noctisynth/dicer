@@ -4,9 +4,9 @@ try:
     from ..utils.dicer import Dice, expr
     from ..utils.utils import _coc_cachepath as _cachepath, logger as _log, get_group_id, get_user_id
 except ImportError:
-    from utils.messages import help_messages
-    from utils.dicer import Dice, expr
-    from utils.utils import _coc_cachepath as _cachepath, logger as _log, get_group_id, get_user_id
+    from dicergirl.utils.messages import help_messages
+    from dicergirl.utils.dicer import Dice, expr
+    from dicergirl.utils.utils import _coc_cachepath as _cachepath, logger as _log, get_group_id, get_user_id
 
 import json
 

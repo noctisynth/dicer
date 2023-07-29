@@ -2,7 +2,7 @@ import random
 try:
     from ..utils.dicer import Dice
 except ImportError:
-    from utils.dicer import Dice
+    from dicergirl.utils.dicer import Dice
 
 class Agent(object):
     def __init__(self) -> None:

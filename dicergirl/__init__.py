@@ -2,8 +2,6 @@ from pathlib import Path
 from loguru import logger
 
 from .utils.settings import set_package, package
-package = set_package("nonebot2")
-
 from .coc.investigator import Investigator
 from .scp.agent import Agent
 from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp

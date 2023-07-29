@@ -3,8 +3,8 @@ try:
     from ..utils.utils import logger as _log, _scp_cachepath
     from ..utils.utils import get_group_id, get_user_id
 except ImportError:
-    from utils.utils import logger as _log, _scp_cachepath
-    from utils.utils import get_group_id, get_user_id
+    from dicergirl.utils.utils import logger as _log, _scp_cachepath
+    from dicergirl.utils.utils import get_group_id, get_user_id
 
 import json
 

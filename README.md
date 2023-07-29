@@ -1,10 +1,10 @@
-# CocDicer
+# DicerGirl
 
 ## 介绍
 跑团骰娘机器人欧若可, 支持 QQ频道 及 Nonebot2 部署.
 
 ## 软件架构
-任何支持 Python3 环境搭建的平台, 建议使用 Python3.10 及以上的 Python 版本, CocDicer 不支持 Python2.
+任何支持 Python3 环境搭建的平台, 建议使用 Python3.10 及以上的 Python 版本, DicerGirl 不支持 Python2.
 
 ## 版本特性
 同时支持基于`qq-botpy`的 QQ频道机器人 以及 Nonebot2 Onebot v11. 这使得该库可以在不进行迁移修改的情况下完全兼容腾讯官方支持的 QQ频道机器人 以及功能强大的 Nonebot2.
@@ -62,7 +62,12 @@ pip install -r requirements.txt
 
 对于 Nonebot2 与 Go-CQHTTP 的配置和使用, 这里不进行过多赘述.
 
-### 3. 配置 QQBot
+### 3. 安装 DicerGirl
+使用以下指令安装 DicerGirl:
+```sh
+pip install dicergirl
+```
+
 #### 频道模式
 如果你使用 QQ频道模式, 你需要先打开根目录的 config.yaml 文件, 将其中的`appid`和`token`改成腾讯[QQ 开放平台](https://q.qq.com/)中创建 QQ 机器人所得到的 BotAppId 和 机器人令牌, 在终端中执行命令:
 ```sh
@@ -71,7 +76,7 @@ python run.py
 
 你也可以在目录表层创建一个`.py`文件:
 ```python
-from dicer.utils.settings import set_package
+from dicergirl.utils.settings import set_package
 set_package("qqguild")
 
 from dicer import main
@@ -84,9 +89,19 @@ main()
 请注意在执行指令之前依照 QQ 开放平台配置自己的机器人，并开启并创建 QQ频道.
 
 #### Nonebot2 模式
-如果你使用 Nonebot2 作为 Dicer 的引擎, 你需要将克隆的仓库拷贝到: `你的Nonebot2项目目录/src` 中, 并在 pyproject.toml 中的`plugin_dirs`参数中加入`['src']`.
+1. 直接安装
+如果你使用 Nonebot2 作为 Dicer 的引擎, 你应当先注意你是否需要激活虚拟环境, 并执行:
+```sh
+pip install dicergirl
+```
 
-配置完毕后, 在终端切入你的 Nonebot2 项目目录并执行:
+如果你不知道如何激活虚拟环境, 且你使用了 Nonebot2 推荐的`venv`而不是`conda`, 那么你应该打开你的 Nonebot2 项目, 进入`.venv`目录中, 找到`pip`(Windows 中是 `pip.exe`), 然后进入该可执行文件的文件夹, 再执行以上命令.
+
+2. 源文件安装
+或者你也可以将克隆的仓库拷贝到: `你的Nonebot2项目目录/src` 中, 并在 pyproject.toml 中的`plugin_dirs`参数中加入`['src']`, 这与直接安装的结果是等同的, 但是这不利于你收到 DicerGirl 的最新更新.
+
+3. 配置完毕
+之后, 在终端切入你的 Nonebot2 项目目录并执行:
 ```sh
 nb run --reload
 ```

@@ -1,4 +1,4 @@
-from dicergirl.utils.utils import version
+from dicergirl import version
 
 import setuptools
 
@@ -30,6 +30,7 @@ setuptools.setup(
         'qq-botpy',
         'watchdog',
         'loguru',
+        'pyyaml',
         'openai'
     ],
     python_requires=">=3",

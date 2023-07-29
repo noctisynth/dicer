@@ -11,7 +11,7 @@ from .coc.coccards import cards, cache_cards, sa_handler
 from .scp.scpcards import scp_cards, scp_cache_cards
 from .scp.scputils import sra, scp_dam, at as sat
 from .utils.messages import help_message, version
-from .utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str
+from .utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, version
 from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
 from .utils.chat import chat
 
@@ -23,19 +23,26 @@ DEBUG = False
 current_dir = Path(__file__).resolve().parent
 mode = "scp"
 
-if package == "nonebot2":
-    from nonebot import get_driver, get_bot
+try:
+    driver = nonebot.get_driver()
+except ValueError:
+    utilless = True
+else:
+    utilless = False
+
+if package == "nonebot2" and not utilless:
     from nonebot.rule import Rule
     from nonebot.matcher import Matcher
     from nonebot.plugin import on_startswith
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
     from nonebot.adapters.onebot.v12 import Bot as V12Bot
-    if nonebot.get_driver()._adapters.get("OneBot V12"):
+
+    if driver._adapters.get("OneBot V12"):
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent
     else:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
-    driver = get_driver()
+    
 
     testcommand = on_startswith(".test", priority=2, block=True)
     debugcommand = on_startswith(".debug", priority=2, block=True)
@@ -453,8 +460,9 @@ if package == "nonebot2":
         await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客版权所有.\nCopyright © 2011-2023 Unknown Visitor. All Rights Reserved.")
         return
 elif package == "qqguild":
-    from .main import main
-    main()
+    pass
+elif package == "nonebot2":
+    pass
 else:
-    logger.critical("未知的包模式!")
+    logger.critical(f"未知的包模式: {package}!")
     sys.exit()

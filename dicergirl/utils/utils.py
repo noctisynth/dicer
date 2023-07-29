@@ -3,8 +3,8 @@ from loguru import logger
 from typing import Union
 
 try:
-    from utils.decorators import translate_punctuation
-    from utils.settings import package, setconfig, getconfig
+    from dicergirl.utils.decorators import translate_punctuation
+    from dicergirl.utils.settings import package, setconfig, getconfig
 except ImportError:
     from .decorators import translate_punctuation
     from .settings import package, setconfig, getconfig
@@ -34,7 +34,7 @@ _scp_cachepath = data_dir / "scp_cards.json"
 _super_user = data_dir / "super_user.json"
 _log = logger
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
-version = "3.0.2"
+version = "3.0.3"
 
 def init():
     if not dicer_girl_dir.exists():

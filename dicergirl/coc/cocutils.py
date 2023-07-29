@@ -6,11 +6,11 @@ try:
     from .coccards import cards, attrs_dict
     from .investigator import Investigator
 except ImportError:
-    from utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
-    from utils.dicer import Dice, expr
-    from utils.utils import _log
-    from coc.coccards import cards, attrs_dict
-    from coc.investigator import Investigator
+    from dicergirl.utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
+    from dicergirl.utils.dicer import Dice, expr
+    from dicergirl.utils.utils import _log
+    from dicergirl.coc.coccards import cards, attrs_dict
+    from dicergirl.coc.investigator import Investigator
 
 import random
 import re

@@ -4,10 +4,10 @@ try:
     from .scpcards import scp_cards, scp_attrs_dict as attrs_dict
     from .agent import Agent
 except ImportError:
-    from utils.messages import help_messages, help_message
-    from utils.dicer import Dice, scp_doc
-    from scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict
-    from scp.agent import Agent
+    from dicergirl.utils.messages import help_messages, help_message
+    from dicergirl.utils.dicer import Dice, scp_doc
+    from dicergirl.scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict
+    from dicergirl.scp.agent import Agent
 
 import random
 

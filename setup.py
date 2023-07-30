@@ -1,4 +1,4 @@
-from dicergirl import version
+from dicergirl.utils.utils import version
 
 import setuptools
 

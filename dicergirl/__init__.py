@@ -2,16 +2,6 @@ from pathlib import Path
 from loguru import logger
 
 from .utils.settings import set_package, package
-from .coc.investigator import Investigator
-from .scp.agent import Agent
-from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
-from .coc.coccards import cards, cache_cards, sa_handler
-from .scp.scpcards import scp_cards, scp_cache_cards
-from .scp.scputils import sra, scp_dam, at as sat
-from .utils.messages import help_message, version
-from .utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, version
-from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
-from .utils.chat import chat
 
 import logging
 import nonebot
@@ -30,6 +20,17 @@ else:
     utilless = False
 
 if package == "nonebot2" and not utilless:
+    from .coc.investigator import Investigator
+    from .scp.agent import Agent
+    from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
+    from .coc.coccards import cards, cache_cards, sa_handler
+    from .scp.scpcards import scp_cards, scp_cache_cards
+    from .scp.scputils import sra, scp_dam, at as sat
+    from .utils.messages import help_message, version
+    from .utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, version
+    from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
+    from .utils.chat import chat
+
     from nonebot.rule import Rule
     from nonebot.matcher import Matcher
     from nonebot.plugin import on_startswith

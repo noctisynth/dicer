@@ -5,8 +5,8 @@ from botpy.api import BotAPI
 from botpy.logging import get_logger
 from pathlib import Path
 
-from utils.settings import set_package
-package = set_package("qqguild")
+from utils.settings import set_package, get_package
+set_package("qqguild")
 
 from coc.investigator import Investigator
 from scp.agent import Agent
@@ -34,6 +34,7 @@ logger.add(
     sys.stdout,
     level = "INFO"
 )
+package = get_package()
 
 @Commands(name=(".test"))
 async def testhandler(api: BotAPI, message: Message, params=None):

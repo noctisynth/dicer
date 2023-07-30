@@ -21,6 +21,9 @@ def set_package(pkg: str):
             logger.exception(error)
         sys.exit()
 
+def get_package():
+    return package
+
 def setconfig(appid, token, path=Path.home()/".dicergirl", filename="config.yaml"):
     if package == "nonebot2":
         raise AttributeError("你无法在 Nonebot2 模式下创建配置文件, 请确保你在调用`setconfig`函数之前已经执行了`set_package('qqguild').")

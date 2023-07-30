@@ -5,8 +5,10 @@ from watchdog.events import FileSystemEventHandler
 from multiprocessing import Process, freeze_support
 try:
     from .utils.settings import package
+    from .utils.utils import version
 except ImportError:
-    from utils.settings import package
+    from dicergirl.utils.settings import package
+    from .utils.utils import version
 
 import sys
 import runpy
@@ -30,7 +32,8 @@ class FileModifiedHandler(FileSystemEventHandler):
     def __init__(self):
         super(FileModifiedHandler, self).__init__()
         self.is_modified: bool = False
-        self.modified_module: str = None
+        self.modified_module: str = ""
+        self.modified_file: str = ""
 
     def on_modified(self, event):
         if not event.is_directory:
@@ -40,6 +43,7 @@ class FileModifiedHandler(FileSystemEventHandler):
             if split[1] == "py":
                 self.is_modified = True
                 self.modified_module = split[0]
+                self.modified_file = event.src_path
 
 def monitor_folder(folder_path, target=None):
     thread = Process(target=target)
@@ -49,7 +53,7 @@ def monitor_folder(folder_path, target=None):
     observer = Observer()
     observer.schedule(event_handler, folder_path, recursive=True)
     observer.start()
-    logger.info("文件监视器已启动, `QQGuild`机器人已开启热重载模式.")
+    logger.success("文件监视器已启动, `QQGuild`机器人已开启热重载模式.")
     logger.info(f"监视目录: {folder_path}")
 
     thread.start()
@@ -61,10 +65,10 @@ def monitor_folder(folder_path, target=None):
                 event_handler.is_modified = False
                 if target:
                     if thread.is_alive():
-                        logger.info(f"模块`{event_handler.modified_module}`被更改, 开始终止主程序.")
+                        logger.info(f"文件`{event_handler.modified_file}`被更改, 开始终止主程序.")
                         thread.terminate()
                         thread.join()
-                    logger.info("主线程已终止, 重启中.")
+                    logger.success("主线程已终止, 重启中...")
                     thread = Process(target=target)
                     thread.daemon = True
                     thread.start()
@@ -80,6 +84,9 @@ def run():
     runpy.run_module(MODULE_TO_RELOAD, run_name="__main__", alter_sys=True)
  
 def main():
+    logger.info(f"Dicer Girl {version}")
+    logger.info("Copyright © 2011-2023 Unknown Visitor. All Rights Reserved.")
+    logger.info("开始初始化环境...")
     freeze_support()
     try:
         monitor_folder(current_dir, target=run)

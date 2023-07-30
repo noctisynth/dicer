@@ -1,16 +1,16 @@
-import logging
+from loguru import logger
+
 import re
 import random
-
-_log = logging.getLogger()
 
 class Dice:
     def __init__(self, roll_string="", explode=False):
         self.roll_string = roll_string
         self.dices = []
         self.method = "+"
-        self.parse(roll_string=self.roll_string, explode=explode)
         self.results = []
+        self.add = []
+        self.parse(roll_string=self.roll_string, explode=explode)
         self.total = 0
         self.great = False
 
@@ -27,15 +27,24 @@ class Dice:
             self.dices += [f"D{self.b}"] * self.a
             return self
 
-        pattern = r'(\d+)d(\d+)([+\-])?(\d+)?'
+        pattern = r'^(\d+)d(\d+)([+\-])?(\d+)?d?(\d+)?$'
         match = re.match(pattern, self.roll_string)
 
         if match:
             self.a = int(match.group(1))
             self.b = int(match.group(2))
             self.method = match.group(3) if match.group(3) else "+"
-            self.x = int(match.group(4)) if match.group(4) else 0
-            self.db = f"{self.a}D{self.b}"
+            if match.group(4) and match.group(5):
+                xd = Dice(f"{match.group(4)}d{match.group(5)}").roll()
+                self.x = xd.calc()
+                self.db = f"{self.a}D{self.b}{self.method}{match.group(4)}D{match.group(5)}"
+                self.add = xd.results
+                logger.debug(xd.results)
+            else:
+                self.x = int(match.group(4)) if match.group(4) else 0
+                if self.x:
+                    self.db = f"{self.a}D{self.b}{self.method}{self.x}"
+                self.add = [self.x] if self.x else None
             self.dices += [f"D{self.b}"] * self.a
         else:
             try:
@@ -53,14 +62,19 @@ class Dice:
             self.results = 0
             self.total = 0
             return self
+
         self.results = []
+        if self.add:
+            add = sum(self.add)
+        else:
+            add = 0
+
         for _ in range(self.a):
             result = random.randint(1, self.b)
             if result == 1:
-                result -= 1
-            if self.explode and self.b == 8:
-                if result == 1:
+                if self.explode:
                     result -= 1
+            if self.explode and self.b == 8:
                 self.dices.append("D10")
                 result2 = random.randint(1, 10)
                 if result2 == 1:
@@ -83,9 +97,13 @@ class Dice:
             self.results += [result]
 
         if self.method == "+":
-            self.total = sum(self.results) + self.x
+            self.total = sum(self.results) + add
         else:
-            self.total = sum(self.results) - self.x
+            self.total = sum(self.results) - add
+        
+        if self.add:
+            self.results.append(self.add)
+
         return self
 
     def detail_expr(self):
@@ -107,7 +125,7 @@ def expr(d, anum):
     d.roll()
     result = d.calc()
     s = f"{d}={(d.detail_expr())}={result}"
-    _log.debug(d.detail_expr())
+    logger.debug(d.detail_expr())
     if anum:
         s += "\n"
         if result == 100:
@@ -162,8 +180,8 @@ def scp_doc(result, difficulty, agent=None, great=False):
 
 if __name__ == "__main__":
     try:
-        roll_string = "1d6"
-        dice = Dice().parse("1d6").roll()
-        print(f"{roll_string}={dice.detail_expr()}={dice.calc()}")
+        roll_string = "2d1-2"
+        dice = Dice().parse(roll_string).roll()
+        print(f"{dice.db}={dice.detail_expr()}={dice.calc()}")
     except ValueError as e:
         print(e)

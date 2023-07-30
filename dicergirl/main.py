@@ -1,5 +1,4 @@
 from botpy.message import Message
-from botpy.ext.cog_yaml import read
 from botpy.types.message import MarkdownPayload
 from botpy.api import BotAPI
 from botpy.logging import get_logger
@@ -28,6 +27,7 @@ DEBUG = False
 current_dir = Path(__file__).resolve().parent
 config = get_config()
 mode = "scp"
+
 get_logger().setLevel(logging.CRITICAL)
 logger.remove()
 logger.add(
@@ -292,7 +292,7 @@ async def rahandler(api: BotAPI, message: Message, params=None):
 @Commands(name=(".rh"))
 async def rhhandler(api: BotAPI, message: Message, params=None):
     args = format_str(message, begin=".rh")
-    await message.reply(content="[Oracle] 暗骰: 命运的骰子在滚动.")
+    await message.reply(content="[Oracle] 暗骰: 命运的齿轮在转动.")
     await api.post_dms(guild_id=message.guild_id, msg_id=message.id, content=rd0(args))
 
 @Commands(name=(".rha"))
@@ -427,7 +427,7 @@ class OracleClient(botpy.Client):
         init()
         cards.load()
         scp_cards.load()
-        logger.info("机器人启动成功, 将进行心跳维持链接.")
+        logger.success("机器人启动成功, 将进行心跳维持链接.")
 
     async def on_at_message_create(self, message: Message):
         is_command = False

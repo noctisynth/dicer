@@ -10,15 +10,27 @@ except ImportError:
     from .settings import package, setconfig, getconfig
 
 if package == "nonebot2":
-    from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
     class Message:
         pass
+    try:
+        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+    except ModuleNotFoundError:
+        logger.warning("未找到依赖`Nonebot2`, 请检查你的配置.")
+        class MessageEvent:
+            pass
+        class GroupMessageEvent:
+            pass
 elif package == "qqguild":
-    from botpy.message import Message
     class MessageEvent:
         pass
     class GroupMessageEvent:
         pass
+    try:
+        from botpy.message import Message
+    except ModuleNotFoundError:
+        logger.warning("未找到依赖`qq-botpy`, 请检查你的配置.")
+        class Message:
+            pass
 
 import json
 import os
@@ -34,7 +46,7 @@ _scp_cachepath = data_dir / "scp_cards.json"
 _super_user = data_dir / "super_user.json"
 _log = logger
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
-version = "3.0.3"
+version = "3.0.4"
 
 def init():
     if not dicer_girl_dir.exists():

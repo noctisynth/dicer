@@ -52,6 +52,7 @@ pip install watchdog qq-botpy loguru
 ```sh
 pip install nb-cli
 ```
+如果你在更新`pip`之后, 你的设备安装`nb-cli`依旧出现错误, 在安装 Dicer Girl 的时候, 你可以采用 Python Nonebot2 原生的`bot.py`模式, 来取代`nb run`指令.
 
 如果你同时部署这两者, 你可以直接采取:
 ```sh
@@ -69,47 +70,156 @@ pip install dicergirl
 ```
 
 #### 频道模式
-如果你使用 QQ频道模式, 你需要先打开根目录的 config.yaml 文件, 将其中的`appid`和`token`改成腾讯[QQ 开放平台](https://q.qq.com/)中创建 QQ 机器人所得到的 BotAppId 和 机器人令牌, 在终端中执行命令:
-```sh
-python run.py
-```
-
-你也可以在目录表层创建一个`.py`文件:
+如果你使用 QQ频道模式, 你需要穿件一个`.py`文件并写入以下内容
 ```python
+from dicergirl.utils.utils import init, set_config
 from dicergirl.utils.settings import set_package
-set_package("qqguild")
+from dicergirl.run import main
 
-from dicer import main
+init() # 初始化 Dicer Girl
+set_package("qqguild") # 声明使用`qqguild`模式
+set_config("1020*****", "RiFuHMFembccObW*****************") # 分别填入你的 BotAppID 和机器人令牌
 
-main()
+if __name__ == "__main__":
+    main()
 ```
-
-它们可以起到相同的效果.
 
 请注意在执行指令之前依照 QQ 开放平台配置自己的机器人，并开启并创建 QQ频道.
 
 #### Nonebot2 模式
-1. 直接安装
+1. 安装 Dicer Girl
+##### 直接安装
 如果你使用 Nonebot2 作为 Dicer 的引擎, 你应当先注意你是否需要激活虚拟环境, 并执行:
 ```sh
 pip install dicergirl
 ```
+使用`nb-cli`创建的 Nonebot2 项目是推荐使用虚拟环境的, 不过你在执行`nb create`之后, 是否创建虚拟环境这一选项是可选的.
 
-如果你不知道如何激活虚拟环境, 且你使用了 Nonebot2 推荐的`venv`而不是`conda`, 那么你应该打开你的 Nonebot2 项目, 进入`.venv`目录中, 找到`pip`(Windows 中是 `pip.exe`), 然后进入该可执行文件的文件夹, 再执行以上命令.
+如果你不知道如何激活虚拟环境, 且你使用了 Nonebot2 默认的`venv`而不是`conda`, 那么你应该打开你的 Nonebot2 项目, 进入`.venv`目录中, 找到`pip`(Windows 中是 `pip.exe`), 然后进入该可执行文件的文件夹, 再执行以上命令.
 
-2. 源文件安装
+如果你使用`conda`作为虚拟环境, 你应当执行:
+```sh
+conda activate [venv] 
+```
+其中`[venv]`应该被替换为你设定的 conda 虚拟环境名称.
+
+##### 源文件安装
 或者你也可以将克隆的仓库拷贝到: `你的Nonebot2项目目录/src` 中, 并在 pyproject.toml 中的`plugin_dirs`参数中加入`['src']`, 这与直接安装的结果是等同的, 但是这不利于你收到 DicerGirl 的最新更新.
 
-3. 配置完毕
+2. 启动项目
+##### 使用`nb-cli`启动
 之后, 在终端切入你的 Nonebot2 项目目录并执行:
 ```sh
 nb run --reload
+```
+其中, `--reload`意味着你启用了 Nonebot2 自带的热重载模式, 它使得你可以在你修改某些 Nonebot2、Dicer Girl 或者你自行加入的第三方依赖库之后, 在不手动终止程序的情况下让 Nonebot2 自行判断是否需要重载项目.
+##### 使用`bot.py`原生启动
+如果你无法成功通过`pip`安装`nb-cli`, 你使用安装`nonebot2`来替代:
+```sh
+pip install nonebot2 nonebot-adapter-onebot nonebot2[fastapi] nonebot2[httpx] nonebot2[websockets]
+```
+安装成功后, 新建一个文件夹, 并创建`bot.py`、`pyproject.toml`、`.env.prod`三个文件, 以及一个空文件`README.md`.
+
+分别写入以下内容:
+
+bot.py
+```python
+#!/bin/python
+# 文件: bot.py
+from nonebot.adapters.onebot.v11 import Adapter as ONEBOT_V11Adapter
+
+nonebot.init()
+
+driver = nonebot.get_driver()
+driver.register_adapter(ONEBOT_V11Adapter)
+
+nonebot.load_builtin_plugins('echo')
+nonebot.load_from_toml("pyproject.toml")
+
+if __name__ == "__main__":
+    nonebot.run()
+```
+pyproject.toml
+```toml
+# 文件: pyproject.toml
+[project]
+name = "oracle-dicer"
+version = "0.1.0"
+description = "oracle-dicer"
+readme = "README.md"
+requires-python = ">=3.8, <4.0"
+
+[tool.nonebot]
+adapters = [
+    { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
+]
+plugins = ['dicergirl']
+plugin_dirs = ['src']
+builtin_plugins = ["echo"]
+```
+.env.prod
+```toml
+DRIVER=~fastapi+~httpx+~websockets
+```
+完成后, 打开终端, 执行:
+```
+python3 bot.py
+```
+如果你是 Windows 系统, 请使用`python`来替代`python3`:
+```
+python bot.py
 ```
 
 ## 使用
 你可以在部署完成后, 在相应的 QQ 群或者 QQ 频道发送消息`.help`来查看使用方法.
 
 目前已兼容 COC 跑团与 SCP 跑团的大部分指令.
+
+```
+欧若可骰娘 Version 3.0.5
+此骰娘基于腾讯QQ机器人(botpy)搭建, 由欧若可(Oracle)提供部分算法支持.
+最终版本由未知访客团队(Unknow Visitor, 原左旋联盟)完成.
+感谢 灵冬-老孙 提供相关技术支持.
+
+.help 帮助信息
+.su   进行超级管理员鉴权
+.coc  进行车卡, 完成 COC 角色作成
+.scp  进行车卡, 完成 SCP 角色作成
+.mode 切换当前跑团模式
+.r    投掷指令 例如:
+            .r 10 100 (10D100)
+            .r 10d100 (10D100)
+        d   制定骰子面数
+        a   检定
+            .ra [str: 数据名] 例如:
+                .ra 幸运 (默认为幸运值D100)
+                .ra 幸运 80 (幸运值D80)
+                .ra 力量 90 (力量值D90)
+        h   暗骰 - 无效算法
+        #   多轮检定
+        bp  奖励骰&惩罚骰 - 无效算法
+        +/- 附加计算 - 无效算法
+.sra  基金会特工标准检定
+.dam  调查员或特工承伤检定
+.at   调查员或特工伤害检定
+.sc   疯狂检定
+.st   射击命中判定
+.ti   临时疯狂症状
+.li   总结疯狂症状
+.en   技能成长 - 无效算法
+.set  角色卡设定
+        .set [str: 数据名] [int: 数据]
+.show 角色卡查询
+.sa   COC快速检定
+.del  删除数据
+        .del c  删除临时数据
+        .del card 删除存储数据
+输入`.help [指令名]`获取该指令的详细信息
+注: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
+
+欧若可骰娘 版本 3.0.4, 未知访客版权所有.
+Copyright © 2011-2023 Unknown Visitor. All Rights Reserved.
+```
 
 ## 声明
 此项目由 Apache-2.0 协议开源, 使用代码时, 请注意遵照开源协议.

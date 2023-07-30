@@ -8,6 +8,7 @@ class Dice:
     def __init__(self, roll_string="", explode=False):
         self.roll_string = roll_string
         self.dices = []
+        self.method = "+"
         self.parse(roll_string=self.roll_string, explode=explode)
         self.results = []
         self.total = 0

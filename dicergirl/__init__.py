@@ -1,7 +1,7 @@
 from pathlib import Path
 from loguru import logger
 
-from .utils.settings import set_package, package
+from .utils.settings import set_package, get_package
 from .utils.utils import version
 
 import logging
@@ -19,6 +19,8 @@ except ValueError:
     utilless = True
 else:
     utilless = False
+
+package = get_package()
 
 if package == "nonebot2" and not utilless:
     from .coc.investigator import Investigator
@@ -43,7 +45,6 @@ if package == "nonebot2" and not utilless:
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent
     else:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
-    
 
     testcommand = on_startswith(".test", priority=2, block=True)
     debugcommand = on_startswith(".debug", priority=2, block=True)
@@ -75,13 +76,18 @@ if package == "nonebot2" and not utilless:
     @driver.on_startup
     async def _():
         global DEBUG
-        print("欧若可骰娘初始化中......")
+        logger.info("欧若可骰娘初始化中...")
         if DEBUG:
-            _log.setLevel(logging.DEBUG)
-            _log.info("[cocdicer] DEBUG 模式已启动.")
-        init()
+            logging.getLogger().setLevel(logging.DEBUG)
+            logger.remove()
+            logger.add(
+                sys.stdout,
+                level = "DEBUG"
+            )
+            logger.info("DEBUG 模式已启动.")
         cards.load()
         scp_cards.load()
+        logger.success("欧若可骰娘初始化完毕.")
 
     def is_group_message() -> Rule:
         async def _is_group_message(bot: Bot, event: MessageEvent) -> bool:
@@ -118,21 +124,36 @@ if package == "nonebot2" and not utilless:
             _log.debug(args)
             if args[0] == "off":
                 DEBUG = False
-                _log.setLevel(logging.INFO)
-                _log.info("[cocdicer] 输出等级设置为 INFO.")
+                logging.getLogger().setLevel(logging.INFO)
+                logger.remove()
+                logger.add(
+                    sys.stdout,
+                    level = "INFO"
+                )
+                logger.info("[cocdicer] 输出等级设置为 INFO.")
                 await matcher.send("[Oracle] DEBUG 模式已关闭.")
                 return
         else:
             DEBUG = True
-            _log.setLevel(logging.DEBUG)
-            _log.info("[cocdicer] 输出等级设置为 DEBUG.")
+            logging.getLogger().setLevel(logging.DEBUG)
+            logger.remove()
+            logger.add(
+                sys.stdout,
+                level = "INFO"
+            )
+            logger.info("[cocdicer] 输出等级设置为 DEBUG.")
             await matcher.send("[Oracle] DEBUG 模式已启动.")
             return
 
         if args[0] == "on":
             DEBUG = True
-            _log.setLevel(logging.DEBUG)
-            _log.info("[cocdicer] 输出等级设置为 DEBUG.")
+            logging.getLogger().setLevel(logging.DEBUG)
+            logger.remove()
+            logger.add(
+                sys.stdout,
+                level = "INFO"
+            )
+            logger.info("[cocdicer] 输出等级设置为 DEBUG.")
             await matcher.send("[Oracle] DEBUG 模式已启动.")
         else:
             await matcher.send("[Oracle] 错误, 我无法解析你的指令.")

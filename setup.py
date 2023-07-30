@@ -19,7 +19,7 @@ setuptools.setup(
     },
     classifiers = [
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     license = "Apache-2.0",

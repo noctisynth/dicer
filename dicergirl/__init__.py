@@ -16,13 +16,11 @@ try:
     driver = nonebot.get_driver()
     set_package("nonebot2")
 except ValueError:
-    utilless = True
-else:
-    utilless = False
+    set_package("qqguild")
 
 package = get_package()
 
-if package == "nonebot2" and not utilless:
+if package == "nonebot2":
     from .coc.investigator import Investigator
     from .scp.agent import Agent
     from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
@@ -482,8 +480,6 @@ if package == "nonebot2" and not utilless:
         await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客版权所有.\nCopyright © 2011-2023 Unknown Visitor. All Rights Reserved.")
         return
 elif package == "qqguild":
-    pass
-elif package == "nonebot2":
     pass
 else:
     logger.critical(f"未知的包模式: {package}!")

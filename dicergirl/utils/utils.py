@@ -10,10 +10,12 @@ import inspect
 
 try:
     from dicergirl.utils.decorators import translate_punctuation
-    from dicergirl.utils.settings import package, setconfig, getconfig
+    from dicergirl.utils.settings import get_package, setconfig, getconfig
 except ImportError:
     from .decorators import translate_punctuation
-    from .settings import package, setconfig, getconfig
+    from .settings import get_package, setconfig, getconfig
+
+package = get_package()
 
 if package == "nonebot2":
     class Message:
@@ -43,10 +45,11 @@ dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"
 _coc_cachepath = data_dir / "coc_cards.json"
 _scp_cachepath = data_dir / "scp_cards.json"
+_dnd_cachepath = data_dir / "dnd_cards.json"
 _super_user = data_dir / "super_user.json"
 _log = logger
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
-version = "3.0.6"
+version = "3.0.7"
 
 def init():
     if not dicer_girl_dir.exists():
@@ -55,16 +58,20 @@ def init():
     if not data_dir.exists():
         _log.info("Dicer Girl 数据文件夹未建立, 建立它.")
         data_dir.mkdir()
-    if not os.path.exists(_coc_cachepath):
-        _log.info("[cocdicer] COC存储文件未建立, 建立它.")
+    if not _coc_cachepath.exists():
+        _log.info("COC 存储文件未建立, 建立它.")
         with open(_coc_cachepath, "w", encoding="utf-8") as f:
             f.write("{}")
-    if not os.path.exists(_scp_cachepath):
-        _log.info("[cocdicer] SCP存储文件未建立, 建立它.")
+    if not _scp_cachepath.exists():
+        _log.info("SCP 存储文件未建立, 建立它.")
         with open(_scp_cachepath, "w", encoding="utf-8") as f:
             f.write("{}")
-    if not os.path.exists(_super_user):
-        _log.info("[cocdicer] 超级用户存储文件未建立, 建立它.")
+    if not _dnd_cachepath.exists():
+        _log.info("DND 存储文件未建立, 建立它.")
+        with open(_dnd_cachepath, "w", encoding="utf-8") as f:
+            f.write("{}")
+    if not _super_user.exists():
+        _log.info("超级用户存储文件未建立, 建立它.")
         with open(_super_user, "w", encoding="utf-8") as f:
             f.write("{}")
 
@@ -114,18 +121,23 @@ def get_handlers(main):
 
 def get_group_id(event):
     try:
-        if package == "nonebot2":
+        if package == "qqguild":
+            return str(event.channel_id)
+        elif package == "nonebot2":
             return str(event.group_id)
-        elif package == "qqguild":
-            return 
-    except KeyError:
+    except:
+        logger.warning(f"超出预计的 package: {package}, 将 Group ID 设置为 0.")
         return "0"
 
-def get_user_id(event: Union[Message, MessageEvent, GroupMessageEvent]):
-    if isinstance(event, Message):
-        return eval(str(event.author))["id"]
-    else:
-        return str(event.get_user_id())
+def get_user_id(event):
+    try:
+        if package == "qqguild":
+            return eval(str(event.author))["id"]
+        elif package:
+            return str(event.get_user_id())
+    except:
+        logger.warning(f"超出预计的 package: {package}, 将 User ID 设置为 0.")
+        return "0"
 
 def add_super_user(message):
     with open(_super_user, "w+") as _su:

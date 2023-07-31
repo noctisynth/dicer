@@ -7,17 +7,17 @@ from pathlib import Path
 from utils.settings import set_package, get_package
 set_package("qqguild")
 
-from coc.investigator import Investigator
-from scp.agent import Agent
-from coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
-from coc.coccards import cards, cache_cards, sa_handler
-from scp.scpcards import scp_cards, scp_cache_cards
-from scp.scputils import sra, scp_dam, at as sat
-from utils.decorators import Commands
-from utils.messages import help_message, version
-from utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config
-from utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
-from utils.chat import chat
+from dicergirl.coc.investigator import Investigator
+from dicergirl.scp.agent import Agent
+from dicergirl.coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
+from dicergirl.coc.coccards import cards, cache_cards, sa_handler
+from dicergirl.scp.scpcards import scp_cards, scp_cache_cards
+from dicergirl.scp.scputils import sra, scp_dam, at as sat
+from dicergirl.utils.decorators import Commands
+from dicergirl.utils.messages import help_message, version
+from dicergirl.utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config
+from dicergirl.utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
+from dicergirl.utils.chat import chat
 
 import botpy
 import logging
@@ -149,6 +149,31 @@ async def cochandler(api: BotAPI, message: Message, params=None):
     if 15 <= args and args < 90:
         cache_cards.update(message, inv.__dict__, save=False)
         await message.reply(content=str(inv.output()))
+    return True
+
+@Commands(name=(".scp"))
+async def scp_handler(api: BotAPI, message: Message, params=None):
+    args = format_msg(message, begin=".scp")
+    if len(args) > 1:
+        logger.info("指令错误, 驳回.")
+        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
+        return True
+
+    try:
+        if len(args) == 0:
+            raise ValueError
+        args = int(args[0])
+    except ValueError:
+        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
+        args = 20
+
+    agt = Agent()
+    agt.age_check(args)
+    agt.init()
+    
+    if 15 <= args and args < 90:
+        scp_cache_cards.update(message, agt.__dict__, save=False)
+        await message.reply(content=str(agt.output()))
     return True
 
 @Commands(name=(".show"))
@@ -285,9 +310,12 @@ async def enhandler(api: BotAPI, message: Message, params=None):
 @Commands(name=(".ra"))
 async def rahandler(api: BotAPI, message: Message, params=None):
     args = format_msg(message, begin=".ra")
-    await message.reply(content=ra(args, message))
+    if mode in ["coc", "scp", "dnd"]:
+        if mode == "scp":
+            await message.reply(content=sra(args, message))
+        elif mode == "coc":
+            await message.reply(content=ra(args, message))
     return True
-
 
 @Commands(name=(".rh"))
 async def rhhandler(api: BotAPI, message: Message, params=None):
@@ -363,37 +391,6 @@ async def delhandler(api: BotAPI, message: Message, params=None):
     elif mode == "scp":
         for msg in scp_del_handler(message, args):
             await message.reply(content=msg)
-    return True
-
-@Commands(name=(".scp"))
-async def scp_handler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".scp")
-    if len(args) > 1:
-        logger.info("指令错误, 驳回.")
-        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-        return True
-
-    try:
-        if len(args) == 0:
-            raise ValueError
-        args = int(args[0])
-    except ValueError:
-        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-        args = 20
-
-    agt = Agent()
-    agt.age_check(args)
-    agt.init()
-    
-    if 15 <= args and args < 90:
-        scp_cache_cards.update(message, agt.__dict__, save=False)
-        await message.reply(content=str(agt.output()))
-    return True
-
-@Commands(name=(".sra"))
-async def scp_rahandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".sra")
-    await message.reply(content=sra(args, message))
     return True
 
 @Commands(name=(".chat"))

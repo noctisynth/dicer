@@ -352,21 +352,16 @@ if package == "nonebot2":
         global mode
         args = format_msg(event.get_message(), begin=(".mode", ".m"))
         if args:
-            if args[0] == "coc":
-                mode = "coc"
-                await matcher.send("[Oracle] 已切换到COC跑团模式.")
-                return
-            elif args[0] == "scp":
-                mode = "scp"
-                await matcher.send("[Oracle] 已切换到SCP跑团模式.")
-                return
+            if args[0].lower() in modes:
+                mode = args[0].lower()
+                await matcher.send(f"[Oracle] 已切换到 {mode.upper()} 跑团模式.")
+                return True
             else:
                 await matcher.send("[Oracle] 未知的跑团模式, 忽略.")
                 await matcher.send(help_message("mode"))
-                return
+                return True
         else:
-            await matcher.send(f"[Oracle] 当前的跑团模式为 {mode}.")
-
+            await matcher.send(f"[Oracle] 当前的跑团模式为 {mode.upper()}.")
 
     @stcommand.handle()
     async def stcommandhandler(matcher: Matcher, event: GroupMessageEvent):

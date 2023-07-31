@@ -17,6 +17,7 @@ from dicergirl.scp.scputils import sra, scp_dam, at as sat
 
 from dicergirl.dnd.adventurer import Adventurer
 from dicergirl.dnd.dndcards import dnd_cards, dnd_cache_cards
+from dicergirl.dnd.dndutils import dra
 
 from dicergirl.utils.decorators import Commands
 from dicergirl.utils.messages import help_message, version
@@ -201,12 +202,12 @@ async def dnd_handler(api: BotAPI, message: Message, params=None):
     adv.age_check(args)
     adv.init()
     
-    if adv.int <= 8:
+    if adv.int[0] <= 8:
         await message.reply(content="[Orcale] 很遗憾, 检定新的冒险者智力不足, 弱智是不允许成为冒险者的, 请重新进行车卡检定.")
         return True
 
     if 15 <= args and args < 90:
-        scp_cache_cards.update(message, adv.__dict__, save=False)
+        dnd_cache_cards.update(message, adv.__dict__, save=False)
         await message.reply(content=str(adv.output()))
     return True
 
@@ -335,6 +336,8 @@ async def rahandler(api: BotAPI, message: Message, params=None):
             await message.reply(content=sra(args, message))
         elif mode == "coc":
             await message.reply(content=ra(args, message))
+        elif mode == "dnd":
+            await message.reply(content=dra(args, message))
     return True
 
 @Commands(name=(".rh"))
@@ -441,6 +444,7 @@ class OracleClient(botpy.Client):
         init()
         cards.load()
         scp_cards.load()
+        dnd_cards.load()
         logger.success("机器人启动成功, 将进行心跳维持链接.")
 
     async def on_at_message_create(self, message: Message):

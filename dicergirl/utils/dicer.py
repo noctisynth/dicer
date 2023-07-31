@@ -71,9 +71,11 @@ class Dice:
 
         for _ in range(self.a):
             result = random.randint(1, self.b)
+
             if result == 1:
                 if self.explode:
                     result -= 1
+
             if self.explode and self.b == 8:
                 self.dices.append("D10")
                 result2 = random.randint(1, 10)
@@ -94,6 +96,7 @@ class Dice:
                         result += result4
                         if result4 == 20:
                             self.great = True
+
             self.results += [result]
 
         if self.method == "+":
@@ -135,13 +138,17 @@ def expr(d, anum):
         elif result == 1:
             s += "大成功！"
         elif result <= anum // 5:
-            s += f"检定值{anum} {result}≤{anum//5} 极难成功"
+            s += f"检定值: {anum} {result}≤{anum//5}\n"
+            s += "检定结果: 极难成功."
         elif result <= anum // 2:
-            s += f"检定值{anum} {result}≤{anum//2} 困难成功"
+            s += f"检定值: {anum} {result}≤{anum//2}\n"
+            s += "检定结果: 困难成功."
         elif result <= anum:
-            s += f"检定值{anum} {result}≤{anum} 成功"
+            s += f"检定值: {anum} {result}≤{anum}\n"
+            s += "检定结果: 成功."
         else:
-            s += f"检定值{anum} {result}>{anum} 失败"
+            s += f"检定值: {anum} {result}>{anum}\n"
+            s += "检定结果: 失败."
     return s
 
 def scp_doc(result, difficulty, agent=None, great=False):
@@ -150,7 +157,8 @@ def scp_doc(result, difficulty, agent=None, great=False):
     r = f"事件难度: {difficulty}\n"
     if difficulty > 25:
         r += f"检定数据: {random.randint(1, 25)}"
-        r += f"检定结果: 致命失败.\n检定结论: {agent} 在试图挑战数学、挑战科学、挑战真理, 尝试达成一个不可能事件, {agent} 毫无疑问获得了 致命失败."
+        r += f"检定结果: 致命失败.\n"
+        r += f"检定结论: {agent} 在试图挑战数学、挑战科学、挑战真理, 尝试达成一个不可能事件, {agent} 毫无疑问获得了 致命失败."
         return r
     r += f"检定数据: {result}\n"
     if great:
@@ -176,6 +184,33 @@ def scp_doc(result, difficulty, agent=None, great=False):
         else:
             r += "检定结果: 失败.\n"
             r += "检定结论: 成功与失败宛如山顶与深渊, 无论是哪一种都是可能的, 相反, 在这个世界落入深渊是一件更加合理的事情."
+    return r
+
+def dnd_doc(result, dc, adventurer=None):
+    if not adventurer:
+        adventurer = "该冒险者"
+    r = f"事件难度: {dc}\n"
+    r += f"检定数据: {result}\n"
+    if result >= 20:
+        r += "检定结果: 大成功.\n"
+        r += "检定结论: 被命运眷顾的幸运者, 这毫无疑问是一次完美的成功."
+    elif result > dc:
+        r += "检定结果: 成功.\n"
+        r += "检定结论: 前进吧, 冒险者, 异世的诗篇还在等着你."
+    elif result <= dc / 2:
+        r += "检定结果: 大失败.\n"
+        r += "检定结论: 冒险不是自寻死路, 有时候, 放弃也是一个好的选择."
+    elif result < dc:
+        r += "检定结果: 失败.\n"
+        r += "检定结论: 成功与失败总是相辅相成, 不要让一次失败打倒你."
+    else:
+        result = random.randint(0, 1)
+        if result:
+            r += "检定结果: 成功.\n"
+            r += "检定结论: 小心, 你的成功完全是一次偶然, 不要认为这样的偶然稀松平常, 冷静与冲动并存, 才是一个合格的冒险者."
+        else:
+            r += "检定结果: 失败.\n"
+            r += "检定结论: 成功与失败由于一体两面, 无论是哪一种都是可能的, 但是你不必气馁, 失败与成功都是冒险的一部分."
     return r
 
 if __name__ == "__main__":

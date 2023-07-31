@@ -6,7 +6,7 @@ except ImportError:
 class Help_Messages():
     def __init__(self):
         self.main = f"""欧若可骰娘 Version {version}
-此骰娘基于腾讯QQ机器人(botpy)搭建, \
+此骰娘基于腾讯 QQ频道(qq-botpy)及 Nonebot2 搭建, \
 由欧若可(Oracle)提供部分算法支持.
 最终版本由未知访客团队(Unknow Visitor, 原左旋联盟)完成.
 感谢 灵冬-老孙 提供相关技术支持.
@@ -15,6 +15,7 @@ class Help_Messages():
 .su   进行超级管理员鉴权
 .coc  进行车卡, 完成 COC 角色作成
 .scp  进行车卡, 完成 SCP 角色作成
+.dnd  进行车卡, 完成 DND 角色作成
 .mode 切换当前跑团模式
 .r    投掷指令 例如:
             .r 10 100 (10D100)

@@ -22,14 +22,21 @@ package = get_package()
 
 if package == "nonebot2":
     from .coc.investigator import Investigator
-    from .scp.agent import Agent
-    from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
     from .coc.coccards import cards, cache_cards, sa_handler
+    from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
+
+    from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
     from .scp.scputils import sra, scp_dam, at as sat
-    from .utils.messages import help_message
-    from .utils.utils import logger as _log, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, version
-    from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, set_handler, show_handler, del_handler
+
+    from .dnd.adventurer import Adventurer
+    from .dnd.dndcards import dnd_cards, dnd_cache_cards
+    from .dnd.dndutils import dra
+
+    from .utils.decorators import Commands
+    from .utils.messages import help_message, version
+    from .utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes
+    from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, coc_set_handler, coc_show_handler, coc_del_handler, dnd_set_handler, dnd_show_handler, dnd_del_handler
     from .utils.chat import chat
 
     from nonebot.rule import Rule
@@ -49,6 +56,8 @@ if package == "nonebot2":
     superusercommand = on_startswith(".su", priority=2, block=True)# | on_startswith(".sudo", priority=2, block=True)
     botcommand = on_startswith(".bot", priority=1, block=True)
     coccommand = on_startswith(".coc", priority=1, block=True)
+    scpcommand = on_startswith(".scp", priority=1, block=True)
+    dndcommand = on_startswith(".dnd", priority=1, block=True)
     showcommand = on_startswith(".show", priority=2, block=True)# | on_startswith(".display", priority=2, block=True)
     setcommand = on_startswith(".set", priority=2, block=True)
     helpcommand = on_startswith(".help", priority=2, block=True)# | on_startswith(".h", priority=2, block=True)
@@ -66,8 +75,6 @@ if package == "nonebot2":
     sccommand = on_startswith(".sc", priority=2, block=True)
     sacommand = on_startswith(".sa", priority=2, block=True)
     delcommand = on_startswith(".del", priority=2, block=True)# | on_startswith(".delete", priority=2, block=True)
-    scpcommand = on_startswith(".scp", priority=1, block=True)
-    scpracommand = on_startswith(".sra", priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith(".version", priority=2, block=True)# | on_startswith(".v", priority=2, block=True)
 
@@ -97,8 +104,8 @@ if package == "nonebot2":
         if not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
-        _log.info("发送消息:" + str(event.get_message()))
-        _log.info(event.get_message().__repr__())
+        logger.info("发送消息:" + str(event.get_message()))
+        logger.info(event.get_message().__repr__())
         msg = format_msg(event.get_message())
         if not msg:
             msg = "[]"
@@ -119,7 +126,7 @@ if package == "nonebot2":
             return
 
         if args:
-            _log.debug(args)
+            logger.debug(args)
             if args[0] == "off":
                 DEBUG = False
                 logging.getLogger().setLevel(logging.INFO)
@@ -174,7 +181,7 @@ if package == "nonebot2":
             return
 
         if not args:
-            _log.critical(f"超级令牌: {su_uuid}")
+            logger.critical(f"超级令牌: {su_uuid}")
             await matcher.send("[Oracle] 启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
         else:
             if not args == su_uuid:
@@ -207,7 +214,7 @@ if package == "nonebot2":
     async def cochandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".coc")
         if len(args) > 1:
-            _log.info("指令错误, 驳回.")
+            logger.info("指令错误, 驳回.")
             await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
             return False
 
@@ -226,40 +233,88 @@ if package == "nonebot2":
             cache_cards.update(event, inv.__dict__, save=False)
             await matcher.send(str(inv.output()))
 
+    @scpcommand.handle()
+    async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
+        args = format_msg(event.get_message(), begin=".scp")
+        if len(args) > 1:
+            logger.info("指令错误, 驳回.")
+            await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
+            return
+
+        try:
+            if len(args) == 0:
+                raise ValueError
+            args = int(args[0])
+        except ValueError:
+            await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
+            args = 20
+
+        agt = Agent()
+        agt.age_check(args)
+        agt.init()
+
+        if 15 <= args and args < 90:
+            scp_cache_cards.update(event, agt.__dict__, save=False)
+            await matcher.send(str(agt.output()))
+
+    @dndcommand.handle()
+    async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
+        args = format_msg(event.get_message(), begin=".dnd")
+        if len(args) > 1:
+            logger.info("指令错误, 驳回.")
+            await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
+            return True
+
+        try:
+            if len(args) == 0:
+                raise ValueError
+            args = int(args[0])
+        except ValueError:
+            await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
+            args = 20
+
+        adv = Adventurer()
+        adv.age_check(args)
+        adv.init()
+        
+        if adv.int[0] <= 8:
+            await matcher.send("[Orcale] 很遗憾, 检定新的冒险者智力不足, 弱智是不允许成为冒险者的, 请重新进行车卡检定.")
+            return True
+
+        if 15 <= args and args < 90:
+            dnd_cache_cards.update(event, adv.__dict__, save=False)
+            await matcher.send(str(adv.output()))
+        return True
+
     @showcommand.handle()
     async def showhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=(".show", ".display"))
         if not args:
-            if mode == "scp":
-                sh = scp_show_handler(event, args)
-            elif mode == "coc":
-                sh = show_handler(event, args)
+            if mode in modes:
+                try:
+                    sh = eval(f"{mode}_show_handler(event, args)")
+                except:
+                    sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
             else:
                 await matcher.send("未知的跑团模式.")
-                return
+                return True
 
             for msg in sh:
                 await matcher.send(str(msg))
-            return
+            return True
 
-        if args[0] in ["s", "scp"]:
+        if args[0] in modes:
             args.remove(args[0])
-            sh = scp_show_handler(event, args)
-        elif args[0] in ["c", "coc"]:
-            args.remove(args[0])
-            sh = show_handler(event, args)
+            sh = eval(f"{args[0]}_show_handler(event, args)")
         else:
-            if mode == "scp":
-                sh = scp_show_handler(event, args)
-            elif mode == "coc":
-                sh = show_handler(event, args)
-            else:
-                await matcher.send("未知的跑团模式.")
-                return
+            try:
+                sh = eval(f"{mode}_show_handler(event, args)")
+            except:
+                sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
 
         for msg in sh:
             await matcher.send(str(msg))
-
+        return
 
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
@@ -267,22 +322,18 @@ if package == "nonebot2":
         if not args:
             args.append(mode)
 
-        if args[0] in ["s", "scp"]:
-            args.remove(args[0])
-            sh = scp_set_handler(event, args)
-        elif args[0] in ["c", "coc"]:
-            args.remove(args[0])
-            sh = set_handler(event, args)
+        if args[0] in modes:
+            try:
+                now = args[0]
+                args.remove(args[0])
+                sh = eval(f"{now}_set_handler(event, args)")
+            except:
+                sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
         else:
-            if mode == "scp":
-                sh = scp_set_handler(event, args)
-            elif mode == "coc":
-                sh = set_handler(event, args)
-            else:
-                await matcher.send("未知的跑团模式.")
-                return
+            sh = [f"[Oracle] 错误: 未知的跑团模式."]
 
         await matcher.send(sh)
+        return
 
 
     @helpcommand.handle()
@@ -357,7 +408,14 @@ if package == "nonebot2":
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".ra")
-        await matcher.send(ra(args, event))
+        if mode in ["coc", "scp", "dnd"]:
+            if mode == "scp":
+                await matcher.send(sra(args, event))
+            elif mode == "coc":
+                await matcher.send(ra(args, event))
+            elif mode == "dnd":
+                await matcher.send(dra(args, event))
+        return
 
     @rhcommand.handle()
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -426,44 +484,11 @@ if package == "nonebot2":
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=(".del", ".delete"))
-        if mode == "coc":
-            for msg in del_handler(event, args):
-                await matcher.send(msg)
-        elif mode == "scp":
-            for msg in scp_del_handler(event, args):
+        args = format_str(event, begin=(".del", ".delete"))
+        if mode in modes:
+            for msg in eval(f"{mode}_del_handler(event, args)"):
                 await matcher.send(msg)
         return
-
-    @scpcommand.handle()
-    async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=".scp")
-        if len(args) > 1:
-            _log.info("指令错误, 驳回.")
-            await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-            return
-
-        try:
-            if len(args) == 0:
-                raise ValueError
-            args = int(args[0])
-        except ValueError:
-            await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-            args = 20
-
-        agt = Agent()
-        agt.age_check(args)
-        agt.init()
-
-        if 15 <= args and args < 90:
-            scp_cache_cards.update(event, agt.__dict__, save=False)
-            await matcher.send(str(agt.output()))
-
-    @scpracommand.handle()
-    async def scp_rahandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=".sra")
-        await matcher.send(sra(args, event))
-
 
     @chatcommand.handle()
     async def chathandler(matcher: Matcher, event: GroupMessageEvent):

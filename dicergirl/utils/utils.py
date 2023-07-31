@@ -42,7 +42,7 @@ elif package == "qqguild":
         class Message:
             pass
 
-version = "3.0.7"
+version = "3.0.9"
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"

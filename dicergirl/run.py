@@ -8,7 +8,7 @@ try:
     from .utils.utils import version
 except ImportError:
     from dicergirl.utils.settings import package
-    from .utils.utils import version
+    from dicergirl.utils.utils import version
 
 import sys
 import runpy

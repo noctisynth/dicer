@@ -13,7 +13,7 @@ class Cards():
         self.data = {}
 
     def save(self):
-        _log.info("保存 SCP 人物卡数据.")
+        _log.info("[cards] 保存DND人物卡数据.")
         with open(_scp_cachepath, "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False)
 
@@ -62,18 +62,17 @@ class Cards():
                 return True
         return False
 
-scp_cards = Cards()
-scp_cache_cards = Cards()
-scp_attrs_dict: Dict[str, List[str]] = {
+dnd_cards = Cards()
+dnd_cache_cards = Cards()
+dnd_attrs_dict: Dict[str, List[str]] = {
     "名字": ["name", "名字", "名称", "姓名"],
     "性别": ["sex", "性别"],
     "年龄": ["age", "年龄"],
-    "强度": ["str", "力量", "攻击", "强度"],
-    "灵巧": ["dex", "灵巧"],
-    "健康": ["hth", "健康"],
-    "命运": ["fte", "命运"],
-    "魅力": ["chr", "魅力"],
-    "情报": ["int", "情报"],
-    "意志": ["wil", "意志", "精神"],
+    "力量": ["str", "力量", "攻击", "攻击力"],
+    "敏捷": ["dex", "敏捷"],
+    "体质": ["con", "体质"],
+    "智力": ["int", "智力", "灵感"],
+    "感知": ["fel", "感知", "感觉", "侦查"],
+    "魅力": ["chr", "魅力", "外貌"],
     "生命": ["hp", "生命"]
 }

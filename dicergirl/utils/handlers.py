@@ -1,3 +1,4 @@
+from loguru import logger
 try:
     from ..utils.utils import _coc_cachepath, _scp_cachepath, logger as _log, get_group_id
     from ..utils.dicer import Dice, expr

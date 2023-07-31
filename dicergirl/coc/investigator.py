@@ -150,8 +150,8 @@ class Investigator(object):
         data += "力量: %d 体质: %d 体型: %d\n" % (self.str, self.con, self.siz)
         data += "敏捷: %d 外貌: %d 智力: %d\n" % (self.dex, self.app, self.int)
         data += "意志: %d 教育: %d 幸运: %d\n" % (self.pow, self.edu, self.luc)
-        data += "DB: %d 移动速度: %d SAN: %d\n" % (self.db(), self.mov(), self.san)
-        data += "生命值: %s/%s" % (self.hp, self.lp_max())
+        data += "DB: %s 移动速度: %d SAN: %d\n" % (self.db(), self.mov(), self.san)
+        data += "生命值: %d/%d" % (self.hp, self.lp_max())
         return data
 
     def skills_output(self) -> str:

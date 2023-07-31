@@ -158,7 +158,7 @@ def ra(args, event):
 
     card_data = cards.get(event)
     if not card_data:
-        return "[Oracle] 在执行参数检定前, 请先完成车卡并保存."
+        return "[Oracle] 在执行参数检定前, 请先执行`.coc`车卡并执行`.set`保存."
     inv = Investigator().load(card_data)
     is_base = False
     for _, alias in attrs_dict.items():

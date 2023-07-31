@@ -319,24 +319,24 @@ def dnd_set_handler(message, args):
         if dnd_cache_cards.get(message):
             card_data = dnd_cache_cards.get(message)
             dnd_cards.update(message, inv_dict=card_data)
-            inv = Agent().load(card_data)
+            inv = Adventurer().load(card_data)
             return "[Oracle] 成功从缓存保存人物卡属性: \n" + inv.output()
         else:
             return "[Oracle] 未找到缓存数据, 请先使用`.dnd`指令进行车卡生成角色卡."
     else:
         if dnd_cards.get(message):
             card_data = dnd_cards.get(message)
-            inv = Agent().load(card_data)
+            inv = Adventurer().load(card_data)
         else:
             return "[Oracle] 未找到已保存数据, 请先使用空白`.set`指令保存角色数据."
         if len(args) % 2 != 0:
             return "[Oracle] 参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量, 因为我无法连接到OpenAI, 这使得我无法使用 GPT-4 作为神经网络引擎, 我使用 TensorFlow 作为替代.\n此外, 这看起来不像是来源于我的错误."
         elif len(args) == 2:
-            for attr, alias in scp_attrs_dict.items():
+            for attr, alias in dnd_attrs_dict.items():
                 if args[0] in alias:
                     if attr in ["名字", "性别"]:
                         if attr == "性别" and not args[1] in ["男", "女"]:
-                            return "[Oracle] 欧若可拒绝将基金会特工性别将设置为 {sex}, 这是对物种的侮辱.".format(sex=args[1])
+                            return "[Oracle] 欧若可拒绝将冒险者性别将设置为 {sex}, 这是对物种的侮辱.".format(sex=args[1])
                         inv.__dict__[alias[0]] = args[1]
                     else:
                         try:
@@ -344,11 +344,11 @@ def dnd_set_handler(message, args):
                         except ValueError:
                             return "[Oracle] 请输入正整数属性数据"
                     dnd_cards.update(message, inv.__dict__)
-                    return "[Oracle] 设置基金会特工 %s 为: %s" % (attr, args[1])
+                    return "[Oracle] 设置冒险者 %s 为: %s" % (attr, args[1])
             try:
                 inv.skills[args[0]] = int(args[1])
                 dnd_cards.update(message, inv.__dict__)
-                return "[Oracle] 设置基金会特工 %s 技能为: %s." % (args[0], args[1])
+                return "[Oracle] 设置冒险者 %s 技能为: %s." % (args[0], args[1])
             except ValueError:
                 return "[Oracle] 请输入正整数技能数据."
         elif len(args) > 2:
@@ -367,11 +367,11 @@ def dnd_set_handler(message, args):
                     return "[Oracle] 参数错误, 可能是 Python 解释器的错误, 请检查该服务的 Python 版本, 我无法解析到我当前承载的服务器状态, 因为开发者并未给我提供 API 接口.\n此外, 这看起来不像是来源于我的错误."
             for sub_li in li:
                 has_set = False
-                for attr, alias in scp_attrs_dict.items():
+                for attr, alias in dnd_attrs_dict.items():
                     if sub_li[0] in alias:
                         if attr in ["名字", "性别"]:
                             if attr == "性别" and not sub_li[1] in ["男", "女"]:
-                                return "[Oracle] 欧若可拒绝将基金会特工性别将设置为 {sex}, 这是对物种的侮辱.".format(sex=sub_li[1])
+                                return "[Oracle] 欧若可拒绝将冒险者将设置为 {sex}, 这是对物种的侮辱.".format(sex=sub_li[1])
                             inv.__dict__[alias[0]] = sub_li[1]
                         else:
                             try:
@@ -380,14 +380,14 @@ def dnd_set_handler(message, args):
                                 reply.append("基础数据 %s 要求正整数数据, 但你传入了 %s." % (sub_li[0], sub_li[1]))
                                 continue
                         dnd_cards.update(message, inv.__dict__)
-                        reply.append("设置基金会特工基础数据 %s 为: %s" % (attr, sub_li[1]))
+                        reply.append("设置冒险者基础数据 %s 为: %s" % (attr, sub_li[1]))
                         has_set = True
                 if has_set:
                     continue
                 try:
                     inv.skills[sub_li[0]] = int(sub_li[1])
                     dnd_cards.update(message, inv.__dict__)
-                    reply.append("设置基金会特工 %s 技能为: %s." % (sub_li[0], sub_li[1]))
+                    reply.append("设置冒险者 %s 技能为: %s." % (sub_li[0], sub_li[1]))
                 except ValueError:
                     reply.append("技能 %s 要求正整数数据, 但你传入了 %s." % (sub_li[0], sub_li[1]))
             rep = "[Oracle]\n"
@@ -402,24 +402,24 @@ def dnd_show_handler(message, args):
     if not args:
         if dnd_cards.get(message):
             card_data = dnd_cards.get(message)
-            inv = Agent().load(card_data)
+            inv = Adventurer().load(card_data)
             data = "[Oracle] 使用中人物卡: \n" 
             data += inv.output() + "\n"
             data += inv.skills_output()
             r.append(data)
         if dnd_cache_cards.get(message):
             card_data = dnd_cache_cards.get(message)
-            inv = Agent().load(card_data)
+            inv = Adventurer().load(card_data)
             r.append("[Oracle] 已暂存人物卡: \n" + inv.output())
     elif args[0] in ["skill", "s", "skills"]:
         if dnd_cards.get(message):
             card_data = dnd_cards.get(message)
-            inv = Agent().load(card_data)
+            inv = Adventurer().load(card_data)
             r.append(inv.skills_output())
     elif args[0] == "all":
         cd = dnd_cards.data[get_group_id(message)]
         for data in cd:
-            inv = Agent().load(cd[data])
+            inv = Adventurer().load(cd[data])
             d = inv.output() + "\n"
             d += inv.skills_output()
             r.append(d)

@@ -1,11 +1,11 @@
 try:
     from ..utils.messages import help_messages, help_message
-    from ..utils.dicer import Dice, scp_doc
+    from ..utils.dicer import Dice, dnd_doc
     from .dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
     from .adventurer import Adventurer
 except ImportError:
     from dicergirl.utils.messages import help_messages, help_message
-    from dicergirl.utils.dicer import Dice, scp_doc
+    from dicergirl.utils.dicer import Dice, dnd_doc
     from dicergirl.dnd.dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
     from dicergirl.dnd.adventurer import Adventurer
 
@@ -36,7 +36,7 @@ def at(args):
         d = Dice().parse("1d6").roll()
     return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
 
-def scp_dam(args, message):
+def dnd_dam(args, message):
     card = dnd_cards.get(message)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.dnd`指令进行车卡生成角色卡并`.set`进行保存."
@@ -82,51 +82,31 @@ def dra(args, event):
         return help_message("sra")
     if len(args) > 2:
         return "[Oracle] 错误: 参数过多(最多2需要但%d给予)." % len(args)
-    
+
     if len(args) == 2:
-        difficulty = int(args[1])
+        dc = int(args[1])
     else:
-        difficulty = 12
+        dc = 12
 
     card_data = dnd_cards.get(event)
     if not card_data:
-        return "[Oracle] 在执行参数检定前, 请先完成`.dnd`车卡并执行`.set`保存."
+        return "[Oracle] 在执行参数检定前, 请先执行`.dnd`车卡并执行`.set`保存."
     inv = Adventurer().load(card_data)
     is_base = False
-    for attr, alias in attrs_dict.items():
+    for _, alias in attrs_dict.items():
         if args[0] in alias:
-            dices: list = eval("inv.dices['{prop}']".format(prop=alias[0]))
+            v = int(eval("inv.{prop}".format(prop=alias[0]))[1])
             is_base = True
             break
     is_skill = False
     if not is_base:
         for skill in inv.skills:
             if args[0] == skill:
-                v = inv.skills[skill]
+                v = int(inv.skills[skill][1])
+                is_skill = True
                 break
     if not is_base and not is_skill:
         return "[Oracle] 错误: 没有这个数据或技能."
-    
-    all_dices = []
-    if len(dices) > 4:
-        while True:
-            if len(all_dices) == 4:
-                break
-            choice = random.choice(dices)
-            all_dices.append(choice)
-            dices.remove(choice)
-    elif len(dices) <= 4:
-        all_dices = dices
-    
-    results = []
-    great = False
-    for dice in all_dices:
-        dice = Dice("1"+dice.lower()).roll()
-        results.append(dice.total)
-        if dice.great == True:
-            great = True
-    result = max(results)
-    results.remove(result)
-    result += max(results)
-    r = scp_doc(result, difficulty, agent=inv.name, great=great)
-    return r
+
+    outcome = Dice("1d20").roll().calc() + v
+    return dnd_doc(outcome, dc, adventurer=card_data["name"])

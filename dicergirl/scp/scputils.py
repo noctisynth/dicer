@@ -90,10 +90,10 @@ def sra(args, event):
 
     card_data = scp_cards.get(event)
     if not card_data:
-        return "[Oracle] 在执行参数检定前, 请先完成`.scp`车卡并执行`.set`保存."
+        return "[Oracle] 在执行参数检定前, 请先执行`.scp`车卡并执行`.set`保存."
     inv = Agent().load(card_data)
     is_base = False
-    for attr, alias in attrs_dict.items():
+    for _, alias in attrs_dict.items():
         if args[0] in alias:
             dices: list = eval("inv.dices['{prop}']".format(prop=alias[0]))
             is_base = True

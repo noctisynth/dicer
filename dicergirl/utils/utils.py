@@ -3,7 +3,7 @@ from loguru import logger
 from typing import Union
 
 import json
-import os
+import sys
 import uuid
 import re
 import inspect
@@ -11,9 +11,11 @@ import inspect
 try:
     from dicergirl.utils.decorators import translate_punctuation
     from dicergirl.utils.settings import get_package, setconfig, getconfig
+    from dicergirl import coc, scp, dnd
 except ImportError:
     from .decorators import translate_punctuation
     from .settings import get_package, setconfig, getconfig
+    from . import coc, scp, dnd
 
 package = get_package()
 
@@ -40,6 +42,7 @@ elif package == "qqguild":
         class Message:
             pass
 
+version = "3.0.7"
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"
@@ -49,7 +52,7 @@ _dnd_cachepath = data_dir / "dnd_cards.json"
 _super_user = data_dir / "super_user.json"
 _log = logger
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
-version = "3.0.7"
+modes = {module.split(".")[-1]: sys.modules[module] for module in sys.modules if hasattr(sys.modules[module], "__type__")}
 
 def init():
     if not dicer_girl_dir.exists():

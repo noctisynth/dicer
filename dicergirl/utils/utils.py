@@ -15,7 +15,7 @@ try:
 except ImportError:
     from .decorators import translate_punctuation
     from .settings import get_package, setconfig, getconfig
-    from . import coc, scp, dnd
+    from src.dicergirl import coc, scp, dnd
 
 package = get_package()
 
@@ -136,7 +136,7 @@ def get_user_id(event):
     try:
         if package == "qqguild":
             return eval(str(event.author))["id"]
-        elif package:
+        elif package == "nonebot2":
             return str(event.get_user_id())
     except:
         logger.warning(f"超出预计的 package: {package}, 将 User ID 设置为 0.")

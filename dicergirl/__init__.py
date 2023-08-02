@@ -1,16 +1,8 @@
 from pathlib import Path
 from loguru import logger
-
 from .utils.settings import set_package, get_package
-from .utils.utils import version
 
-import logging
 import nonebot
-import sys
-
-DEBUG = False
-current_dir = Path(__file__).resolve().parent
-mode = "scp"
 
 try:
     driver = nonebot.get_driver()
@@ -18,6 +10,14 @@ try:
 except ValueError:
     set_package("qqguild")
 
+from .utils.utils import version
+
+import logging
+import sys
+
+DEBUG = False
+current_dir = Path(__file__).resolve().parent
+mode = "scp"
 package = get_package()
 
 if package == "nonebot2":

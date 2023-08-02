@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import yaml
 
-package = "qqguild"
+package = None
 allowed_packages = ["nonebot2", "qqguild"]
 
 def set_package(pkg: str):

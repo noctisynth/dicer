@@ -15,7 +15,7 @@ try:
 except ImportError:
     from .decorators import translate_punctuation
     from .settings import get_package, setconfig, getconfig
-    from src.dicergirl import coc, scp, dnd
+    from .. import coc, scp, dnd
 
 package = get_package()
 

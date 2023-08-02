@@ -319,18 +319,11 @@ if package == "nonebot2":
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".set")
-        if not args:
-            args.append(mode)
-
-        if args[0] in modes:
-            try:
-                now = args[0]
-                args.remove(args[0])
-                sh = eval(f"{now}_set_handler(event, args)")
-            except:
-                sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
-        else:
-            sh = [f"[Oracle] 错误: 未知的跑团模式."]
+        try:
+            now = mode
+            sh = eval(f"{mode}_set_handler(event, args)")
+        except:
+            sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
 
         await matcher.send(sh)
         return

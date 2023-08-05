@@ -1,4 +1,9 @@
 # DicerGirl
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dicergirl)
+[![PyPI](https://img.shields.io/pypi/v/dicergirl)](https://pypi.org/project/dicergirl/)
+![PyPI - Wheel](https://img.shields.io/pypi/wheel/dicergirl)
+[![PyPI - Downloads](https://img.shields.io/pypi/dw/dicergirl)](https://pypi.org/project/dicergirl/)
+![PyPI - License](https://img.shields.io/pypi/l/dicergirl)
 
 ## 介绍
 跑团骰娘机器人欧若可, 支持 QQ频道 及 Nonebot2 部署.

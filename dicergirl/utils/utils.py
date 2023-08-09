@@ -7,6 +7,7 @@ import sys
 import uuid
 import re
 import inspect
+import json
 
 try:
     from dicergirl.utils.decorators import translate_punctuation
@@ -42,7 +43,7 @@ elif package == "qqguild":
         class Message:
             pass
 
-version = "3.0.13"
+version = "3.1.0"
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"
@@ -88,7 +89,7 @@ def format_msg(message, begin=None):
     msg = format_str(message, begin=begin).split(" ")
     outer = []
     for m in msg:
-        m = re.split(r'(\d+)|([a-zA-Z]+)|([\u4e00-\u9fa5]+)', m)
+        m = re.split(r'(\d+)|([a-zA-Z\u4e00-\u9fa5]+)', m)
         m = list(filter(None, m))
         outer += m
     msg = outer
@@ -97,7 +98,7 @@ def format_msg(message, begin=None):
     return msg
 
 def format_str(message: Union[Message, str], begin=None):
-    regex = "[<](.*?)[>]"
+    regex = r"[<\[](.*?)[\]>]"
     content = message.content if isinstance(message, Message) else message
     msg = re.sub("\s+", " ", re.sub(regex, "", str(content).lower())).strip(" ")
     msg = translate_punctuation(msg)
@@ -110,6 +111,16 @@ def format_str(message: Union[Message, str], begin=None):
             msg = msg.replace(begin, "").lstrip(" ")
     _log.debug(msg)
     return msg
+
+def get_mentions(event: GroupMessageEvent):
+    mentions = []
+    message = json.loads(event.json())["message"]
+
+    for mention in message:
+        if mention["type"] == "at":
+            mentions.append(mention["data"]["qq"])
+
+    return mentions
 
 def get_handlers(main):
     commands_functions = []

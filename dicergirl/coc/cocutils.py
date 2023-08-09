@@ -3,13 +3,13 @@ try:
     from ..utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
     from ..utils.dicer import Dice, expr
     from ..utils.utils import _log
-    from .coccards import cards, attrs_dict
+    from .coccards import coc_cards, attrs_dict
     from .investigator import Investigator
 except ImportError:
     from dicergirl.utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
     from dicergirl.utils.dicer import Dice, expr
     from dicergirl.utils.utils import _log
-    from dicergirl.coc.coccards import cards, attrs_dict
+    from dicergirl.coc.coccards import coc_cards, attrs_dict
     from dicergirl.coc.investigator import Investigator
 
 import random
@@ -33,7 +33,7 @@ def sc(arg, event):
             reply.append("[Oracle] 用户指定了应当检定的 SAN 值, 这会使得本次检定不会被记录.")
             using_card = False
         else:
-            card = cards.get(event)
+            card = coc_cards.get(event)
             using_card = True
         r = Dice().roll().calc()
         s = f"[Oracle] 调查员: {card['name']}\n"
@@ -60,7 +60,7 @@ def sc(arg, event):
         s += f"当前 {card['name']} 的 SAN 值为: {card['san']}"
         reply.append(s)
         if using_card:
-            cards.update(event, card)
+            coc_cards.update(event, card)
         return reply
     except:
         return help_messages.sc
@@ -84,7 +84,7 @@ def st():
     return "D20=%d: 命中了%s" % (result, rstr)
 
 def at(args, event):
-    inv = Investigator().load(cards.get(event))
+    inv = Investigator().load(coc_cards.get(event))
     method = "+"
 
     if args:
@@ -105,7 +105,7 @@ def at(args, event):
     return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})\n造成了 {d.total+dbtotal}点 伤害."
 
 def coc_dam(args, message):
-    card = cards.get(message)
+    card = coc_cards.get(message)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.coc`指令进行车卡生成角色卡并`.set`进行保存."
     max_hp = card["con"] + card["siz"]
@@ -130,7 +130,7 @@ def coc_dam(args, message):
         r += f", 调查员 {card['name']} 濒死."
     else:
         r += "."
-    cards.update(message, card)
+    coc_cards.update(message, card)
     return r
 
 def rd0(arg: str) -> str:
@@ -166,7 +166,7 @@ def ra(args, event):
     if len(args) > 2:
         return "[Oracle] 错误: 参数过多(2需要 %d给予)." % len(args)
 
-    card_data = cards.get(event)
+    card_data = coc_cards.get(event)
     if not card_data:
         return "[Oracle] 在执行参数检定前, 请先执行`.coc`车卡并执行`.set`保存."
     inv = Investigator().load(card_data)

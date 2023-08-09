@@ -22,7 +22,7 @@ package = get_package()
 
 if package == "nonebot2":
     from .coc.investigator import Investigator
-    from .coc.coccards import cards, cache_cards, sa_handler
+    from .coc.coccards import coc_cards, coc_cache_cards
     from .coc.cocutils import sc, st, at, coc_dam, en, rd0, ra, ti, li, rb, rp
 
     from .scp.agent import Agent
@@ -35,8 +35,8 @@ if package == "nonebot2":
 
     from .utils.decorators import Commands
     from .utils.messages import help_message, version
-    from .utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes
-    from .utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, coc_set_handler, coc_show_handler, coc_del_handler, dnd_set_handler, dnd_show_handler, dnd_del_handler
+    from .utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
+    from .utils.handlers import show_handler, set_handler, scp_del_handler, coc_del_handler, dnd_del_handler
     from .utils.chat import chat
 
     from nonebot.rule import Rule
@@ -73,7 +73,6 @@ if package == "nonebot2":
     ticommand = on_startswith(".ti", priority=2, block=True)
     licommand = on_startswith(".li", priority=2, block=True)
     sccommand = on_startswith(".sc", priority=2, block=True)
-    sacommand = on_startswith(".sa", priority=2, block=True)
     delcommand = on_startswith(".del", priority=2, block=True)# | on_startswith(".delete", priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith(".version", priority=2, block=True)# | on_startswith(".v", priority=2, block=True)
@@ -90,7 +89,8 @@ if package == "nonebot2":
                 level = "DEBUG"
             )
             logger.info("DEBUG 模式已启动.")
-        cards.load()
+        init()
+        coc_cards.load()
         scp_cards.load()
         logger.success("欧若可骰娘初始化完毕.")
 
@@ -225,7 +225,7 @@ if package == "nonebot2":
         await matcher.send(inv.age_change(args))
 
         if 15 <= args and args < 90:
-            cache_cards.update(event, inv.__dict__, save=False)
+            coc_cache_cards.update(event, inv.__dict__, save=False)
             await matcher.send(str(inv.output()))
 
     @scpcommand.handle()
@@ -284,11 +284,13 @@ if package == "nonebot2":
     @showcommand.handle()
     async def showhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=(".show", ".display"))
+        at = get_mentions(event)
         if not args:
             if mode in modes:
                 try:
-                    sh = eval(f"{mode}_show_handler(event, args)")
-                except:
+                    sh = show_handler(event, args, at, mode=mode)
+                except Exception as error:
+                    logger.exception(error)
                     sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
             else:
                 await matcher.send("未知的跑团模式.")
@@ -314,8 +316,10 @@ if package == "nonebot2":
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".set")
+        at = get_mentions(event)
+
         try:
-            sh = eval(f"{mode}_set_handler(event, args)")
+            sh = set_handler(event, args, at, mode=mode)
         except:
             sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
 
@@ -456,13 +460,6 @@ if package == "nonebot2":
                 await matcher.send(scr)
         else:
             await matcher.send(scrs)
-
-
-    @sacommand.handle()
-    async def sahandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=".sa")
-        await matcher.send(sa_handler(event, args))
-
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent):

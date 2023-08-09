@@ -65,8 +65,8 @@ class Cards():
         return False
 
 
-cards = Cards()
-cache_cards = Cards()
+coc_cards = Cards()
+coc_cache_cards = Cards()
 attrs_dict: Dict[str, List[str]] = {
     "名字": ["name", "名字", "名称", "姓名"],
     "性别": ["sex", "性别"],
@@ -83,40 +83,3 @@ attrs_dict: Dict[str, List[str]] = {
     "理智": ["san", "理智", "精神状态", "san值"],
     "生命": ["hp", "生命"]
 }
-
-def sa_handler(message, args: str):
-    args = args.split(" ")
-    args = list(filter(None, args))
-    if args:
-        args = args[0]
-    else:
-        args = None
-    if not args:
-        return help_messages.sa
-    elif not cards.get(message):
-        return "[Oracle] 请先使用`.set`指令保存人物卡后再使用快速检定功能."
-    for attr, alias in attrs_dict.items():
-        if args in alias:
-            arg = alias[0]
-            break
-        else:
-            arg = None
-    if not arg:
-        return f"[Oracle] 错误: 目标参数不在 {attrs_dict} 之内."
-    card_data = cards.get(message)
-    dices = Dice()
-    try:
-        data = card_data[arg]
-        if arg != "名字":
-            val = int(data)
-        else:
-            val = None
-    except KeyError:
-        return f"[Oracle] 致命错误: 存储的数据 {data} 转化为数字的时候出现错误."
-    if not isinstance(val, int):
-        return f"[Oracle] 错误: 参数 {arg} 不可以进行快速检定, 即便它在合法指令中, 因为它没有数值.\n\
-            如果你确信这是一个错误, 请尝试重新车卡或联系管理员."
-    return expr(dices, val)
-
-if __name__ == "__main__":
-    pass

@@ -1,5 +1,4 @@
 from pathlib import Path
-from loguru import logger
 from typing import Union
 
 import json
@@ -12,6 +11,7 @@ import json
 try:
     from dicergirl.utils.decorators import translate_punctuation
     from dicergirl.utils.settings import get_package, setconfig, getconfig
+    from dicergirl.utils.multilogging import multilogger
     from dicergirl import coc, scp, dnd
 except ImportError:
     from .decorators import translate_punctuation
@@ -19,6 +19,17 @@ except ImportError:
     from .. import coc, scp, dnd
 
 package = get_package()
+version = "3.1.3"
+current_dir = Path(__file__).resolve().parent
+dicer_girl_dir = Path.home() / ".dicergirl"
+data_dir = dicer_girl_dir / "data"
+_coc_cachepath = data_dir / "coc_cards.json"
+_scp_cachepath = data_dir / "scp_cards.json"
+_dnd_cachepath = data_dir / "dnd_cards.json"
+_super_user = data_dir / "super_user.json"
+logger = multilogger(name="Dicer Girl", payload="utils")
+su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
+modes = {module.split(".")[-1]: sys.modules[module] for module in sys.modules if hasattr(sys.modules[module], "__type__")}
 
 if package == "nonebot2":
     class Message:
@@ -43,39 +54,27 @@ elif package == "qqguild":
         class Message:
             pass
 
-version = "3.1.0"
-current_dir = Path(__file__).resolve().parent
-dicer_girl_dir = Path.home() / ".dicergirl"
-data_dir = dicer_girl_dir / "data"
-_coc_cachepath = data_dir / "coc_cards.json"
-_scp_cachepath = data_dir / "scp_cards.json"
-_dnd_cachepath = data_dir / "dnd_cards.json"
-_super_user = data_dir / "super_user.json"
-_log = logger
-su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
-modes = {module.split(".")[-1]: sys.modules[module] for module in sys.modules if hasattr(sys.modules[module], "__type__")}
-
 def init():
     if not dicer_girl_dir.exists():
-        _log.info("Dicer Girl 文件夹未建立, 建立它.")
+        logger.info("Dicer Girl 文件夹未建立, 建立它.")
         dicer_girl_dir.mkdir()
     if not data_dir.exists():
-        _log.info("Dicer Girl 数据文件夹未建立, 建立它.")
+        logger.info("Dicer Girl 数据文件夹未建立, 建立它.")
         data_dir.mkdir()
     if not _coc_cachepath.exists():
-        _log.info("COC 存储文件未建立, 建立它.")
+        logger.info("COC 存储文件未建立, 建立它.")
         with open(_coc_cachepath, "w", encoding="utf-8") as f:
             f.write("{}")
     if not _scp_cachepath.exists():
-        _log.info("SCP 存储文件未建立, 建立它.")
+        logger.info("SCP 存储文件未建立, 建立它.")
         with open(_scp_cachepath, "w", encoding="utf-8") as f:
             f.write("{}")
     if not _dnd_cachepath.exists():
-        _log.info("DND 存储文件未建立, 建立它.")
+        logger.info("DND 存储文件未建立, 建立它.")
         with open(_dnd_cachepath, "w", encoding="utf-8") as f:
             f.write("{}")
     if not _super_user.exists():
-        _log.info("超级用户存储文件未建立, 建立它.")
+        logger.info("超级用户存储文件未建立, 建立它.")
         with open(_super_user, "w", encoding="utf-8") as f:
             f.write("{}")
 
@@ -94,7 +93,7 @@ def format_msg(message, begin=None):
         outer += m
     msg = outer
     msg = list(filter(None, msg))
-    _log.debug(msg)
+    logger.debug(msg)
     return msg
 
 def format_str(message: Union[Message, str], begin=None):
@@ -102,14 +101,14 @@ def format_str(message: Union[Message, str], begin=None):
     content = message.content if isinstance(message, Message) else message
     msg = re.sub("\s+", " ", re.sub(regex, "", str(content).lower())).strip(" ")
     msg = translate_punctuation(msg)
-    _log.debug(msg)
+    logger.debug(msg)
     if begin:
         if isinstance(begin, list) or isinstance(begin, tuple):
             for b in begin:
                 msg = msg.replace(b, "").lstrip(" ")
         else:
             msg = msg.replace(begin, "").lstrip(" ")
-    _log.debug(msg)
+    logger.debug(msg)
     return msg
 
 def get_mentions(event: GroupMessageEvent):

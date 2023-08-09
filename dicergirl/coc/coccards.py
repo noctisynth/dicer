@@ -2,20 +2,24 @@ from typing import Dict, List
 try:
     from ..utils.messages import help_messages
     from ..utils.dicer import Dice, expr
-    from ..utils.utils import _coc_cachepath as _cachepath, logger as _log, get_group_id, get_user_id
+    from ..utils.utils import _coc_cachepath as _cachepath, get_group_id, get_user_id
+    from ..utils.multilogging import multilogger
 except ImportError:
     from dicergirl.utils.messages import help_messages
     from dicergirl.utils.dicer import Dice, expr
-    from dicergirl.utils.utils import _coc_cachepath as _cachepath, logger as _log, get_group_id, get_user_id
+    from dicergirl.utils.utils import _coc_cachepath as _cachepath, get_group_id, get_user_id
+    from dicergirl.utils.multilogging import multilogger
 
 import json
+
+logger = multilogger(name="Dicer Girl", payload="COCCard")
 
 class Cards():
     def __init__(self):
         self.data = {}
 
     def save(self):
-        _log.info("[cards] 保存COC人物卡数据.")
+        logger.info("[cards] 保存COC人物卡数据.")
         with open(_cachepath, "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False)
 

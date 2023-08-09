@@ -1,9 +1,10 @@
 from pathlib import Path
-from loguru import logger
 from .utils.settings import set_package, get_package
+from .utils.multilogging import multilogger
 
 import nonebot
 
+logger = multilogger(name="Dicer Girl", payload="Nonebot2")
 try:
     driver = nonebot.get_driver()
     set_package("nonebot2")
@@ -35,7 +36,7 @@ if package == "nonebot2":
 
     from .utils.decorators import Commands
     from .utils.messages import help_message, version
-    from .utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
+    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
     from .utils.handlers import show_handler, set_handler, del_handler
     from .utils.chat import chat
 

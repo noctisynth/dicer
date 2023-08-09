@@ -1,7 +1,12 @@
-from loguru import logger
+try:
+    from dicergirl.utils.multilogging import multilogger
+except ImportError:
+    from .multilogging import multilogger
 
 import re
 import random
+
+logger = multilogger(name="Dicer Girl", payload="Dicer")
 
 class Dice:
     def __init__(self, roll_string="", explode=False):

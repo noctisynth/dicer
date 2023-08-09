@@ -1,11 +1,16 @@
-from loguru import logger
 from pathlib import Path
+
+try:
+    from dicergirl.utils.multilogging import multilogger
+except ImportError:
+    from .multilogging import multilogger
 
 import sys
 import yaml
 
 package = None
 allowed_packages = ["nonebot2", "qqguild"]
+logger = multilogger(name="Dicer Girl", payload="Settings")
 
 def set_package(pkg: str):
     global package

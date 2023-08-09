@@ -1,19 +1,23 @@
 from typing import Dict, List
 try:
-    from ..utils.utils import logger as _log, _scp_cachepath
+    from ..utils.utils import _scp_cachepath
     from ..utils.utils import get_group_id, get_user_id
+    from ..utils.multilogging import multilogger
 except ImportError:
-    from dicergirl.utils.utils import logger as _log, _scp_cachepath
+    from dicergirl.utils.utils import _scp_cachepath
     from dicergirl.utils.utils import get_group_id, get_user_id
+    from dicergirl.utils.multilogging import multilogger
 
 import json
+
+logger = multilogger(name="Dicer Girl", payload="SCPCard")
 
 class Cards():
     def __init__(self):
         self.data = {}
 
     def save(self):
-        _log.info("保存 SCP 人物卡数据.")
+        logger.info("保存 SCP 人物卡数据.")
         with open(_scp_cachepath, "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False)
 

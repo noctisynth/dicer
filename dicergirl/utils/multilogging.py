@@ -4,7 +4,7 @@ import sys
 import re
 
 def multilogger(
-        sink: Union[sys.stdout, sys.stderr] = sys.stdout,
+        sink = sys.stdout,
         name: str = "UV Attack",
         payload: str = "",
         format: str = "<!time>[<level>{level}</level>] <cyan><!name></cyan> | <!payload><!module><level>{message}</level>",

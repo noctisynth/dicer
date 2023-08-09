@@ -2,18 +2,20 @@ from typing import Optional
 try:
     from ..utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
     from ..utils.dicer import Dice, expr
-    from ..utils.utils import _log
+    from ..utils.multilogging import multilogger
     from .coccards import coc_cards, coc_attrs_dict
     from .investigator import Investigator
 except ImportError:
     from dicergirl.utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
     from dicergirl.utils.dicer import Dice, expr
-    from dicergirl.utils.utils import _log
+    from dicergirl.utils.multilogging import multilogger
     from dicergirl.coc.coccards import coc_cards, coc_attrs_dict
     from dicergirl.coc.investigator import Investigator
 
 import random
 import re
+
+logger = multilogger(name="Dicer Girl", payload="COCUtil")
 
 def sc(arg, event):
     reply = []
@@ -139,7 +141,7 @@ def rd0(arg: str) -> str:
     try:
         parse = d_str.pop(0)
         d = Dice().parse(parse)
-        _log.debug(str(parse))
+        logger.debug(str(parse))
         time = 1
         if len(d_str) > 0:
             try:

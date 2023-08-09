@@ -29,12 +29,26 @@ def st():
         rstr = "头部"
     return "[Oracle] 命中了%s" % (rstr)
 
-def at(args):
+def at(args, event):
+    inv = Adventurer().load(dnd_cards.get(event))
+    method = "+"
+
     if args:
         d = Dice().parse(args).roll()
     else:
         d = Dice().parse("1d6").roll()
-    return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
+
+    if "d" in inv.db():
+        db = Dice(inv.db()).roll()
+        dbtotal = db.total
+        db = db.db
+    else:
+        db = int(inv.db())
+        dbtotal = db
+        if db < 0:
+            method = ""
+
+    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})={d.total+dbtotal}\n造成了 {d.total+dbtotal}点 伤害."
 
 def dnd_dam(args, message):
     card = dnd_cards.get(message)

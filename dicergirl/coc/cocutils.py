@@ -104,7 +104,7 @@ def at(args, event):
 
     return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})\n造成了 {d.total+dbtotal}点 伤害."
 
-def dam(args, message):
+def coc_dam(args, message):
     card = cards.get(message)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.coc`指令进行车卡生成角色卡并`.set`进行保存."

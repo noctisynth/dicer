@@ -285,10 +285,13 @@ def scp_show_handler(message, args):
 def scp_del_handler(message, args: str):
     r = []
     args = args.split(" ")
+
     if args:
         args = list(filter(None, args))
     else:
         args = None
+    
+    logger.info(args)
     for arg in args:
         if not arg:
             pass

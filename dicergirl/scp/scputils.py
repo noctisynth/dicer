@@ -1,11 +1,11 @@
 try:
     from ..utils.messages import help_messages, help_message
-    from ..utils.dicer import Dice, scp_doc
+    from ..utils.dicer import Dice, scp_doc, expr
     from .scpcards import scp_cards, scp_attrs_dict as attrs_dict
     from .agent import Agent
 except ImportError:
     from dicergirl.utils.messages import help_messages, help_message
-    from dicergirl.utils.dicer import Dice, scp_doc
+    from dicergirl.utils.dicer import Dice, scp_doc, expr
     from dicergirl.scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict
     from dicergirl.scp.agent import Agent
 
@@ -29,18 +29,35 @@ def st():
         rstr = "头部"
     return "[Oracle] 命中了%s" % (rstr)
 
-def at(args):
+def at(args, event):
+    inv = Agent().load(scp_cards.get(event))
+    method = "+"
+
     if args:
         d = Dice().parse(args).roll()
     else:
         d = Dice().parse("1d6").roll()
-    return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
+
+    if "d" in inv.db():
+        db = Dice(inv.db()).roll()
+        dbtotal = db.total
+        db = db.db
+    else:
+        db = int(inv.db())
+        dbtotal = db
+        if db < 0:
+            method = ""
+
+    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})={d.total+dbtotal}\n造成了 {d.total+dbtotal}点 伤害."
 
 def scp_dam(args, message):
     card = scp_cards.get(message)
+
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.scp`指令进行车卡生成角色卡并`.set`进行保存."
+
     max_hp = card["hp_max"]
+
     if len(args) == 1:
         if not args[0] in ["check", "c"]:
             arg = int(args[0])
@@ -59,6 +76,7 @@ def scp_dam(args, message):
             d = Dice().parse(f"{args[0]}{args[1]}{args[2]}").roll()
             card["hp"] -= d.total
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
+
     if card["hp"] <= 0:
         card["hp"] = 0
         r += f", 特工 {card['name']} 已死亡."
@@ -74,12 +92,14 @@ def scp_dam(args, message):
         r += f", 特工 {card['name']} 濒死."
     else:
         r += "."
+
     scp_cards.update(message, card)
     return r
 
 def sra(args, event):
     if len(args) == 0:
         return help_message("sra")
+
     if len(args) > 2:
         return "[Oracle] 错误: 参数过多(最多2需要但%d给予)." % len(args)
     
@@ -89,25 +109,35 @@ def sra(args, event):
         difficulty = 12
 
     card_data = scp_cards.get(event)
+
     if not card_data:
         return "[Oracle] 在执行参数检定前, 请先执行`.scp`车卡并执行`.set`保存."
+
     inv = Agent().load(card_data)
+
     is_base = False
     for _, alias in attrs_dict.items():
         if args[0] in alias:
             dices: list = eval("inv.dices['{prop}']".format(prop=alias[0]))
             is_base = True
             break
+
     is_skill = False
     if not is_base:
         for skill in inv.skills:
             if args[0] == skill:
                 v = inv.skills[skill]
                 break
+
     if not is_base and not is_skill:
         return "[Oracle] 错误: 没有这个数据或技能."
     
+    if not is_base and is_skill:
+        result = Dice()
+        return expr(result, int(v))
+
     all_dices = []
+
     if len(dices) > 4:
         while True:
             if len(all_dices) == 4:
@@ -117,7 +147,7 @@ def sra(args, event):
             dices.remove(choice)
     elif len(dices) <= 4:
         all_dices = dices
-    
+
     results = []
     great = False
     for dice in all_dices:
@@ -125,6 +155,7 @@ def sra(args, event):
         results.append(dice.total)
         if dice.great == True:
             great = True
+
     result = max(results)
     results.remove(result)
     result += max(results)

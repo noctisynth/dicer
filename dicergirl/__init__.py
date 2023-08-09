@@ -23,7 +23,7 @@ package = get_package()
 if package == "nonebot2":
     from .coc.investigator import Investigator
     from .coc.coccards import cards, cache_cards, sa_handler
-    from .coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
+    from .coc.cocutils import sc, st, at, coc_dam, en, rd0, ra, ti, li, rb, rp
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
@@ -93,11 +93,6 @@ if package == "nonebot2":
         cards.load()
         scp_cards.load()
         logger.success("欧若可骰娘初始化完毕.")
-
-    def is_group_message() -> Rule:
-        async def _is_group_message(bot: Bot, event: MessageEvent) -> bool:
-            return True if type(event) is GroupMessageEvent else False
-        return Rule(_is_group_message)
 
     @testcommand.handle()
     async def testhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -320,7 +315,6 @@ if package == "nonebot2":
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".set")
         try:
-            now = mode
             sh = eval(f"{mode}_set_handler(event, args)")
         except:
             sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
@@ -379,7 +373,7 @@ if package == "nonebot2":
         if mode == "scp":
             sd = scp_dam(args, event)
         elif mode == "coc":
-            sd = dam(args, event)
+            sd = coc_dam(args, event)
         else:
             await matcher.send("未知的跑团模式.")
             return
@@ -472,7 +466,7 @@ if package == "nonebot2":
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event, begin=(".del", ".delete"))
+        args = format_str(event.get_message(), begin=(".del", ".delete"))
         if mode in modes:
             for msg in eval(f"{mode}_del_handler(event, args)"):
                 await matcher.send(msg)

@@ -25,7 +25,6 @@ setuptools.setup(
     license = "Apache-2.0",
     packages = setuptools.find_packages(),
     install_requires = [
-        'nb-cli',
         'nonebot2',
         'qq-botpy',
         'watchdog',

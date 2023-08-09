@@ -1,3 +1,6 @@
 *.log*
 __pycache__/
 test.py
+dist/
+dicergirl.egg-info/
+build/

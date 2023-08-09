@@ -3,13 +3,13 @@ try:
     from ..utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
     from ..utils.dicer import Dice, expr
     from ..utils.utils import _log
-    from .coccards import coc_cards, attrs_dict
+    from .coccards import coc_cards, coc_attrs_dict
     from .investigator import Investigator
 except ImportError:
     from dicergirl.utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
     from dicergirl.utils.dicer import Dice, expr
     from dicergirl.utils.utils import _log
-    from dicergirl.coc.coccards import coc_cards, attrs_dict
+    from dicergirl.coc.coccards import coc_cards, coc_attrs_dict
     from dicergirl.coc.investigator import Investigator
 
 import random
@@ -171,7 +171,7 @@ def ra(args, event):
         return "[Oracle] 在执行参数检定前, 请先执行`.coc`车卡并执行`.set`保存."
     inv = Investigator().load(card_data)
     is_base = False
-    for _, alias in attrs_dict.items():
+    for _, alias in coc_attrs_dict.items():
         if args[0] in alias:
             v = int(eval("inv.{prop}".format(prop=alias[0])))
             is_base = True

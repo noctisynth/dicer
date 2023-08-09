@@ -67,7 +67,7 @@ class Cards():
 
 coc_cards = Cards()
 coc_cache_cards = Cards()
-attrs_dict: Dict[str, List[str]] = {
+coc_attrs_dict: Dict[str, List[str]] = {
     "名字": ["name", "名字", "名称", "姓名"],
     "性别": ["sex", "性别"],
     "年龄": ["age", "年龄"],

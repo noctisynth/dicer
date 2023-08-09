@@ -36,7 +36,7 @@ if package == "nonebot2":
     from .utils.decorators import Commands
     from .utils.messages import help_message, version
     from .utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
-    from .utils.handlers import show_handler, set_handler, scp_del_handler, coc_del_handler, dnd_del_handler
+    from .utils.handlers import show_handler, set_handler, del_handler
     from .utils.chat import chat
 
     from nonebot.rule import Rule
@@ -318,6 +318,10 @@ if package == "nonebot2":
         args = format_msg(event.get_message(), begin=".set")
         at = get_mentions(event)
 
+        if not at and not is_super_user(event):
+            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+            return
+
         try:
             sh = set_handler(event, args, at, mode=mode)
         except:
@@ -464,10 +468,15 @@ if package == "nonebot2":
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_str(event.get_message(), begin=(".del", ".delete"))
+        at = get_mentions(event)
+
+        if not at and not is_super_user(event):
+            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+            return
+
         if mode in modes:
-            for msg in eval(f"{mode}_del_handler(event, args)"):
+            for msg in del_handler(event, args, at, mode=mode):
                 await matcher.send(msg)
-        return
 
     @chatcommand.handle()
     async def chathandler(matcher: Matcher, event: GroupMessageEvent):

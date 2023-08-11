@@ -1,13 +1,15 @@
 try:
     from ..utils.messages import help_messages, help_message
     from ..utils.dicer import Dice, scp_doc, expr
-    from .scpcards import scp_cards, scp_attrs_dict as attrs_dict, all_names
+    from .scpcards import scp_cards
+    from .attributes import all_names, scp_attrs_dict as attrs_dict
     from .agent import Agent
     from ..utils.multilogging import multilogger
 except ImportError:
     from dicergirl.utils.messages import help_messages, help_message
     from dicergirl.utils.dicer import Dice, scp_doc, expr
-    from dicergirl.scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict, all_names
+    from dicergirl.scp.scpcards import scp_cards
+    from dicergirl.scp.attributes import scp_attrs_dict as attrs_dict, all_names
     from dicergirl.scp.agent import Agent
     from dicergirl.utils.multilogging import multilogger
 

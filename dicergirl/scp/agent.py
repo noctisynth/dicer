@@ -1,9 +1,9 @@
 try:
     from ..utils.dicer import Dice
-    from .scpcards import scp_attrs_dict, knowledge_data, skills_data, ability_data
+    from .attributes import scp_attrs_dict, ability_data, knowledge_data, skills_data
 except ImportError:
     from dicergirl.utils.dicer import Dice
-    from dicergirl.scp.scpcards import scp_attrs_dict, knowledge_data, skills_data, ability_data
+    from dicergirl.scp.attributes import scp_attrs_dict, knowledge_data, skills_data, ability_data
 
 import random
 

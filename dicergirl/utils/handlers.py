@@ -1,14 +1,16 @@
 try:
     from ..utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
     from ..coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
-    from ..scp.scpcards import scp_cache_cards, scp_cards, scp_attrs_dict
+    from ..scp.scpcards import scp_cache_cards, scp_cards
+    from ..scp.attributes import scp_attrs_dict
     from ..dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from .. import coc, scp, dnd
     from ..utils.messages import help_messages
 except ImportError:
     from dicergirl.utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
     from dicergirl.coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
-    from dicergirl.scp.scpcards import scp_cache_cards, scp_cards, scp_attrs_dict
+    from dicergirl.scp.scpcards import scp_cache_cards, scp_cards
+    from dicergirl.scp.attributes import scp_attrs_dict
     from dicergirl.dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from dicergirl import coc, scp, dnd
     from dicergirl.utils.messages import help_messages

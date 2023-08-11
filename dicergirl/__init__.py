@@ -15,6 +15,7 @@ from .utils.utils import version
 
 import logging
 import sys
+import random
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -98,13 +99,15 @@ if package == "nonebot2":
     @testcommand.handle()
     async def testhandler(matcher: Matcher, event: GroupMessageEvent):
         if not is_super_user(event):
-            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+            await matcher.send("[Oracle] 权限不足, 拒绝执行测试指令.")
             return
-        logger.info("发送消息:" + str(event.get_message()))
-        logger.info(event.get_message().__repr__())
-        msg = format_msg(event.get_message())
+
+        logger.info("收到消息:" + str(event.get_message()))
+        msg = format_msg(event.get_message(), begin=".test")
+
         if not msg:
             msg = "[]"
+
         if msg[-1] == "markdown":
             mp = ""
             await matcher.send(group_id=event.group_id, message=mp)
@@ -231,27 +234,71 @@ if package == "nonebot2":
 
     @scpcommand.handle()
     async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=".scp")
-        if len(args) > 1:
-            logger.info("指令错误, 驳回.")
-            await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-            return
+        args = format_msg(event.get_message(), begin=".scp", zh_en=True)
 
-        try:
-            if len(args) == 0:
-                raise ValueError
-            args = int(args[0])
-        except ValueError:
-            await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-            args = 20
+        if len(args) != 0:
+            if args[0] in ["reset", "r"]:
+                if not is_super_user(event):
+                    await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
+                    return
+
+                agt = Agent().load(scp_cards.get(event))
+                agt.reset()
+                scp_cards.update(event, agt.__dict__, save=True)
+                await matcher.send("[Oracle] 人物卡属性已重置.")
+                return
+            
+            if args[0] in ["buy", "b", "upgrade", "u", "up"]:
+                if len(args) <= 2:
+                    await matcher.send(help_message("scp"))
+                    return
+
+                agt = Agent().load(scp_cards.get(event))
+                anb = agt.all_not_base()
+
+                if args[1] in anb.keys():
+                    oldattr = getattr(agt, anb[args[1]])
+                    level = int(oldattr[args[1]])
+
+                    try:
+                        up = int(args[2])
+                    except ValueError:
+                        await matcher.send(help_message("scp"))
+                        return
+
+                    if level >= up:
+                        await matcher.send(f"[Oracle] 你的 {args[1]} 技能的等级已经是 {level} 级了.")
+                        return
+
+                    required = int(up * (up + 1) / 2 - level * (level + 1) / 2)
+                    if agt.p[anb[args[1]]] < required:
+                        await matcher.send(f"[Oracle] 你的熟练值不足以支撑你将 {args[1]} 提升到 {up} 级.")
+                        return
+
+                    agt.p[anb[args[1]]] -= required
+
+                    flt = random.randint(1, 10)
+
+                    if flt == 10:
+                        flt = 0
+
+                    oldattr[args[1]] = float(up) + flt/10
+                    setattr(agt, anb[args[1]], oldattr)
+                    scp_cards.update(event, agt.__dict__, save=True)
+                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {args[2]} 级.\n该技能的熟练度为 {oldattr[args[1]]}.")
+                    return
+                else:
+                    await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")
+                    return
+            else:
+                await matcher.send(f"[Oracle] 技能 {args[1]} 看起来似乎不存在.")
+                return
 
         agt = Agent()
-        agt.age_check(args)
         agt.init()
 
-        if 15 <= args and args < 90:
-            scp_cache_cards.update(event, agt.__dict__, save=False)
-            await matcher.send(str(agt.output()))
+        scp_cache_cards.update(event, agt.__dict__, save=False)
+        await matcher.send(str(agt.output()))
 
     @dndcommand.handle()
     async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):

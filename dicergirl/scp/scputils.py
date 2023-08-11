@@ -106,11 +106,11 @@ def sra(args, event):
     if len(args) == 0:
         return help_message("sra")
 
-    if len(args) > 2:
+    if len(args) > 3:
         return "[Oracle] 错误: 参数过多(最多2需要但%d给予)." % len(args)
     
     if len(args) == 2:
-        difficulty = int(args[1])
+        difficulty = int(args[-1])
     else:
         difficulty = 12
 
@@ -132,7 +132,7 @@ def sra(args, event):
     if not is_base:
         for skill in inv.skills:
             if args[0] == skill:
-                v = inv.skills[skill]
+                exp = inv.skills[skill]
                 is_skill = True
                 break
 
@@ -140,7 +140,7 @@ def sra(args, event):
         return "[Oracle] 错误: 没有这个数据或技能."
     
     if not is_base and is_skill:
-        return expr(Dice(), int(v))
+        return expr(Dice(), int(exp))
 
     all_dices = []
 

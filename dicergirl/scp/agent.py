@@ -23,6 +23,7 @@ class Agent(object):
         self.hp_max = 0
         self.hp = 0
         self.enp = 0
+        self.rep = 0
         self.dices = {}
         self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
         self.skills = {skill: 0 for skill in skills_data.keys()}
@@ -63,7 +64,14 @@ class Agent(object):
         self.reset_hp()
         self.reset_enp()
         self.reset_p()
-
+        self.reset_rep()
+    
+    def reset(self):
+        self.reset_hp()
+        self.reset_enp()
+        self.reset_p()
+        self.reset_rep()
+    
     def reset_hp(self):
         base = 10
         for d in self.dices["hth"]:
@@ -91,7 +99,15 @@ class Agent(object):
         }
         self.p["knowledge"] += (self.__count("D10", self.dices["int"]) + self.__count("D10", self.dices["per"])) * 5
         self.p["skills"] += (self.__count("D10", self.dices["str"]) + self.__count("D10", self.dices["dex"])) * 5
-        self.p["ability"] += (self.__count("D10", self.dices["chr"]), self.__count("D10", self.dices["wil"])) * 5
+        self.p["ability"] += (self.__count("D10", self.dices["chr"]) + self.__count("D10", self.dices["wil"])) * 5
+    
+    def reset_rep(self):
+        self.rep = 0
+        for i in self.dices["fte"]:
+            if i == "D8":
+                self.rep += 1
+            elif i == "D10":
+                self.rep += 3
 
     def __count(self, string, list):
         count = 0
@@ -112,24 +128,78 @@ class Agent(object):
     def __repr__(self) -> str:
         data = "姓名: %s\n" % self.name
         data += "性别: %s 年龄: %d\n" % (self.sex, self.age)
-        data += "强度: %d 命运: %d\n" % (self.str, self.fte)
-        data += "感知: %d 魅力: %d\n" % (self.per, self.chr) 
-        data += "灵巧: %d 情报: %d\n" % (self.dex, self.int)
-        data += "健康: %d 意志: %d\n" % (self.hth, self.wil)
+        data += "强度: %s 命运: %s\n" % (self.__dices_format("str"), self.__dices_format("fte"))
+        data += "感知: %s 魅力: %s\n" % (self.__dices_format("per"), self.__dices_format("chr")) 
+        data += "灵巧: %s 情报: %s\n" % (self.__dices_format("dex"), self.__dices_format("int"))
+        data += "健康: %s 意志: %s\n" % (self.__dices_format("hth"), self.__dices_format("wil"))
+        data += "熟练值:\n"
+        data += "  知识: %s " % self.p["knowledge"]
+        data += "技能: %s " % self.p["skills"]
+        data += "能力: %s\n" % self.p["ability"]
+        data += "声望: %s\n" % (self.rep)
         data += "激励点: %d\n" % (self.enp)
         data += "生命: %d/%d" % (self.hp, self.hp_max)
         return data
+    
+    def __dices_format(self, prop):
+        d8 = 0
+        d10 = 0
+        d12 = 0
+        d20 = 0
+
+        for dice in self.dices[prop]:
+            if dice == "D8":
+                d8 += 1
+            elif dice == "D10":
+                d10 += 1
+            elif dice == "D12":
+                d12 += 1
+            elif dice == "D20":
+                d20 += 1
+
+        d8 = f"{d8}D8"
+        d10 = f"+{d10}D10" if d10 != 0 else ""
+        d12 = f"+{d12}D12" if d12 != 0 else ""
+        d20 = f"+{d20}D20" if d20 != 0 else ""
+        return d8 + d10 + d12 + d20
 
     def skills_output(self) -> str:
-        if not self.skills:
+        if not self.skills and not self.knowledge and not self.ability:
             return "%s 当前无任何技能数据。" % self.name
-        r = "%s技能数据: " % self.name
-        for k, v in self.skills.items():
-            r += "\n%s: %d" % (k, v)
+
+        r = "\n" + self.__skill_output_format("知识", self.knowledge.items()) + "\n"
+        r += "\n" + self.__skill_output_format("技巧", self.skills.items()) + "\n"
+        r += "\n" + self.__skill_output_format("能力", self.ability.items())
+
+        return r
+    
+    def __skill_output_format(self, name, items):
+        r = f"{self.name} {name}"
+        count = 0
+        for k, v in items:
+            if count % 2 == 0:
+                line = "\n"
+                tab = " "
+            else:
+                line = ""
+                tab = ""
+
+            r += f"{line}{k}: {v}{tab}"
+            count += 1
         return r
 
     def output(self) -> str:
         return self.__repr__()
+    
+    def all_not_base(self):
+        nbs = {k: "skills" for k, v in self.skills.items()}
+        nbk = {k: "knowledge" for k, v in self.knowledge.items()}
+        nba = {k: "ability" for k, v in self.ability.items()}
+        anb = {}
+        anb.update(nbs)
+        anb.update(nbk)
+        anb.update(nba)
+        return anb
 
     def load(self, data: dict):
         self.__dict__.update(data)

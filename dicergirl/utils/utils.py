@@ -20,7 +20,7 @@ except ImportError:
     from .. import coc, scp, dnd
 
 package = get_package()
-version = "3.1.8"
+version = "3.1.9"
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"
@@ -85,13 +85,16 @@ def set_config(appid, token):
 def get_config() -> dict:
     return getconfig(path=dicer_girl_dir, filename="config.yaml")
 
-def format_msg(message, begin=None):
+def format_msg(message, begin=None, zh_en=False):
     msg = format_str(message, begin=begin).split(" ")
     outer = []
+    regex = r'(\d+)|([a-zA-Z\u4e00-\u9fa5]+)' if not zh_en else r"(\d+)|([a-zA-Z]+)|([\u4e00-\u9fa5]+)"
+
     for m in msg:
-        m = re.split(r'(\d+)|([a-zA-Z\u4e00-\u9fa5]+)', m)
+        m = re.split(regex, m)
         m = list(filter(None, m))
         outer += m
+
     msg = outer
     msg = list(filter(None, msg))
     logger.debug(msg)
@@ -103,12 +106,14 @@ def format_str(message: Union[Message, str], begin=None):
     msg = re.sub("\s+", " ", re.sub(regex, "", str(content).lower())).strip(" ")
     msg = translate_punctuation(msg)
     logger.debug(msg)
+
     if begin:
         if isinstance(begin, list) or isinstance(begin, tuple):
             for b in begin:
                 msg = msg.replace(b, "").lstrip(" ")
         else:
             msg = msg.replace(begin, "").lstrip(" ")
+
     logger.debug(msg)
     return msg
 

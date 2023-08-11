@@ -159,13 +159,17 @@ def expr(d, anum):
 def scp_doc(result, difficulty, agent=None, great=False):
     if not agent:
         agent = "该特工"
+
     r = f"事件难度: {difficulty}\n"
+
     if difficulty > 25:
         r += f"检定数据: {random.randint(1, 25)}"
         r += f"检定结果: 致命失败.\n"
         r += f"检定结论: {agent} 在试图挑战数学、挑战科学、挑战真理, 尝试达成一个不可能事件, {agent} 毫无疑问获得了 致命失败."
         return r
+
     r += f"检定数据: {result}\n"
+
     if great:
         r += "检定结果: 关键成功.\n"
         if result <= difficulty:
@@ -181,6 +185,9 @@ def scp_doc(result, difficulty, agent=None, great=False):
     elif result < difficulty:
         r += "检定结果: 失败.\n"
         r += "检定结论: 人类从来都生活在饱含恐惧与绝望的危险之中, 失败是一件稀松平常的事情, 小心, 错误的决定或许会让你步入深渊."
+    elif result >= (difficulty*2):
+        r += "检定结果: 关键成功.\n"
+        r += "检定结论: "
     else:
         result = random.randint(0, 1)
         if result:

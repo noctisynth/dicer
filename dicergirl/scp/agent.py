@@ -1,8 +1,11 @@
-import random
 try:
     from ..utils.dicer import Dice
+    from .scpcards import scp_attrs_dict, knowledge_data, skills_data, ability_data
 except ImportError:
     from dicergirl.utils.dicer import Dice
+    from dicergirl.scp.scpcards import scp_attrs_dict, knowledge_data, skills_data, ability_data
+
+import random
 
 class Agent(object):
     def __init__(self) -> None:
@@ -21,7 +24,14 @@ class Agent(object):
         self.hp = 0
         self.enp = 0
         self.dices = {}
-        self.skills = {}
+        self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
+        self.skills = {skill: 0 for skill in skills_data.keys()}
+        self.ability = {ability: 0 for ability in ability_data.keys()}
+        self.p = {
+            "knowledge": 17,
+            "skills": 14,
+            "ability": 10
+        }
         self.tools = {}
 
     def init(self):
@@ -35,16 +45,7 @@ class Agent(object):
             "int": 1,
             "wil": 1
         }
-        attr = {
-            "str": 1,
-            "hth": 1,
-            "per": 1,
-            "dex": 1,
-            "fte": 1,
-            "chr": 1,
-            "int": 1,
-            "wil": 1
-        }
+        attr = {p: 1 for p in prop}
         total = 20 - len(prop)
         for _ in range(total):
             name = random.choice(list(prop.keys()))
@@ -61,6 +62,7 @@ class Agent(object):
         self.__dict__.update(prop)
         self.reset_hp()
         self.reset_enp()
+        self.reset_p()
 
     def reset_hp(self):
         base = 10
@@ -80,6 +82,23 @@ class Agent(object):
             if d == "D10":
                 base += 1
         self.enp = base
+    
+    def reset_p(self):
+        self.p = {
+            "knowledge": 17,
+            "skills": 14,
+            "ability": 10
+        }
+        self.p["knowledge"] += (self.__count("D10", self.dices["int"]) + self.__count("D10", self.dices["per"])) * 5
+        self.p["skills"] += (self.__count("D10", self.dices["str"]) + self.__count("D10", self.dices["dex"])) * 5
+        self.p["ability"] += (self.__count("D10", self.dices["chr"]), self.__count("D10", self.dices["wil"])) * 5
+
+    def __count(self, string, list):
+        count = 0
+        for item in list:
+            if string == item:
+                count += 1
+        return count
 
     def age_check(self, age=20):
         if self.age != 20:

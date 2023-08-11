@@ -24,11 +24,11 @@ package = get_package()
 if package == "nonebot2":
     from .coc.investigator import Investigator
     from .coc.coccards import coc_cards, coc_cache_cards
-    from .coc.cocutils import sc, st, at, coc_dam, en, rd0, ra, ti, li, rb, rp
+    from .coc.cocutils import sc, st, at, coc_dam, coc_en, rd0, ra, ti, li, rb, rp
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import sra, scp_dam, at as sat
+    from .scp.scputils import sra, scp_dam, scp_en, at as sat
 
     from .dnd.adventurer import Adventurer
     from .dnd.dndcards import dnd_cards, dnd_cache_cards
@@ -319,7 +319,7 @@ if package == "nonebot2":
         args = format_msg(event.get_message(), begin=".set")
         at = get_mentions(event)
 
-        if not at and not is_super_user(event):
+        if at and not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
 
@@ -392,8 +392,19 @@ if package == "nonebot2":
 
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=".en")
-        await matcher.send(en(args, event.get_message()))
+        args = format_msg(event.get_message(), begin=".en")
+        at = get_mentions(event)
+
+        if at and not is_super_user(event):
+            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+            return
+
+        try:
+            en = eval(f"{mode}_en(event, args)")
+        except:
+            en = f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."
+
+        await matcher.send(en(args))
 
 
     @racommand.handle()
@@ -471,7 +482,7 @@ if package == "nonebot2":
         args = format_str(event.get_message(), begin=(".del", ".delete"))
         at = get_mentions(event)
 
-        if not at and not is_super_user(event):
+        if at and not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
 

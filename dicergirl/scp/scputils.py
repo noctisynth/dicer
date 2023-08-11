@@ -1,15 +1,19 @@
 try:
     from ..utils.messages import help_messages, help_message
     from ..utils.dicer import Dice, scp_doc, expr
-    from .scpcards import scp_cards, scp_attrs_dict as attrs_dict
+    from .scpcards import scp_cards, scp_attrs_dict as attrs_dict, all_names
     from .agent import Agent
+    from ..utils.multilogging import multilogger
 except ImportError:
     from dicergirl.utils.messages import help_messages, help_message
     from dicergirl.utils.dicer import Dice, scp_doc, expr
-    from dicergirl.scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict
+    from dicergirl.scp.scpcards import scp_cards, scp_attrs_dict as attrs_dict, all_names
     from dicergirl.scp.agent import Agent
+    from dicergirl.utils.multilogging import multilogger
 
 import random
+
+logger = multilogger(name="Dicer Girl", payload="SCPUtil")
 
 def st():
     result = random.randint(1, 20)
@@ -118,7 +122,7 @@ def sra(args, event):
     is_base = False
     for _, alias in attrs_dict.items():
         if args[0] in alias:
-            dices: list = eval("inv.dices['{prop}']".format(prop=alias[0]))
+            dices = [dice for dice in inv.dices[alias[0]]]
             is_base = True
             break
 
@@ -127,21 +131,19 @@ def sra(args, event):
         for skill in inv.skills:
             if args[0] == skill:
                 v = inv.skills[skill]
+                is_skill = True
                 break
 
     if not is_base and not is_skill:
         return "[Oracle] 错误: 没有这个数据或技能."
     
     if not is_base and is_skill:
-        result = Dice()
-        return expr(result, int(v))
+        return expr(Dice(), int(v))
 
     all_dices = []
 
     if len(dices) > 4:
-        while True:
-            if len(all_dices) == 4:
-                break
+        while len(all_dices) != 4:
             choice = random.choice(dices)
             all_dices.append(choice)
             dices.remove(choice)
@@ -153,32 +155,31 @@ def sra(args, event):
     for dice in all_dices:
         dice = Dice("1"+dice.lower()).roll()
         results.append(dice.total)
-        if dice.great == True:
+        if dice.great:
             great = True
-
+    
     result = max(results)
-    results.remove(result)
-    result += max(results)
+
+    if len(results) > 1:
+        results.remove(result)
+        result += max(results)
+
     r = scp_doc(result, difficulty, agent=inv.name, great=great)
     return r
 
+def scp_en(event, args):
+    if not args:
+        return help_messages.en
 
-# 未验证指令
-def dhr(t, o):
-    if t == 0 and o == 0:
-        return 100
-    else:
-        return t*10+o
-
-def en(args, message):
     try:
-        arg = int(args[1])
+        en = int(args[1])
     except ValueError:
         return help_messages.en
+
     check = random.randint(1, 100)
+
     if check > arg or check > 95:
         plus = random.randint(1, 10)
         r = "判定值%d, 判定成功, 技能成长%d+%d=%d" % (check, arg, plus, arg+plus)
-        return r + "\n温馨提示: 如果技能提高到90%或更高, 增加2D6理智点数。"
     else:
-        return "[Oracle] 判定值%d, 判定失败, 技能无成长。" % check
+        return "判定值%d, 判定失败, 技能无成长。" % check

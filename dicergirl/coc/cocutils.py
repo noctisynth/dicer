@@ -281,19 +281,17 @@ def rp(args):
     ten.remove(result//10)
     return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
-# 未验证指令
-def dhr(t, o):
-    if t == 0 and o == 0:
-        return 100
-    else:
-        return t*10+o
+def coc_en(event, args):
+    if not args:
+        return help_messages.en
 
-def en(args, message):
     try:
         arg = int(args[1])
     except ValueError:
         return help_messages.en
+
     check = random.randint(1, 100)
+
     if check > arg or check > 95:
         plus = random.randint(1, 10)
         r = "判定值%d, 判定成功, 技能成长%d+%d=%d" % (check, arg, plus, arg+plus)

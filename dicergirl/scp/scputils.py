@@ -94,11 +94,12 @@ def scp_dam(args, message):
 def sra(args, event):
     if len(args) == 0:
         return help_message("sra")
-    elif len(args) > 3:
-        return "[Oracle] 错误: 参数过多(最多2需要但%d给予)." % len(args)
+    elif len(args) > 4:
+        return "[Oracle] 错误: 参数过多(最多4需要但%d给予)." % len(args)
     
     try:
         difficulty = int(args[-1])
+        args.remove(args[-1])
     except ValueError:
         difficulty = 12
 
@@ -110,7 +111,7 @@ def sra(args, event):
     inv = Agent().load(card_data)
 
     is_base = False
-    if len(args) in (1, 2):
+    if len(args) == 1:
         for _, alias in attrs_dict.items():
             if args[0] in alias:
                 dices = [dice for dice in inv.dices[alias[0]]]
@@ -120,7 +121,7 @@ def sra(args, event):
 
     is_skill = False
     skill_only = False
-    if not is_base and len(args) >= 2:
+    if not is_base and len(args) == 3:
         if args[1] in ["+", "/", "&", "*"]:
             is_validated_skill = False
             for _, alias in attrs_dict.items():
@@ -139,7 +140,7 @@ def sra(args, event):
             else:
                 return f"[Oracle] 错误: 技能、知识或能力 {args[2]} 不存在."
         else:
-            return help_messages.en
+            return help_messages.sra
     elif not is_base and len(args) == 1:
         if args[0] in all_names:
             anb = inv.all_not_base()
@@ -184,7 +185,7 @@ def sra(args, event):
         results.append(dice.total)
         if dice.great:
             great = True
-    
+
     result = max(results)
 
     if len(results) > 1:

@@ -16,6 +16,7 @@ from .utils.utils import version
 import logging
 import sys
 import random
+import re
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -35,7 +36,7 @@ if package == "nonebot2":
     from .dnd.dndcards import dnd_cards, dnd_cache_cards
     from .dnd.dndutils import dra
 
-    from .utils.decorators import Commands
+    from .utils.decorators import translate_punctuation
     from .utils.messages import help_message, version
     from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
     from .utils.handlers import show_handler, set_handler, del_handler
@@ -43,41 +44,88 @@ if package == "nonebot2":
 
     from nonebot.rule import Rule
     from nonebot.matcher import Matcher
-    from nonebot.plugin import on_startswith
+    from nonebot.plugin import on_startswith, on_message
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
     from nonebot.adapters.onebot.v12 import Bot as V12Bot
+    from nonebot.consts import STARTSWITH_KEY
 
     if driver._adapters.get("OneBot V12"):
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent
     else:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+    
+    class StartswithRule:
+        __slots__ = ("msg", "ignorecase")
+
+        def __init__(self, msg, ignorecase=False):
+            self.msg = msg
+            self.ignorecase = ignorecase
+
+        def __repr__(self) -> str:
+            return f"Startswith(msg={self.msg}, ignorecase={self.ignorecase})"
+
+        def __eq__(self, other: object) -> bool:
+            return (
+                isinstance(other, StartswithRule)
+                and frozenset(self.msg) == frozenset(other.msg)
+                and self.ignorecase == other.ignorecase
+            )
+
+        def __hash__(self) -> int:
+            return hash((frozenset(self.msg), self.ignorecase))
+
+        async def __call__(self, event, state) -> bool:
+            try:
+                text = translate_punctuation(event.get_plaintext())
+            except Exception:
+                return False
+            if match := re.match(
+                f"^(?:{'|'.join(re.escape(prefix) for prefix in self.msg)})",
+                text,
+                re.IGNORECASE if self.ignorecase else 0,
+            ):
+                state[STARTSWITH_KEY] = match.group()
+                return True
+            return False
+
+    def startswith(msg, ignorecase=True):
+        if isinstance(msg, str):
+            msg = (msg,)
+
+        return Rule(StartswithRule(msg, ignorecase))
+
+    def on_startswith(commands, priority=0, block=True):
+        if isinstance(commands, str):
+            commands = (commands, )
+        
+        return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
 
     testcommand = on_startswith(".test", priority=2, block=True)
     debugcommand = on_startswith(".debug", priority=2, block=True)
-    superusercommand = on_startswith(".su", priority=2, block=True)# | on_startswith(".sudo", priority=2, block=True)
+    superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
     botcommand = on_startswith(".bot", priority=1, block=True)
     coccommand = on_startswith(".coc", priority=1, block=True)
     scpcommand = on_startswith(".scp", priority=1, block=True)
     dndcommand = on_startswith(".dnd", priority=1, block=True)
-    showcommand = on_startswith(".show", priority=2, block=True)# | on_startswith(".display", priority=2, block=True)
-    setcommand = on_startswith(".set", priority=2, block=True)
-    helpcommand = on_startswith(".help", priority=2, block=True)# | on_startswith(".h", priority=2, block=True)
-    modecommand = on_startswith(".mode", priority=2, block=True)# | on_startswith(".m", priority=2, block=True)
+    showcommand = on_startswith((".show", ".display"), priority=2, block=True)
+    setcommand = on_startswith((".set", ".st"), priority=2, block=True)
+    helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
+    modecommand = on_startswith((".mode", ".m"), priority=2, block=True)
     stcommand = on_startswith(".sht", priority=2, block=True)
-    attackcommand = on_startswith(".at", priority=2, block=True)# | on_startswith(".attack", priority=2, block=True)
-    damcommand = on_startswith(".dam", priority=2, block=True)# | on_startswith(".damage", priority=2, block=True)
-    encommand = on_startswith(".en", priority=2, block=True)
+    attackcommand = on_startswith((".at", ".attack"), priority=2, block=True)
+    damcommand = on_startswith((".dam", ".damage"), priority=2, block=True)
+    encommand = on_startswith((".en", ".encourage"), priority=2, block=True)
     racommand = on_startswith(".ra", priority=2, block=True)
     rhcommand = on_startswith(".rh", priority=2, block=True)
     rhacommand = on_startswith(".rha", priority=1, block=True)
-    rcommand = on_startswith(".r", priority=3, block=True)
+    rcommand = on_startswith((".r", ".roll"), priority=3, block=True)
     ticommand = on_startswith(".ti", priority=2, block=True)
     licommand = on_startswith(".li", priority=2, block=True)
     sccommand = on_startswith(".sc", priority=2, block=True)
-    delcommand = on_startswith(".del", priority=2, block=True)# | on_startswith(".delete", priority=2, block=True)
+    delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
-    versioncommand = on_startswith(".version", priority=2, block=True)# | on_startswith(".v", priority=2, block=True)
+    versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
 
     @driver.on_startup
     async def _():
@@ -482,14 +530,17 @@ if package == "nonebot2":
         args = format_str(event.get_message(), begin=".r")
         if not args:
             await matcher.send(rd0(args))
+            return
+
         if args[0] == "b":
             args = args[1:]
             await matcher.send(rb(args))
             return
-        if args[0] == "p":
+        elif args[0] == "p":
             args = args[1:]
             await matcher.send(rp(args))
             return
+
         try:
             await matcher.send(rd0(args))
         except:

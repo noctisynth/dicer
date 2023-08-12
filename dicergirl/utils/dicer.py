@@ -49,6 +49,8 @@ class Dice:
                 self.x = int(match.group(4)) if match.group(4) else 0
                 if self.x:
                     self.db = f"{self.a}D{self.b}{self.method}{self.x}"
+                else:
+                    self.db = f"{self.a}D{self.b}"
                 self.add = [self.x] if self.x else None
             self.dices += [f"D{self.b}"] * self.a
         else:
@@ -129,11 +131,12 @@ class Dice:
     def __str__(self):
         return self.db
 
-def expr(d, anum):
+def expr(d: Dice, anum):
     d.roll()
     result = d.calc()
-    s = f"{d}={(d.detail_expr())}={result}"
-    logger.debug(d.detail_expr())
+    s = f"掷骰: {d.db}\n"
+    s += f"{d.db}={(d.detail_expr())}={result}"
+
     if anum:
         s += "\n"
         if result == 100:

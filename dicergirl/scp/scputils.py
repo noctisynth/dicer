@@ -36,25 +36,14 @@ def st():
     return "[Oracle] 命中了%s" % (rstr)
 
 def at(args, event):
-    inv = Agent().load(scp_cards.get(event))
-    method = "+"
+    agt = Agent().load(scp_cards.get(event))
 
     if args:
         d = Dice().parse(args).roll()
     else:
         d = Dice().parse("1d6").roll()
 
-    if "d" in inv.db():
-        db = Dice(inv.db()).roll()
-        dbtotal = db.total
-        db = db.db
-    else:
-        db = int(inv.db())
-        dbtotal = db
-        if db < 0:
-            method = ""
-
-    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})={d.total+dbtotal}\n造成了 {d.total+dbtotal}点 伤害."
+    return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
 
 def scp_dam(args, message):
     card = scp_cards.get(message)

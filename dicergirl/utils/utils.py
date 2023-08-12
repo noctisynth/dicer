@@ -20,7 +20,7 @@ except ImportError:
     from .. import coc, scp, dnd
 
 package = get_package()
-version = "3.1.11"
+version = "3.1.12"
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"

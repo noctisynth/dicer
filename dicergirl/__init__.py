@@ -249,22 +249,21 @@ if package == "nonebot2":
                 return
             
             if args[0] in ["buy", "b", "upgrade", "u", "up"]:
-                if len(args) <= 2:
-                    await matcher.send(help_message("scp"))
-                    return
-
                 agt = Agent().load(scp_cards.get(event))
                 anb = agt.all_not_base()
 
                 if args[1] in anb.keys():
                     oldattr = getattr(agt, anb[args[1]])
                     level = int(oldattr[args[1]])
-
-                    try:
-                        up = int(args[2])
-                    except ValueError:
-                        await matcher.send(help_message("scp"))
-                        return
+                    
+                    if len(args) <= 2:
+                        up = level + 1
+                    else:
+                        try:
+                            up = int(args[2])
+                        except ValueError:
+                            await matcher.send(help_message("scp"))
+                            return
 
                     if level >= up:
                         await matcher.send(f"[Oracle] 你的 {args[1]} 技能的等级已经是 {level} 级了.")
@@ -449,9 +448,9 @@ if package == "nonebot2":
         try:
             en = eval(f"{mode}_en(event, args)")
         except:
-            en = f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."
+            en = f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode.upper()} 不存在该指令."
 
-        await matcher.send(en(args))
+        await matcher.send(en)
 
 
     @racommand.handle()

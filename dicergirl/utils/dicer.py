@@ -156,7 +156,7 @@ def expr(d, anum):
             s += "检定结果: 失败."
     return s
 
-def scp_doc(result, difficulty, agent=None, great=False):
+def scp_doc(result, difficulty, encourage=None, agent=None, great=False):
     if not agent:
         agent = "该特工"
 
@@ -167,8 +167,13 @@ def scp_doc(result, difficulty, agent=None, great=False):
         r += f"检定结果: 致命失败.\n"
         r += f"检定结论: {agent} 在试图挑战数学、挑战科学、挑战真理, 尝试达成一个不可能事件, {agent} 毫无疑问获得了 致命失败."
         return r
-
-    r += f"检定数据: {result}\n"
+    
+    if encourage:
+        r += f"肾上腺素: {encourage}\n"
+        r += f"检定数据: {result}+{encourage}\n"
+        result += encourage
+    else:
+        r += f"检定数据: {result}\n"
 
     if great:
         r += "检定结果: 关键成功.\n"
@@ -176,6 +181,9 @@ def scp_doc(result, difficulty, agent=None, great=False):
             r += "检定结论: 有时候, 一次普通的成功或许会大幅度的牵扯到整个未来, 但这并不是一件太过于值得高兴的事情, 因为它不见得是一个好的开始."
         else:
             r += "检定结论: 被 Administrator 所眷顾的人, 毫无疑问这是一次完美的成功, 但是你或许会面对更加绝望的未来."
+    elif result >= (difficulty*2):
+        r += "检定结果: 关键成功.\n"
+        r += "检定结论: 绝境之中的人常常能够爆发出无尽的潜力, 疯狂是人类最强大的武器, 用疯狂去嗤笑命运吧."
     elif result > difficulty:
         r += "检定结果: 成功.\n"
         r += "检定结论: 命运常常给予人们无声的嗤笑, 一次成功当然是好事, 但也要警惕这是否是步入深渊的开始."
@@ -185,9 +193,6 @@ def scp_doc(result, difficulty, agent=None, great=False):
     elif result < difficulty:
         r += "检定结果: 失败.\n"
         r += "检定结论: 人类从来都生活在饱含恐惧与绝望的危险之中, 失败是一件稀松平常的事情, 小心, 错误的决定或许会让你步入深渊."
-    elif result >= (difficulty*2):
-        r += "检定结果: 关键成功.\n"
-        r += "检定结论: "
     else:
         result = random.randint(0, 1)
         if result:

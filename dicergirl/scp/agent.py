@@ -25,6 +25,7 @@ class Agent(object):
         self.enp = 0
         self.rep = 0
         self.dices = {}
+        self.en = {}
         self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
         self.skills = {skill: 0 for skill in skills_data.keys()}
         self.ability = {ability: 0 for ability in ability_data.keys()}
@@ -47,6 +48,7 @@ class Agent(object):
             "wil": 1
         }
         attr = {p: 1 for p in prop}
+        self.en = {p: 0 for p in prop}
         total = 20 - len(prop)
         for _ in range(total):
             name = random.choice(list(prop.keys()))

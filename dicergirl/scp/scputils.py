@@ -105,13 +105,12 @@ def scp_dam(args, message):
 def sra(args, event):
     if len(args) == 0:
         return help_message("sra")
-
-    if len(args) > 3:
+    elif len(args) > 3:
         return "[Oracle] 错误: 参数过多(最多2需要但%d给予)." % len(args)
     
-    if len(args) == 2:
+    try:
         difficulty = int(args[-1])
-    else:
+    except ValueError:
         difficulty = 12
 
     card_data = scp_cards.get(event)
@@ -122,25 +121,62 @@ def sra(args, event):
     inv = Agent().load(card_data)
 
     is_base = False
-    for _, alias in attrs_dict.items():
-        if args[0] in alias:
-            dices = [dice for dice in inv.dices[alias[0]]]
-            is_base = True
-            break
-
-    is_skill = False
-    if not is_base:
-        for skill in inv.skills:
-            if args[0] == skill:
-                exp = inv.skills[skill]
-                is_skill = True
+    if len(args) in (1, 2):
+        for _, alias in attrs_dict.items():
+            if args[0] in alias:
+                dices = [dice for dice in inv.dices[alias[0]]]
+                to_ens = [alias[0]]
+                is_base = True
                 break
 
-    if not is_base and not is_skill:
-        return "[Oracle] 错误: 没有这个数据或技能."
-    
-    if not is_base and is_skill:
-        return expr(Dice(), int(exp))
+    is_skill = False
+    skill_only = False
+    if not is_base and len(args) >= 2:
+        if args[1] in ["+", "/", "&", "*"]:
+            is_validated_skill = False
+            for _, alias in attrs_dict.items():
+                if args[0] in alias:
+                    dices = [dice for dice in inv.dices[alias[0]]]
+                    to_ens = [alias[0]]
+                    is_validated_skill = True
+                    break
+
+            anb = inv.all_not_base()
+            if args[2] in anb.keys() and is_validated_skill:
+                exp = getattr(inv, anb[args[2]])[args[2]]
+                is_skill = True
+            elif not is_validated_skill:
+                return f"[Oracle] 错误: 基础属性 {args[0]} 不存在."
+            else:
+                return f"[Oracle] 错误: 技能、知识或能力 {args[2]} 不存在."
+        else:
+            return help_messages.en
+    elif not is_base and len(args) == 1:
+        if args[0] in all_names:
+            anb = inv.all_not_base()
+            exp = getattr(inv, anb[args[0]])[args[0]]
+            skill_only = True
+            if anb[args[0]] == "knowledge":
+                to_ens = ["int", "per"]
+                to_en = random.choice(to_ens)
+                dices = [dice for dice in (inv.dices[to_en])]
+            elif anb[args[0]] == "skills":
+                to_ens = ["str", "dex"]
+                to_en = random.choice(to_ens)
+                dices = [dice for dice in (inv.dices[to_en])]
+            elif anb[args[0]] == "ability":
+                to_ens = ["chr", "wil"]
+                to_en = random.choice(to_ens)
+                dices = [dice for dice in (inv.dices[to_en])]
+            else:
+                skill_only = False
+
+    if not is_base and not is_skill and not skill_only:
+        if args[0] in inv.skills.keys():
+            exp = inv.skills[args[0]]
+            return expr(Dice(), int(exp))
+        else:
+            return "[Oracle] 错误: 没有这个数据或技能."
 
     all_dices = []
 
@@ -166,7 +202,21 @@ def sra(args, event):
         results.remove(result)
         result += max(results)
 
-    r = scp_doc(result, difficulty, agent=inv.name, great=great)
+    if is_skill or skill_only:
+        result += exp
+    
+    encouraged = False
+    encourage = None
+    for en in card_data["en"]:
+        if en in to_ens:
+            encourage = card_data["en"][en]
+            encouraged = True
+        
+    if encouraged:
+        card_data["en"].pop(en)
+        scp_cards.update(event, card_data)
+
+    r = scp_doc(result, difficulty, encourage=encourage, agent=inv.name, great=great)
     return r
 
 def scp_en(event, args):
@@ -175,13 +225,29 @@ def scp_en(event, args):
 
     try:
         en = int(args[1])
+        if not en:
+            return f"[Oracle] 无法进行发起 {en} 点激励."
     except ValueError:
         return help_messages.en
 
-    check = random.randint(1, 100)
+    card_data = scp_cards.get(event)
 
-    if check > arg or check > 95:
-        plus = random.randint(1, 10)
-        r = "判定值%d, 判定成功, 技能成长%d+%d=%d" % (check, arg, plus, arg+plus)
-    else:
-        return "判定值%d, 判定失败, 技能无成长。" % check
+    if card_data["enp"] < en:
+        return f"[Oracle] 你仅剩的激励点无法进行发起 {en} 点激励."
+    
+    agt = Agent().load(card_data)
+
+    for _, alias in attrs_dict.items():
+        if args[0] in alias:
+            to_en = alias[0]
+            is_validated_skill = True
+            break
+    
+    if not is_validated_skill:
+        return f"[Oracle] 不存在的基础属性 {args[0]} 无法被激励."
+    
+    card_data["enp"] -= en
+    agt.en[to_en] = en 
+    scp_cards.update(event, agt.__dict__)
+
+    return f"[Oracle] 你的 {args[0]} 受到了 {en} 点激励."

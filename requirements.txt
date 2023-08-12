@@ -1,4 +1,3 @@
-nb-cli
 nonebot2
 qq-botpy
 watchdog

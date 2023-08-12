@@ -204,17 +204,14 @@ def sra(args, event):
 
     if is_skill or skill_only:
         result += exp
-    
-    encouraged = False
+
     encourage = None
     for en in card_data["en"]:
         if en in to_ens:
             encourage = card_data["en"][en]
-            encouraged = True
-        
-    if encouraged:
-        card_data["en"].pop(en)
-        scp_cards.update(event, card_data)
+            card_data["en"].pop(en)
+            scp_cards.update(event, card_data)
+            break
 
     r = scp_doc(result, difficulty, encourage=encourage, agent=inv.name, great=great)
     return r

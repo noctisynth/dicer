@@ -15,12 +15,63 @@ except ImportError:
     from dicergirl import coc, scp, dnd
     from dicergirl.utils.messages import help_messages
 
+def __set_plus_format(args: list):
+    while True:
+        try:
+            index = args.index("+")
+        except:
+            break
+        args[index] = args[index] + args[index+1]
+        args.pop(index+1)
+    
+    while True:
+        try:
+            index = args.index("-")
+        except:
+            break
+        args[index] = args[index] + args[index+1]
+        args.pop(index+1)
+
+    return args
+
+def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, cha=None, qid=None) -> bool:
+    for attr, alias in attrs_dict.items():
+        if args[0] in alias:
+            if attr in ["名字", "性别"]:
+                if attr == "性别" and not args[1] in ["男", "女"]:
+                    return f"[Oracle] 欧若可拒绝将{module.__cname__}性别将设置为 {args[1]}, 这是对物种的侮辱."
+                cha.__dict__[alias[0]] = args[1]
+            else:
+                try:
+                    if not args[1].startswith(("-", "+")):
+                        cha.__dict__[alias[0]] = int(args[1])
+                    else:
+                        cha.__dict__[alias[0]] += int(args[1][1:])
+                except ValueError:
+                    return "基础数据 %s 要求正整数数据, 但你传入了 %s." % (args[0], args[1])
+            cards.update(event, cha.__dict__, qid=qid)
+            return "[Oracle] 设置%s %s 为: %s" % (module.__cname__, attr, cha.__dict__[alias[0]])
+
+def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid=None):
+    try:
+        if not args[1].startswith(("-", "+")):
+            cha.skills[args[0]] = int(args[1])
+        else:
+            cha.skills[args[0]] += int(args[1][1:])
+        cards.update(event, cha.__dict__, qid=qid)
+        reply.append("设置%s %s 技能为: %s." % (module.__cname__, args[0], cha.skills[args[0]]))
+    except ValueError:
+        reply.append("技能 %s 要求正整数数据, 但你传入了 %s." % (args[0], args[1]))
+    finally:
+        return reply
+
 def set_handler(message, args, at, mode=None):
     cards = eval(f"{mode}_cards")
     cache_cards = eval(f"{mode}_cache_cards")
     charactor = eval(mode).__charactor__
     attrs_dict = eval(f"{mode}_attrs_dict")
     module = eval(mode)
+    args = __set_plus_format(args)
 
     if len(at) == 1:
         qid = at[0]
@@ -41,28 +92,16 @@ def set_handler(message, args, at, mode=None):
             inv = charactor().load(card_data)
         else:
             return f"[Oracle] 未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
+
         if len(args) % 2 != 0:
             return "[Oracle] 参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量.\n此外, 这看起来不像是来源于我的错误."
+
         elif len(args) == 2:
-            for attr, alias in attrs_dict.items():
-                if args[0] in alias:
-                    if attr in ["名字", "性别"]:
-                        if attr == "性别" and not args[1] in ["男", "女"]:
-                            return f"[Oracle] 欧若可拒绝将{module.__cname__}性别将设置为 {args[1]}, 这是对物种的侮辱."
-                        inv.__dict__[alias[0]] = args[1]
-                    else:
-                        try:
-                            inv.__dict__[alias[0]] = int(args[1])
-                        except ValueError:
-                            return "[Oracle] 请输入正整数属性数据."
-                    cards.update(message, inv.__dict__, qid=qid)
-                    return "[Oracle] 设置%s %s 为: %s" % (module.__cname__, attr, args[1])
-            try:
-                inv.skills[args[0]] = int(args[1])
-                cards.update(message, inv.__dict__, qid=qid)
-                return "[Oracle] 设置%s %s 技能为: %s." % (module.__cname__, args[0], args[1])
-            except ValueError:
-                return "[Oracle] 请输入正整数技能数据."
+            sd = __set_default(args, message, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
+            if sd:
+                return sd
+            
+            return __set_skill(args, message, [], cards=cards, cha=inv, module=module, qid=qid)[0]
         elif len(args) > 2:
             reply = []
             li = []
@@ -77,31 +116,14 @@ def set_handler(message, args, at, mode=None):
                     sub_li = []
                 else:
                     return "[Oracle] 参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量.\n此外, 这看起来不像是来源于我的错误."
+
             for sub_li in li:
-                has_set = False
-                for attr, alias in attrs_dict.items():
-                    if sub_li[0] in alias:
-                        if attr in ["名字", "性别"]:
-                            if attr == "性别" and not sub_li[1] in ["男", "女"]:
-                                return f"[Oracle] 欧若可拒绝将{module.__cname__}性别将设置为 {args[1]}, 这是对物种的侮辱."
-                            inv.__dict__[alias[0]] = sub_li[1]
-                        else:
-                            try:
-                                inv.__dict__[alias[0]] = int(sub_li[1])
-                            except ValueError:
-                                reply.append("基础数据 %s 要求正整数数据, 但你传入了 %s." % (sub_li[0], sub_li[1]))
-                                continue
-                        cards.update(message, inv.__dict__, qid=qid)
-                        reply.append("设置%s基础数据 %s 为: %s" % (module.__cname__, attr, sub_li[1]))
-                        has_set = True
-                if has_set:
+                sd = __set_default(sub_li, message, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
+                if sd:
                     continue
-                try:
-                    inv.skills[sub_li[0]] = int(sub_li[1])
-                    cards.update(message, inv.__dict__, qid=qid)
-                    reply.append("设置%s %s 技能为: %s." % (module.__cname__, sub_li[0], sub_li[1]))
-                except ValueError:
-                    reply.append("技能 %s 要求正整数数据, 但你传入了 %s." % (sub_li[0], sub_li[1]))
+
+                reply = __set_skill(sub_li, message, reply, cards=cards, cha=inv, module=module, qid=qid)
+
             rep = "[Oracle]\n"
             for r in reply:
                 rep += r + "\n"

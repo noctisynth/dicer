@@ -293,6 +293,15 @@ if package == "nonebot2":
     @scpcommand.handle()
     async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".scp", zh_en=True)
+        at = get_mentions(event)
+
+        if at and not is_super_user(event):
+            return "[Oracle] 权限不足, 无法指定玩家修改人物卡."
+
+        if at:
+            qid = at[0]
+        else:
+            qid = ""
 
         if len(args) != 0:
             if args[0] in ["reset", "r"]:
@@ -300,12 +309,12 @@ if package == "nonebot2":
                     await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
                     return
 
-                agt = Agent().load(scp_cards.get(event))
+                agt = Agent().load(scp_cards.get(event, qid=qid))
 
                 if len(args) == 2:
                     try:
                         exec(f"agt.reset_{args[1]}()")
-                        scp_cards.update(event, agt.__dict__, save=True)
+                        scp_cards.update(event, agt.__dict__, qid=qid, save=True)
                         await matcher.send(f"[Oracle] 已重置指定人物卡属性: {args[1]}.")
                     except:
                         await matcher.send("[Oracle] 指令看起来不存在.")
@@ -313,11 +322,11 @@ if package == "nonebot2":
                         return
 
                 agt.reset()
-                scp_cards.update(event, agt.__dict__, save=True)
-                await matcher.send("[Oracle] 人物卡属性已重置.")
+                scp_cards.update(event, agt.__dict__, qid=qid, save=True)
+                await matcher.send(f"[Oracle] 人物卡 {agt.name} 属性已重置.")
                 return
             elif args[0] in ["upgrade", "u", "up", "study", "learn"]:
-                agt = Agent().load(scp_cards.get(event))
+                agt = Agent().load(scp_cards.get(event, qid=qid))
                 anb = agt.all_not_base()
 
                 if args[1] in anb.keys():
@@ -351,13 +360,13 @@ if package == "nonebot2":
 
                     oldattr[args[1]] = float(up) + flt/10
                     setattr(agt, anb[args[1]], oldattr)
-                    scp_cards.update(event, agt.__dict__, save=True)
+                    scp_cards.update(event, agt.__dict__, qid=qid, save=True)
                     await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {args[2]} 级.\n该技能的熟练度为 {oldattr[args[1]]}.")
                     return
                 else:
                     await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")
                     return
-            elif args[0] in ["deal", "d", "buy", "d"]:
+            elif args[0] in ["deal", "d", "buy", "b"]:
                 args_for_deal = args[1:]
                 await matcher.send(deal(event, args_for_deal))
                 return 
@@ -430,7 +439,8 @@ if package == "nonebot2":
 
         try:
             sh = set_handler(event, args, at, mode=mode)
-        except:
+        except Exception as error:
+            logger.exception(error)
             sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
 
         await matcher.send(sh)

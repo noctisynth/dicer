@@ -26,6 +26,7 @@ setuptools.setup(
     packages = setuptools.find_packages(),
     install_requires = [
         'nonebot2',
+        'nonebot-adapter-onebot',
         'qq-botpy',
         'watchdog',
         'loguru',

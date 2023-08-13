@@ -2,14 +2,14 @@ try:
     from ..utils.messages import help_messages, help_message
     from ..utils.dicer import Dice, scp_doc, expr
     from .scpcards import scp_cards
-    from .attributes import all_names, scp_attrs_dict as attrs_dict
+    from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons
     from .agent import Agent
     from ..utils.multilogging import multilogger
 except ImportError:
     from dicergirl.utils.messages import help_messages, help_message
     from dicergirl.utils.dicer import Dice, scp_doc, expr
     from dicergirl.scp.scpcards import scp_cards
-    from dicergirl.scp.attributes import scp_attrs_dict as attrs_dict, all_names
+    from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons
     from dicergirl.scp.agent import Agent
     from dicergirl.utils.multilogging import multilogger
 
@@ -36,14 +36,66 @@ def st():
     return "[Oracle] 命中了%s" % (rstr)
 
 def at(args, event):
-    agt = Agent().load(scp_cards.get(event))
+    card = scp_cards.get(event)
+    agt = Agent().load(card)
 
-    if args:
-        d = Dice().parse(args).roll()
+    if not args:
+        dices = [dice for dice in agt.dices["str"]]
+
+        if len(dices) > 4:
+            while len(all_dices) != 4:
+                choice = random.choice(dices)
+                all_dices.append(choice)
+                dices.remove(choice)
+        elif len(dices) <= 4:
+            all_dices = dices
+
+        results = []
+        for dice in all_dices:
+            dice = Dice("1"+dice.lower()).roll()
+            results.append(dice.total)
+
+        result = max(results)
+
+        if len(results) > 1:
+            results.remove(result)
+            result += max(results)
+
+        return f"[Oracle] 特工发起近战格斗伤害检定, 检定造成了 {result} 点 伤害."
     else:
-        d = Dice().parse("1d6").roll()
+        args = "".join(args)
+        if not args in agt.tools.keys():
+            return f"[Oracle] 看起来该特工并未购置 {args}."
+        
+        return f"[Oracle] 特工使用 {args} 发起攻击, 检定造成了 {Dice(agt.tools[args]['base']).roll().calc()} 点 伤害."
 
-    return f"[Oracle] 投掷 {d.db}={d.total}\n造成了 {d.total}点 伤害."
+def deal(event, args):
+    if len(args) > 0:
+        args = "".join(args)
+
+    card = scp_cards.get(event)
+    level = card["level"]
+    reply = ""
+
+    if not args:
+        reply += f"特工权限: {level}\n"
+        reply += f"Level {level} 准允购置的装备:\n"
+
+        for weapon in weapons[level].keys():
+            r += f"  {weapon}: {weapons[level][weapon]['price']}￥"
+        
+        return reply
+
+    if args in [weapon for weapon in weapons[level].keys()]:
+        if weapons[level][args]['price'] > card['money']:
+            return f"[Oracle] 该特工囊中羞涩, 无法购置装备 {args}.\n贫穷是人类社会生存中的重大危机, 很高兴, 你距离危险更近了一步."
+
+        card['money'] -= weapons[level][args]['price']
+        agt = Agent().load(card)
+        agt.tools[args] = weapons[level][args]
+        return f"[Oracle] 特工购置了 1 件 {args}."
+    else:
+        return f"[Oracle] 装备 {args} 不存在或特工权限不足."
 
 def scp_dam(args, message):
     card = scp_cards.get(message)

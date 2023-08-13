@@ -12,20 +12,14 @@ class Agent(object):
         self.name = "无名特工"
         self.age = 20
         self.sex = "女"
-        self.str = 0
-        self.hth = 0
-        self.per = 0
-        self.dex = 0
-        self.fte = 0
-        self.chr = 0
-        self.int = 0
-        self.wil = 0
+        self.level = 1
         self.hp_max = 0
         self.hp = 0
         self.enp = 0
         self.rep = 0
         self.dices = {}
         self.en = {}
+        self.money = 200
         self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
         self.skills = {skill: 0 for skill in skills_data.keys()}
         self.ability = {ability: 0 for ability in ability_data.keys()}
@@ -62,7 +56,6 @@ class Agent(object):
             attr[p] = dice.dices
 
         self.dices = attr
-        self.__dict__.update(prop)
         self.reset_hp()
         self.reset_enp()
         self.reset_p()

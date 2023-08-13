@@ -30,7 +30,7 @@ if package == "nonebot2":
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import sra, scp_dam, scp_en, at as sat
+    from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal
 
     from .dnd.adventurer import Adventurer
     from .dnd.dndcards import dnd_cards, dnd_cache_cards
@@ -291,12 +291,21 @@ if package == "nonebot2":
                     return
 
                 agt = Agent().load(scp_cards.get(event))
+
+                if len(args) == 2:
+                    try:
+                        exec(f"agt.reset_{args[1]}()")
+                        await matcher.send(f"[Oracle] 已重置指定人物卡属性: {args[1]}.")
+                    except:
+                        await matcher.send("[Oracle] 指令看起来不存在.")
+                    finally:
+                        return
+
                 agt.reset()
                 scp_cards.update(event, agt.__dict__, save=True)
                 await matcher.send("[Oracle] 人物卡属性已重置.")
                 return
-            
-            if args[0] in ["buy", "b", "upgrade", "u", "up"]:
+            elif args[0] in ["upgrade", "u", "up", "study", "learn"]:
                 agt = Agent().load(scp_cards.get(event))
                 anb = agt.all_not_base()
 
@@ -337,8 +346,11 @@ if package == "nonebot2":
                 else:
                     await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")
                     return
+            elif args[0] in ["deal", "d", "buy", "d"]:
+                args_for_deal = args[1:]
+                return deal(event, args_for_deal)
             else:
-                await matcher.send(f"[Oracle] 技能 {args[1]} 看起来似乎不存在.")
+                await matcher.send(f"[Oracle] 指令 {args[0]} 看起来似乎不存在.")
                 return
 
         agt = Agent()

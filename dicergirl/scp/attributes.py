@@ -88,4 +88,106 @@ ability_data = {
     "自我控制": ["自我控制"],
 }
 
+weapons = {
+    1: {
+        "泰瑟枪": {
+            "base": "1d4",
+            "x": "0",
+            "price": 210
+        },
+        "弩": {
+            "base": "1d10",
+            "x": "3d8",
+            "price": 48
+        },
+        "鲁格手枪": {
+            "base": "1d6",
+            "x": "1d6",
+            "price": 480
+        },
+        "M206": {
+            "base": "2d6",
+            "x": "1d6",
+            "price": 360
+        },
+        "RM380": {
+            "base": "1d8",
+            "x": "1d4",
+            "price": 360
+        },
+        "沃尔特-RPK": {
+            "base": "1d6",
+            "x": "1d8",
+            "price": 900
+        },
+        "棒球棍": {
+            "base": "0",
+            "x": "2d8",
+            "price": 24
+        },
+        "指虎": {
+            "base": "1d6",
+            "x": "1d8",
+            "price": 25
+        },
+        "撬棍": {
+            "base": "1d12",
+            "x": "1d10",
+            "price": 96
+        },
+        "甩棍": {
+            "base": "1d8",
+            "x": "1d4",
+            "price": 510
+        },
+        "生存小刀": {
+            "base": "1d8",
+            "x": "1d6",
+            "price": 120
+        },
+        "鞭子": {
+            "base": "1d10",
+            "x": "1d6",
+            "price": 168
+        },
+        "燃烧瓶": {
+            "base": "4d10",
+            "x": "0",
+            "price": 96
+        }
+    },
+    2: {
+       "克洛克-19": {
+           "base": "2d6",
+           "x": "1d8+3",
+           "price": 750
+       },
+       "M1911": {
+           "base": "2d8",
+           "x": "1d10+3",
+           "price": 1500
+       },
+       "M4A1": {
+           "base": "4d8",
+           "x": "2d6",
+           "price": 4500
+       },
+       "马林-336C": {
+           "base": "2d8",
+           "x": "2d8+2",
+           "price": 750
+       },
+       "和平使者": {
+           "base": "2d8",
+           "x": "1d8",
+           "price": 1050
+       },
+       "SAKO-Finnlight": {
+           "base": "2d8",
+           "x": "3d8",
+           "price": 1650
+       }
+    }
+}
+
 all_names = list(set().union(scp_attrs_dict, knowledge_data, skills_data, ability_data))

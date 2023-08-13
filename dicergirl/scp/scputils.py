@@ -46,10 +46,14 @@ def at(args, event):
         return f"[Oracle] 特工发起近战格斗伤害检定, 检定造成了 {result} 点 伤害."
     else:
         args = "".join(args)
-        if not args in agt.tools.keys():
-            return f"[Oracle] 看起来该特工并未购置 {args}."
 
-        return f"[Oracle] 特工使用 {args} 发起攻击, 检定造成了 {Dice(agt.tools[args]['base']).roll().calc()} 点 伤害."
+        upper = {name.upper(): [tool, name] for name, tool in agt.tools.items()}
+        print(upper.keys())
+        print(args.upper())
+        if not args.upper() in upper.keys():
+            return f"[Oracle] 看起来该特工并未购置 {args.upper()}."
+
+        return f"[Oracle] 特工使用 {upper[args.upper()][1]} 发起攻击, 检定造成了 {Dice(upper[args.upper()][0]['base']).roll().calc()} 点 伤害."
 
 def deal(event, args):
     if len(args) > 0:
@@ -61,23 +65,32 @@ def deal(event, args):
 
     if not args:
         reply += f"特工权限: {level}\n"
-        reply += f"Level {level} 准允购置的装备:\n"
 
-        for weapon in weapons[level].keys():
-            reply += f"  {weapon}: {weapons[level][weapon]['price']}￥\n"
+        for lvl in range(level):
+            reply += f"Level {lvl+1} 准允购置的装备:"
+            for weapon in weapons[lvl+1].keys():
+                reply += f"\n  {weapon}: {weapons[lvl+1][weapon]['price']}￥"
+            
+            reply += "\n"
         
         return reply
+    
+    allowed_upper = {}
+    for lvl in weapons.keys():
+        allowed_upper.update({allow.upper(): [lvl, weapon, allow] for allow, weapon in weapons[lvl].items()})
 
-    if args in [weapon for weapon in weapons[level].keys()]:
-        if weapons[level][args]['price'] > card['money']:
+    if args in allowed_upper.keys():
+        real_name = allowed_upper[args][2]
+        if allowed_upper[args][1]['price'] > card['money']:
             return f"[Oracle] 该特工囊中羞涩, 无法购置装备 {args}.\n贫穷是人类社会生存中的重大危机, 很高兴, 你距离危险更近了一步."
 
-        card['money'] -= weapons[level][args]['price']
+        card['money'] -= allowed_upper[args][1]['price']
         agt = Agent().load(card)
-        agt.tools[args] = weapons[level][args]
-        return f"[Oracle] 特工购置了 1 件 {args}."
+        agt.tools[real_name] = allowed_upper[args][1]
+        scp_cards.update(event, agt.__dict__, save=True)
+        return f"[Oracle] 特工购置了 1 件 {real_name}."
     else:
-        return f"[Oracle] 装备 {args} 不存在或特工权限不足."
+        return f"[Oracle] 装备 {real_name} 不存在或特工权限不足."
 
 def scp_dam(args, message):
     card = scp_cards.get(message)

@@ -17,24 +17,6 @@ import random
 
 logger = multilogger(name="Dicer Girl", payload="SCPUtil")
 
-def st():
-    result = random.randint(1, 20)
-    if result < 4:
-        rstr = "右腿"
-    elif result < 7:
-        rstr = "左腿"
-    elif result < 11:
-        rstr = "腹部"
-    elif result < 16:
-        rstr = "胸部"
-    elif result < 18:
-        rstr = "右臂"
-    elif result < 20:
-        rstr = "左臂"
-    elif result < 21:
-        rstr = "头部"
-    return "[Oracle] 命中了%s" % (rstr)
-
 def at(args, event):
     card = scp_cards.get(event)
     agt = Agent().load(card)
@@ -66,12 +48,12 @@ def at(args, event):
         args = "".join(args)
         if not args in agt.tools.keys():
             return f"[Oracle] 看起来该特工并未购置 {args}."
-        
+
         return f"[Oracle] 特工使用 {args} 发起攻击, 检定造成了 {Dice(agt.tools[args]['base']).roll().calc()} 点 伤害."
 
 def deal(event, args):
     if len(args) > 0:
-        args = "".join(args)
+        args = "".join(args).upper()
 
     card = scp_cards.get(event)
     level = card["level"]
@@ -82,7 +64,7 @@ def deal(event, args):
         reply += f"Level {level} 准允购置的装备:\n"
 
         for weapon in weapons[level].keys():
-            r += f"  {weapon}: {weapons[level][weapon]['price']}￥"
+            reply += f"  {weapon}: {weapons[level][weapon]['price']}￥\n"
         
         return reply
 

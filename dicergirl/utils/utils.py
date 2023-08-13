@@ -20,7 +20,7 @@ except ImportError:
     from .. import coc, scp, dnd
 
 package = get_package()
-version = "3.1.15"
+version = "3.1.16"
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"
@@ -108,11 +108,14 @@ def format_str(message: Union[Message, str], begin=None):
     logger.debug(msg)
 
     if begin:
-        if isinstance(begin, list) or isinstance(begin, tuple):
-            for b in begin:
-                msg = msg.replace(b, "").lstrip(" ")
-        else:
-            msg = msg.replace(begin, "").lstrip(" ")
+        if isinstance(begin, str):
+            begin = [begin, ]
+        elif isinstance(begin, tuple):
+            begin = list(begin)
+
+        begin.sort(reverse=True)
+        for b in begin:
+            msg = msg.replace(b, "").lstrip(" ")
 
     logger.debug(msg)
     return msg

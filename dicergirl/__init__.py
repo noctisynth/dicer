@@ -1,8 +1,18 @@
 from pathlib import Path
+from nonebot.plugin import PluginMetadata
 from .utils.settings import set_package, get_package
 from .utils.multilogging import multilogger
 
 import nonebot
+
+__plugin_meta__ = PluginMetadata(
+    name="欧若可骰娘",
+    description="完善的跑团机器人, 支持 COC/DND/SCP 等跑团模式.",
+    usage="安装即可使用.",
+    type="application",
+    homepage="https://gitee.com/unvisitor/dicer",
+    supported_adapters={"~onebot.v11"},
+)
 
 logger = multilogger(name="Dicer Girl", payload="Nonebot2")
 try:
@@ -54,7 +64,7 @@ if package == "nonebot2":
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent
     else:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
-    
+
     class StartswithRule:
         __slots__ = ("msg", "ignorecase")
 
@@ -295,6 +305,7 @@ if package == "nonebot2":
                 if len(args) == 2:
                     try:
                         exec(f"agt.reset_{args[1]}()")
+                        scp_cards.update(event, agt.__dict__, save=True)
                         await matcher.send(f"[Oracle] 已重置指定人物卡属性: {args[1]}.")
                     except:
                         await matcher.send("[Oracle] 指令看起来不存在.")
@@ -348,7 +359,8 @@ if package == "nonebot2":
                     return
             elif args[0] in ["deal", "d", "buy", "d"]:
                 args_for_deal = args[1:]
-                return deal(event, args_for_deal)
+                await matcher.send(deal(event, args_for_deal))
+                return 
             else:
                 await matcher.send(f"[Oracle] 指令 {args[0]} 看起来似乎不存在.")
                 return
@@ -392,29 +404,16 @@ if package == "nonebot2":
     async def showhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=(".show", ".display"))
         at = get_mentions(event)
-        if not args:
-            if mode in modes:
-                try:
-                    sh = show_handler(event, args, at, mode=mode)
-                except Exception as error:
-                    logger.exception(error)
-                    sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
-            else:
-                await matcher.send("未知的跑团模式.")
-                return True
 
-            for msg in sh:
-                await matcher.send(str(msg))
-            return True
-
-        if args[0] in modes:
-            args.remove(args[0])
-            sh = eval(f"{args[0]}_show_handler(event, args)")
-        else:
+        if mode in modes:
             try:
-                sh = eval(f"{mode}_show_handler(event, args)")
-            except:
+                sh = show_handler(event, args, at, mode=mode)
+            except Exception as error:
+                logger.exception(error)
                 sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
+        else:
+            await matcher.send("未知的跑团模式.")
+            return True
 
         for msg in sh:
             await matcher.send(str(msg))

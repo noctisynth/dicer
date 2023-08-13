@@ -196,6 +196,52 @@ class Agent(object):
         anb.update(nba)
         return anb
 
+    def out_allskills(self):
+        return self.skills_output()
+
+    def out_knowledge(self):
+        return self.__skill_output_format("知识", self.knowledge.items()) if self.knowledge else "%s 当前无任何知识数据。" % self.name
+
+    def out_skills(self):
+        return self.__skill_output_format("技能", self.skills.items()) if self.skills else "%s 当前无任何能力数据。" % self.name
+
+    def out_ability(self):
+        return self.__skill_output_format("能力", self.ability.items()) if self.ability else "%s 当前无任何能力数据。" % self.name
+
+    def out_hp(self):
+        return "当前生命值: %d/%d" % (self.hp, self.hp_max)
+
+    def out_enp(self):
+        return f"当前剩余激励点: {self.enp}"
+
+    def out_rep(self):
+        return f"当前声望: {self.rep}"
+
+    def out_p(self):
+        out =  "当前熟练值:\n"
+        out += "  知识: %d" % self.p["knowledge"]
+        out += "  技能: %d" % self.p["skills"]
+        out += "  能力: %d" % self.p["ability"]
+        return out
+    
+    def out_money(self):
+        return f"当前余额: {self.money}"
+
+    def out_en(self):
+        out = "当前激励状态:"
+        for en in self.en.keys():
+            ability = None
+            for attr in scp_attrs_dict.keys():
+                if scp_attrs_dict[attr][0] == en:
+                    ability = attr
+
+            if not ability:
+                return f"[Orcale] 错误: 已经被激励的技能 {en} 不存在!"
+
+            out += f"\n  {ability}: {self.en[en]} 点激励."
+        
+        return out
+
     def load(self, data: dict):
         self.__dict__.update(data)
         return self

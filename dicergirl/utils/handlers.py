@@ -145,9 +145,17 @@ def show_handler(message, args, at, mode=None):
             d += inv.skills_output()
             r.append(d)
     else:
-        r.append("[Oracle] 参数异常.")
+        if cards.get(message, qid=qid):
+            card_data = cards.get(message, qid=qid)
+            cha = charactor().load(card_data)
+            try:
+                r.append(getattr(cha, "out_"+args[0])())
+            except:
+                r.append("[Oracle] 查询时出现异常, 可能你想要查询的内容不存在?")
+
     if not r:
         r.append("[Oracle] 未查询到保存或暂存信息.")
+
     return r
 
 def del_handler(message, args, at, mode=None):

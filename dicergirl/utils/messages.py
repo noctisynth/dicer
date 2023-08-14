@@ -11,93 +11,157 @@ class Help_Messages():
 最终版本由未知访客团队(Unknow Visitor, 原左旋联盟)完成.
 感谢 灵冬-老孙 提供相关技术支持.
 
-.help 帮助信息
-.su   进行超级管理员鉴权
-.coc  进行车卡, 完成 COC 角色作成
-.scp  进行车卡, 完成 SCP 角色作成
-.dnd  进行车卡, 完成 DND 角色作成
-.mode 切换当前跑团模式
-.r    投掷指令 例如:
-            .r 10 100 (10D100)
-            .r 10d100 (10D100)
-        d   制定骰子面数
-        a   检定
-            .ra [str: 数据名] 例如:
-                .ra 幸运 (默认为幸运值D100)
-                .ra 幸运 80 (幸运值D80)
-                .ra 力量 90 (力量值D90)
-        h   暗骰 - 无效算法
-        #   多轮检定
-        bp  奖励骰&惩罚骰 - 无效算法
-        +/- 附加计算 - 无效算法
-.sra  基金会特工标准检定
-.dam  调查员或特工承伤检定
-.at   调查员或特工伤害检定
-.sc   疯狂检定
-.st   射击命中判定
-.ti   临时疯狂症状
-.li   总结疯狂症状
-.en   技能成长 - 无效算法
-.set  角色卡设定
-        .set [str: 数据名] [int: 数据]
-.show 角色卡查询
-.sa   COC快速检定
-.del  删除数据
-        .del c  删除临时数据
-        .del card 删除存储数据
+.help\t帮助信息
+.su\t进行超级管理员鉴权
+.bot\t机器人管理
+.mode\t切换当前跑团模式
+.coc\t进行车卡, 完成 COC 角色作成
+.scp\t进行车卡, 完成 SCP 角色作成
+.dnd\t进行车卡, 完成 DND 角色作成
+.set\t角色卡设定
+.show\t角色卡查询
+.r\t掷骰检定指令
+.dam\t调查员或特工承伤检定
+.at\t调查员或特工伤害检定
+.sc\t疯狂检定
+.ti\t临时疯狂症状
+.li\t总结疯狂症状
+.en\t技能成长
+.del\t删除数据
 输入`.help [指令名]`获取该指令的详细信息
-注: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
+注1: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
+注2: 该骰娘使用正则表达式对指令解析, 指令参数传递为弱空格需求.
+注3: 该骰娘会对英文大小写及中文字符转换, 指令及指令参数为弱大小写和弱中英文区分需求.
+注4: 指令帮助内容中`Optional[...]`代表参数可选, `[command]`表示该参数为指令且必须为`command`, `[str: ...]`表示参数为字符串, `[int: ...]`表示参数为数字, `[a|b]`表示参数多选.
 
-欧若可骰娘 版本 {version}, 未知访客版权所有.
-Copyright © 2011-2023 Unknown Visitor. All Rights Reserved."""
-        self.r = """.r[a#d]    投掷指令 例如:
-            .r 10 100 (10D100)
-        d   制定骰子面数
-        a   检定
-            .ra [str: 数据名] 例如:
-                .ra 幸运 (默认为幸运值D100)
-                .ra 幸运 80 (幸运值D80)
-                .ra 力量 90 (力量值D90)
-        h   暗骰指令, 骰子结构将会私聊发送给该指令者, 遗憾的是, 该指令的算法无效
-        #   多轮投掷指令, `#`后接数字即可设定多轮投掷
-        bp  奖励骰与惩罚骰, 但是遗憾的是, 该指令的算法无效
-        +/- 附加计算指令, 遗憾的是, 该指令的算法无效"""
-        self.sc = """.sc [int: success]/[int: failure] [int: SAN]   疯狂检定
-        success: 判定成功降低san值, 支持aDb语法(a、b与x为数字)
-        failure: 判定失败降低san值, 支持aDb语法(a、b与x为数字)
-        SAN: 当前SAN值, 缺省该参数则会自动使用该用户已保存的人物卡数据."""
-        self.set = """.set [str: name] [(num or str): data]
-        name: 属性名称
-        data: 目标属性值 例如:
-            .set 名字 阿斯塔特 (将你的名字设置为 “阿斯塔特”, 注意, 设置中文参数不支持无间隔传参)
-            .set 幸运 80 (将你的幸运设置为 80)
-            .set 计算机 99 (将你的计算机技能设置为 99)            
-        可以单独输入`.set`指令, 欧若可将自动读取最近一次coc指令结果进行保存.
-        .set 指令已经支持批量数据传输, 例如:
-            .set 名字 阿斯塔特 幸运 80 (将你的名字设置为 “阿斯塔特” 并将你的幸运设置为 80)"""
-        self.show = """.show [skill(skills, s)|all]
-        目前仅支持查询自身人物卡.
-            .show skill 查看自身人物卡技能
-            .show all 查询所有存储的人物卡"""
-        self.ra = """.ra [str: name]    快速检定
-        name: 属性名称 例如:
-            .ra 幸运 快速检定幸运
-            .ra 力量 快速检定力量"""
-        self.sra = """.sra [str: name]    SCP标准检定
-        name: 属性名称 例如:
-            .sra 命运 检定命运属性
-            .sra 健康 检定健康属性"""
-        self.en = ".en skill_level\n" \
-            "skill_level: 需要成长的技能当前等级。"
-        self.del_ = """.[s]del [c|card|str: talent]
-        删除数据, args可以有以下值
-        c: 清空暂存数据
-        card: 删除使用中的人物卡(慎用)
-        talent: 其他任意技能名
-        该命令支持多个参数混合使用, 可以一次指定多个技能名, 使用空格隔开"""
-        self.mode = """.mode [str: mode]
-        切换跑团模式 例如:
-            .mode coc 切换到COC跑团模式"""
+欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.
+Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0."""
+        self.su = """.su Optional[str: token]\t管理员鉴权
+\ttoken: 鉴权令牌
+\t- 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`或`qq-botpy`的控制终端输出, 输出模式为`CRITICAL`.
+\t- 如果你使用`Nonebot2`作为欧若可骰娘的后端, 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同.
+\t\t.su d32ab3...\t管理员验证"""
+        self.bot = """.bot\t机器人管理
+\t.bot on\t机器人启用
+\t.bot off\t机器人禁用
+\t.bot exit\t机器人退出群聊"""
+        self.mode = """.mode [str: mode]\t切换跑团模式
+\t.mode coc\t切换到 COC 跑团模式
+\t- 如果骰娘管理员加入了第三方跑团插件, `mode`参数应该设置为该插件中`__init__.py`的`__name__`参数, 不区分大小写.
+\t- 默认的跑团模式为`SCP`, 每一次机器人重启或更新后, 跑团模式都会更改为`SCP`."""
+        self.coc = """.coc Optional[str: age]\t完成 COC 人物作成
+\tage: 调查员年龄(可选参数)
+\t- 值得注意的是, 调查员的年龄与调查员的外貌、教育值相关."""
+        self.scp = """.scp Optional[reset|deal|upgrade]\t完成 SCP 人物卡作成
+\treset Optional[hp|p|enp|rep|card]: 重置人物卡
+\t- 无参数的`.scp reset`指令会重置人物所有附加属性, 包括生命值、熟练值、激励点和声望, 但不会改变已升级的技能和特工等级、类别.
+\t\thp: 重置人物卡生命值为最大生命值
+\t\t\t.scp reset hp
+\t\tp: 重置人物卡熟练值为最大熟练值
+\t\t\t.scp reset p
+\t\tenp: 重置人物卡激励点为最大激励点
+\t\t\t.scp reset enp
+\t\trep: 重置人物卡声望为最大声望
+\t\t\t.scp reset rep
+\t\tcard: 重置人物卡(请谨慎使用)
+\t\t`.scp reset card`指令会重置人物卡为初始状态, 请谨慎使用.
+\t\t\t.scp reset card
+\tdeal Optional[str: weapon]\t装备购买
+\t- 无参数的`.scp deal`指令会给出当前特工允许的购买的武器.
+\t\tweapon: 武器名称
+\t\t\t.scp deal 燃烧瓶\t购买一个燃烧瓶
+\tupgrade [str: name] [int: level]\t升级技能
+\t\tname: 技能名称
+\t\tlevel: 需要提升到的等级
+\t\t\t.scp upgrade 计算机 5\t将计算机提升到 5 级."""
+        self.dnd = """.dnd Optional[str: age]\t完成 DND 人物作成
+\tage: 冒险者年龄(可选参数)
+\t- 值得注意的是, 冒险者的年龄与冒险者的外貌、教育值相关."""
+        self.set = """.set [str: name] [int: data|str: data]
+\tname: 属性或技能名称
+\t- SCP 跑团中不支持设置属性, 同时设置非自定义技能也是不推荐的, 在设置前, 建议先询问主持人的意见.
+\tdata: 目标属性值
+\t\t.set 名字 阿斯塔特\t将你的名字设置`阿斯塔特`
+\t\t- 注意, 当属性或技能名称均为中文或均为英文时, 指令是强空格需求的.
+\t\t.set 计算机 80\t将你的计算机技能设置为 80
+\t\t.set 幸运 +10\t将你的幸运增加 10 点
+在群聊中输入单独的`.set`指令, 欧若可将自动读取最近一次车卡(即人物卡作成)指令的结果进行保存.
+`.set`指令支持批量设置技能来完成录卡, 例如:
+\t.set 名字 阿斯塔特 幸运 80 ...(将你的名字设置为 “阿斯塔特” 并将你的幸运设置为 80)
+\t- 值得注意的是, 录卡一般常见于 COC 跑团和 DND 跑团, SCP 模式是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡.
+注意, 虽然该指令同样为弱空格指令解析, 即你不需要在参数之间键入空格, 但是这样的指令是不允许的:
+\t.set名字阿斯塔特
+欧若可将会将该指令识别为同一个参数, 你可以使用`.setname阿斯塔特`来解决弱空格指令中的中文混合或英文混合导致的参数数量问题."""
+        self.show = """.show [skill|all|str: attribute] Optional[CQ:at]\t人物卡展示
+\tskill: 查看自身人物卡技能
+\tall: 查询所有存储的人物卡
+\tattribute: 该模式下存在的可查看参数
+\t- 部分参数可能并不在其它模式中支持, 如果管理员加入了第三方插件, 准允的可选参数请询问主持人、骰娘管理员或插件开发者.
+\t- 例如在 SCP 模式中:
+\t\t.show level\t展示特工等级 
+\t\t.show ability\t展示特工能力
+\t\t.show money\t展示特工余额
+\tat: 在群聊中`@`一个玩家, `.show`指令将会指向该玩家, 该参数是可选的."""
+        self.r = """.r[a|d|#|h]\t投掷指令 例如:
+\t\t.r 10 100 (10D100)
+\td\t指定骰子面数
+\t\t.r 10d100 (10D100)
+\t\t- 值得注意的是, `.r 10d100`与`.r 10 100`的效果是等同的.
+\ta [str: 属性或技能名] [int: 检定难度]\t基础属性或技能检定
+\t\t.ra 幸运\t(默认为幸运值D100)
+\t\t.ra 幸运 80\t(幸运值D80)
+\t\t在 SCP 模式中, 还支持以下指令:
+\t\t\t.ra 命运 10\t检定命运同时指定检定的事件难度为 10(默认为12)
+\t\t\t.ra 灵感/计算机 24\t指定以灵感检定计算机技能, 事件难度为24
+\t\t\t- 值得注意的是, 在SCP跑团中, 检定难度应当在 1~25 之间, >25 的难度会直接返回致命失败.
+\th\t暗骰
+\t\t.rh\t发起一次`1d100`的暗骰
+\t#\t多轮检定
+\tb|p\t奖励骰 | 惩罚骰
+\t\t.rb 4\t奖励骰掷骰 4 次
+\t+|-\t附加计算
+\t.r 1d10+2d6\t结果为`1d10`与`2d6`结果的和
+\t.r 1d8-2\t结果为`1d8`与`2`的差
+\t- 除`.r`指令外, 其它需要进行掷骰的指令均支持附加计算."""
+        self.ra = """.ra [str: name] Optional[int: difficulty]\t基础属性或技能检定
+\tname: 属性或技能名称
+\tdifficulty: 事件难度(可选参数)
+\t\t.ra 命运\t快速检定`命运`属性
+\t\t- 在 SCP 模式中, 还支持以下指令:
+\t\t\t.ra 命运 10\t检定命运同时指定检定的事件难度为 10(默认为12)
+\t\t\t.ra 灵感/计算机 24\t指定以灵感检定计算机技能, 事件难度为24
+\t\t- 值得注意的是, 在SCP跑团中, 检定难度应当在 1~25 之间, >25 的难度会直接返回致命失败."""
+        self.sra = self.ra
+        self.dam = """.dam Optional[check|int: dice|str: dice]
+\tcheck: 检定人物当前生命状态
+\t\t.dam check
+\tdice: 伤害掷骰
+\t\t.dam 1d6\t人物受到`1d6`掷骰结果的伤害
+\t\t.dam 6\t人物受到 6 点伤害"""
+        self.at = """.at Optional[str: dice|str: weapon]
+- 无参数的`.at`指令会进行该模式默认的近战伤害检定
+\tdice: 掷骰伤害检定
+\t- SCP 模式中不支持该语法.
+\t\t.at 1d6\t人物造成`1d6`掷骰结果的伤害
+\tweapon: 使用武器进行伤害检定
+\t- 该语法仅在 SCP 模式中支持.
+\t.at 燃烧瓶\t使用燃烧瓶进行伤害检定"""
+        self.sc = """.sc [int: success]/[int: failure] Optional[int: SAN]\tCOC 疯狂检定
+\tsuccess: 判定成功降低san值, 支持aDb语法(a、b与x为数字)
+\tfailure: 判定失败降低san值, 支持aDb语法(a、b与x为数字)
+\tSAN: 指定检定的 SAN 值(可选参数)
+\t- 缺省该参数则会自动使用该用户已保存的人物卡数据."""
+        self.ti = ".ti\t对调查员进行临时疯狂检定"
+        self.li = ".li\t对调查员进行总结疯狂检定"
+        self.en = """.en [str: attribute] [int: encourage]\t属性激励
+\tattribute: 技能名
+\tencourage: 消耗激励点
+\t\t.en 强度 2\t激励属性`强度`2 点"""
+        self.del_ = """.del [cache|card|str: talent]
+\tcache: 删除暂存数据
+\tcard: 删除使用中的人物卡(谨慎使用)
+\ttalent: 删除指定的自定义技能
+\t- 删除自定义技能时, 支持多个参数, 可以一次指定多个技能名."""
 
 help_messages = Help_Messages()
 
@@ -335,3 +399,6 @@ manias = [
     "99) 嗜外狂(Xenomania) : 痴迷于异国的事物。",
     "100) 喜兽癖(Zoomania) : 对待动物的态度近乎疯狂地友好。"
 ]
+
+if __name__ == "__main__":
+    print(help_message("main"))

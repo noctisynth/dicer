@@ -20,6 +20,7 @@ class Agent(object):
         self.dices = {}
         self.en = {}
         self.money = 200
+        self.agentclass = "E"
         self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
         self.skills = {skill: 0 for skill in skills_data.keys()}
         self.ability = {ability: 0 for ability in ability_data.keys()}
@@ -200,13 +201,13 @@ class Agent(object):
         return self.skills_output()
 
     def out_knowledge(self):
-        return self.__skill_output_format("知识", self.knowledge.items()) if self.knowledge else "%s 当前无任何知识数据。" % self.name
+        return self.__skill_output_format("知识", self.knowledge.items()).strip("\n") if self.knowledge else "%s 当前无任何知识数据。" % self.name
 
     def out_skills(self):
-        return self.__skill_output_format("技能", self.skills.items()) if self.skills else "%s 当前无任何能力数据。" % self.name
+        return self.__skill_output_format("技能", self.skills.items()).strip("\n") if self.skills else "%s 当前无任何能力数据。" % self.name
 
     def out_ability(self):
-        return self.__skill_output_format("能力", self.ability.items()) if self.ability else "%s 当前无任何能力数据。" % self.name
+        return self.__skill_output_format("能力", self.ability.items()).strip("\n") if self.ability else "%s 当前无任何能力数据。" % self.name
 
     def out_hp(self):
         return "当前生命值: %d/%d" % (self.hp, self.hp_max)
@@ -223,9 +224,18 @@ class Agent(object):
         out += "  技能: %d" % self.p["skills"]
         out += "  能力: %d" % self.p["ability"]
         return out
-    
+
+    def out_exp(self):
+        return self.out_p()
+
     def out_money(self):
         return f"当前余额: {self.money}"
+
+    def out_class(self):
+        return f"当前特工类别: {self.agentclass}"
+
+    def out_level(self):
+        return f"当前特工权限: {self.level}"
 
     def out_en(self):
         out = "当前激励状态:"
@@ -239,7 +249,7 @@ class Agent(object):
                 return f"[Orcale] 错误: 已经被激励的技能 {en} 不存在!"
 
             out += f"\n  {ability}: {self.en[en]} 点激励."
-        
+
         return out
 
     def load(self, data: dict):

@@ -2,14 +2,14 @@ try:
     from ..utils.messages import help_messages, help_message
     from ..utils.dicer import Dice, scp_doc, expr
     from .scpcards import scp_cards
-    from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons
+    from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from .agent import Agent
     from ..utils.multilogging import multilogger
 except ImportError:
     from dicergirl.utils.messages import help_messages, help_message
     from dicergirl.utils.dicer import Dice, scp_doc, expr
     from dicergirl.scp.scpcards import scp_cards
-    from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons
+    from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from dicergirl.scp.agent import Agent
     from dicergirl.utils.multilogging import multilogger
 
@@ -159,7 +159,7 @@ def sra(args, event):
 
     is_base = False
     if len(args) == 1:
-        for _, alias in attrs_dict.items():
+        for alias in attrs_dict.values():
             if args[0] in alias:
                 dices = [dice for dice in inv.dices[alias[0]]]
                 to_ens = [alias[0]]
@@ -171,7 +171,7 @@ def sra(args, event):
     if not is_base and len(args) == 3:
         if args[1] in ["+", "/", "&", "*"]:
             is_validated_skill = False
-            for _, alias in attrs_dict.items():
+            for alias in attrs_dict.values():
                 if args[0] in alias:
                     dices = [dice for dice in inv.dices[alias[0]]]
                     to_ens = [alias[0]]
@@ -189,19 +189,20 @@ def sra(args, event):
         else:
             return help_messages.sra
     elif not is_base and len(args) == 1:
-        if args[0] in all_names:
+        if args[0] in all_alias:
             anb = inv.all_not_base()
-            exp = getattr(inv, anb[args[0]])[args[0]]
+            key_name = all_alias_dict[args[0]]
+            exp = getattr(inv, anb[key_name])[key_name]
             skill_only = True
-            if anb[args[0]] == "knowledge":
+            if anb[key_name] == "knowledge":
                 to_ens = ["int", "per"]
                 to_en = random.choice(to_ens)
                 dices = [dice for dice in (inv.dices[to_en])]
-            elif anb[args[0]] == "skills":
+            elif anb[key_name] == "skills":
                 to_ens = ["str", "dex"]
                 to_en = random.choice(to_ens)
                 dices = [dice for dice in (inv.dices[to_en])]
-            elif anb[args[0]] == "ability":
+            elif anb[key_name] == "ability":
                 to_ens = ["chr", "wil"]
                 to_en = random.choice(to_ens)
                 dices = [dice for dice in (inv.dices[to_en])]
@@ -271,7 +272,7 @@ def scp_en(event, args):
     
     agt = Agent().load(card_data)
 
-    for _, alias in attrs_dict.items():
+    for alias in attrs_dict.values():
         if args[0] in alias:
             to_en = alias[0]
             is_validated_skill = True

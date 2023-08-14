@@ -193,3 +193,12 @@ weapons = {
 }
 
 all_names = list(set().union(scp_attrs_dict, knowledge_data, skills_data, ability_data))
+all_alias = []
+all_alias_dict = {}
+
+for alias in dict(scp_attrs_dict, **knowledge_data, **skills_data, **ability_data).values():
+    all_alias += alias
+
+for key, alias in dict(scp_attrs_dict, **knowledge_data, **skills_data, **ability_data).items():
+    for alia in alias:
+        all_alias_dict[alia] = key

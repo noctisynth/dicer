@@ -21,7 +21,7 @@ try:
 except ValueError:
     set_package("qqguild")
 
-from .utils.utils import version
+from .utils.utils import version as __version__
 
 import logging
 import sys

@@ -13,6 +13,7 @@ __plugin_meta__ = PluginMetadata(
     homepage="https://gitee.com/unvisitor/dicer",
     supported_adapters={"~onebot.v11"},
 )
+__author__ = "fu050409"
 
 logger = multilogger(name="Dicer Girl", payload="Nonebot2")
 try:
@@ -620,7 +621,7 @@ if package == "nonebot2":
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_str(event.get_message(), begin=(".version", ".v"))
-        await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客版权所有.\nCopyright © 2011-2023 Unknown Visitor. All Rights Reserved.")
+        await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.\nCopyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.")
         return
 elif package == "qqguild":
     pass

@@ -6,10 +6,10 @@ except ImportError:
 class Help_Messages():
     def __init__(self):
         self.main = f"""欧若可骰娘 Version {version}
-此骰娘基于腾讯 QQ频道(qq-botpy)及 Nonebot2 搭建, \
-由欧若可(Oracle)提供部分算法支持.
+此骰娘基于腾讯 QQ频道(qq-botpy) 及 Nonebot2 搭建.
 最终版本由未知访客团队(Unknow Visitor, 原左旋联盟)完成.
 感谢 灵冬-老孙 提供相关技术支持.
+感谢 @Github: abrahum, 本项目中 COC 模式有部分移植了 @Github: abrahum 的 nonebot_plugin_cocdicer 项目.
 
 .help\t帮助信息
 .su\t进行超级管理员鉴权

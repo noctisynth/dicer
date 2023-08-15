@@ -135,33 +135,6 @@ def coc_dam(args, message):
     coc_cards.update(message, card)
     return r
 
-def rd0(arg: str) -> str:
-    args = arg.lower().split(" ")
-    d_str = args.pop(0).split("#")
-    try:
-        parse = d_str.pop(0)
-        d = Dice().parse(parse)
-        logger.debug(str(parse))
-        time = 1
-        if len(d_str) > 0:
-            try:
-                time = int(d_str[0])
-            except:
-                pass
-        anum: Optional[int] = None
-        if len(args) > 0:
-            try:
-                anum = int(args[0])
-            except ValueError:
-                pass
-        r = expr(d, anum)
-        for _ in range(time-1):
-            r += "\n"
-            r += expr(d, anum)
-        return r
-    except ValueError:
-        return help_messages.r
-
 def ra(args, event):
     if len(args) == 0:
         return help_message("ra")

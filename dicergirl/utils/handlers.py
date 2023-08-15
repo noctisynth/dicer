@@ -1,3 +1,4 @@
+from typing import Optional
 try:
     from ..utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
     from ..coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
@@ -6,6 +7,7 @@ try:
     from ..dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from .. import coc, scp, dnd
     from ..utils.messages import help_messages
+    from ..utils.dicer import Dice, expr
 except ImportError:
     from dicergirl.utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
     from dicergirl.coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
@@ -14,6 +16,7 @@ except ImportError:
     from dicergirl.dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from dicergirl import coc, scp, dnd
     from dicergirl.utils.messages import help_messages
+    from dicergirl.utils.dicer import Dice, expr
 
 def __set_plus_format(args: list):
     while True:
@@ -219,3 +222,32 @@ def del_handler(message, args, at, mode=None):
     if not r:
         r.append(help_messages.del_)
     return r
+
+def roll(args: str) -> str:
+    time = 1
+    if args[0] == "#":
+        if len(args) == 1:
+            return "[Oracle] 参数错误, `#`提示符后应当跟随整型数."
+
+        try:
+            time = int(args[1])
+        except ValueError:
+            return "[Oracle] 参数错误, `#`提示符后应当跟随整型数."
+
+        args = args[2:]
+
+    if len(args) > 0:
+        if args[0] == "d":
+            args = ["1" + args[0] + args[1]] + args[2:]
+        elif args[1] == "d":
+            args = [args[0] + args[1] + args[2]]
+
+    try:
+        d = Dice(args[0])
+        r = expr(d, None)
+        for _ in range(time-1):
+            r += "\n"
+            r += expr(d, None)
+        return r
+    except ValueError:
+        return help_messages.r

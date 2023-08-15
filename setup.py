@@ -31,7 +31,8 @@ setuptools.setup(
         'watchdog',
         'loguru',
         'pyyaml',
-        'openai'
+        'openai',
+        'multilogging'
     ],
     python_requires=">=3",
 )

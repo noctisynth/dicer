@@ -13,7 +13,7 @@ __plugin_meta__ = PluginMetadata(
     homepage="https://gitee.com/unvisitor/dicer",
     supported_adapters={"~onebot.v11"},
 )
-__author__ = "fu050409"
+__author__ = "苏向夜 <fu050409@163.com>"
 
 logger = multilogger(name="Dicer Girl", payload="Nonebot2")
 try:
@@ -37,7 +37,7 @@ package = get_package()
 if package == "nonebot2":
     from .coc.investigator import Investigator
     from .coc.coccards import coc_cards, coc_cache_cards
-    from .coc.cocutils import sc, st, at, coc_dam, coc_en, rd0, ra, ti, li, rb, rp
+    from .coc.cocutils import sc, st, at, coc_dam, coc_en, ra, ti, li, rb, rp
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
@@ -50,7 +50,7 @@ if package == "nonebot2":
     from .utils.decorators import translate_punctuation
     from .utils.messages import help_message, version
     from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
-    from .utils.handlers import show_handler, set_handler, del_handler
+    from .utils.handlers import show_handler, set_handler, del_handler, roll
     from .utils.chat import chat
 
     from nonebot.rule import Rule
@@ -539,7 +539,7 @@ if package == "nonebot2":
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         args = format_str(event.get_message(), begin=".rh")
         await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
-        await bot.send_private_msg(user_id=event.get_user_id(), message=rd0(args))
+        await bot.send_private_msg(user_id=event.get_user_id(), message=roll(args))
 
     @rhacommand.handle()
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -548,25 +548,23 @@ if package == "nonebot2":
         await bot.send_private_msg(user_id=event.get_user_id(), message=ra(args, event))
 
     @rcommand.handle()
-    async def rdcommandhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=".r")
+    async def rollhandler(matcher: Matcher, event: GroupMessageEvent):
+        args = format_msg(event.get_message(), begin=(".r", ".roll"))
         if not args:
-            await matcher.send(rd0(args))
+            await matcher.send(roll(["1d100"]))
             return
 
         if args[0] == "b":
-            args = args[1:]
-            await matcher.send(rb(args))
+            await matcher.send(rb(args[1:]))
             return
         elif args[0] == "p":
-            args = args[1:]
-            await matcher.send(rp(args))
+            await matcher.send(rp(args[1:]))
             return
 
-        try:
-            await matcher.send(rd0(args))
-        except:
-            await matcher.send(help_message("r"))
+        #try:
+        await matcher.send(roll(args))
+        #except:
+        #    await matcher.send(help_message("r"))
 
 
     @ticommand.handle()

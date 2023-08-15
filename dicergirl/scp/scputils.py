@@ -20,6 +20,7 @@ logger = multilogger(name="Dicer Girl", payload="SCPUtil")
 def at(args, event):
     card = scp_cards.get(event)
     agt = Agent().load(card)
+    all_dices = []
 
     if not args:
         dices = [dice for dice in agt.dices["str"]]

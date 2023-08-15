@@ -17,6 +17,7 @@ class Agent(object):
         self.hp = 0
         self.enp = 0
         self.rep = 0
+        self.ach = 0
         self.dices = {}
         self.en = {}
         self.money = 200
@@ -67,7 +68,23 @@ class Agent(object):
         self.reset_enp()
         self.reset_p()
         self.reset_rep()
-    
+
+    def reset_card(self):
+        self.reset()
+        self.money = 200
+        self.agentclass = "E"
+        self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
+        self.skills = {skill: 0 for skill in skills_data.keys()}
+        self.ability = {ability: 0 for ability in ability_data.keys()}
+        self.p = {
+            "knowledge": 17,
+            "skills": 14,
+            "ability": 10
+        }
+        self.tools = {}
+        self.ach = 0
+        self.level = 1
+
     def reset_hp(self):
         base = 10
         for d in self.dices["hth"]:

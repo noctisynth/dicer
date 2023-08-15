@@ -165,12 +165,12 @@ def scp_doc(result, difficulty, encourage=None, agent=None, great=False):
 
     r = f"事件难度: {difficulty}\n"
 
-    if difficulty > 25:
-        r += f"检定数据: {random.randint(1, 25)}"
+    if difficulty > 25 and result <= difficulty:
+        r += f"检定数据: {result}\n"
         r += f"检定结果: 致命失败.\n"
         r += f"检定结论: {agent} 在试图挑战数学、挑战科学、挑战真理, 尝试达成一个不可能事件, {agent} 毫无疑问获得了 致命失败."
         return r
-    
+
     if encourage:
         r += f"肾上腺素: {encourage}\n"
         r += f"检定数据: {result}+{encourage}\n"

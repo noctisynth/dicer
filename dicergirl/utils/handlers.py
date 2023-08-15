@@ -240,7 +240,7 @@ def roll(args: str) -> str:
         if args[0] == "d":
             args = ["1" + args[0] + args[1]] + args[2:]
         elif args[1] == "d":
-            args = [args[0] + args[1] + args[2]]
+            args = [''.join(args)]
 
     try:
         d = Dice(args[0])

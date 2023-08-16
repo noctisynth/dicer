@@ -2,6 +2,10 @@
 from functools import wraps
 from typing import Union
 
+try:
+    from .settings import get_package
+except ImportError:
+    from dicergirl.utils.settings import get_package
 import re
 
 def translate_punctuation(string):
@@ -35,20 +39,21 @@ class Commands:
     def __call__(self, func):
         @wraps(func)
         async def decorated(*args, **kwargs):
-            api = kwargs["api"]
-            message = kwargs["message"]
-            content = re.sub(self.regex, "", translate_punctuation(message.content.lower())).strip(" ")
+            print(get_package())
+            if get_package() == "nonebot2":
+                kwargs["begin"] = self.commands
+                return await func(*args, **kwargs)
+
+            content = re.sub(self.regex, "", translate_punctuation(kwargs["message"].content.lower())).strip(" ")
             if content.startswith("/"):
                 content = "." + content[1:]
-            message.content = content
+            kwargs["message"].content = content
             if isinstance(self.commands, tuple):
                 for command in self.commands:
                     if command in content:
-                        params = content.split(command)[1].strip()
-                        return await func(api=api, message=message, params=params)
+                        return await func(*args, **kwargs)
             elif self.commands in content:
-                params = content.split(self.commands)[1].strip()
-                return await func(api=api, message=message, params=params)
+                return await func(*args, **kwargs)
             else:
                 return False
 

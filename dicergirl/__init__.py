@@ -49,7 +49,7 @@ if package == "nonebot2":
     from .dnd.dndcards import dnd_cards, dnd_cache_cards
     from .dnd.dndutils import dra
 
-    from .utils.decorators import translate_punctuation
+    from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
     from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
     from .utils.handlers import show_handler, set_handler, del_handler, roll
@@ -60,7 +60,6 @@ if package == "nonebot2":
     from nonebot.plugin import on_startswith, on_message
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
-    from nonebot.adapters.onebot.v12 import Bot as V12Bot
     from nonebot.consts import STARTSWITH_KEY
 
     if driver._adapters.get("OneBot V12"):
@@ -111,8 +110,11 @@ if package == "nonebot2":
     def on_startswith(commands, priority=0, block=True):
         if isinstance(commands, str):
             commands = (commands, )
-        
-        return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+
+        if get_package() == "nonebot2":
+            return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+        elif get_package() == "qqguild":
+            return Commands(name=commands)
 
     testcommand = on_startswith(".test", priority=2, block=True)
     debugcommand = on_startswith(".debug", priority=2, block=True)

@@ -5,25 +5,27 @@ from botpy.logging import get_logger
 from pathlib import Path
 
 from utils.settings import set_package, get_package
+from multilogging import multilogger
 set_package("qqguild")
 
-from dicergirl.coc.investigator import Investigator
-from dicergirl.coc.coccards import cards, cache_cards, sa_handler
-from dicergirl.coc.cocutils import sc, st, at, dam, en, rd0, ra, ti, li, rb, rp
+from coc.investigator import Investigator
+from coc.coccards import coc_cards, coc_cache_cards
+from coc.cocutils import sc, st, at, coc_dam, coc_en, ra, ti, li, rb, rp
 
-from dicergirl.scp.agent import Agent
-from dicergirl.scp.scpcards import scp_cards, scp_cache_cards
-from dicergirl.scp.scputils import sra, scp_dam, at as sat
+from scp.agent import Agent
+from scp.scpcards import scp_cards, scp_cache_cards
+from scp.scputils import sra, scp_dam, scp_en, at as sat, deal, begin
+from scp.attributes import all_alias_dict
 
-from dicergirl.dnd.adventurer import Adventurer
-from dicergirl.dnd.dndcards import dnd_cards, dnd_cache_cards
-from dicergirl.dnd.dndutils import dra
+from dnd.adventurer import Adventurer
+from dnd.dndcards import dnd_cards, dnd_cache_cards
+from dnd.dndutils import dra
 
-from dicergirl.utils.decorators import Commands
-from dicergirl.utils.messages import help_message, version
-from dicergirl.utils.utils import logger, init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes
-from dicergirl.utils.handlers import scp_set_handler, scp_show_handler, scp_del_handler, coc_set_handler, coc_show_handler, coc_del_handler, dnd_set_handler, dnd_show_handler, dnd_del_handler
-from dicergirl.utils.chat import chat
+from utils.decorators import Commands, translate_punctuation
+from utils.messages import help_message, version
+from utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
+from utils.handlers import show_handler, set_handler, del_handler, roll
+from utils.chat import chat
 
 import botpy
 import logging
@@ -34,6 +36,7 @@ current_dir = Path(__file__).resolve().parent
 config = get_config()
 mode = "scp"
 
+logger = multilogger(name="Dicer Girl", payload="QQGuild")
 get_logger().setLevel(logging.CRITICAL)
 logger.remove()
 logger.add(

@@ -28,6 +28,7 @@ import logging
 import sys
 import random
 import re
+import asyncio
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -41,7 +42,7 @@ if package == "nonebot2":
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal
+    from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal, begin
     from .scp.attributes import all_alias_dict
 
     from .dnd.adventurer import Adventurer
@@ -306,7 +307,12 @@ if package == "nonebot2":
             qid = ""
 
         if len(args) != 0:
-            if args[0] in ["reset", "r"]:
+            if args[0] in ["begin", "start"]:
+                for des in begin():
+                    await matcher.send(des)
+                    await asyncio.sleep(2)
+                return
+            elif args[0] in ["reset", "r"]:
                 if not is_super_user(event):
                     await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
                     return

@@ -52,7 +52,9 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0."""
         self.coc = """.coc Optional[str: age]\t完成 COC 人物作成
 \tage: 调查员年龄(可选参数)
 \t- 值得注意的是, 调查员的年龄与调查员的外貌、教育值相关."""
-        self.scp = """.scp Optional[reset|deal|upgrade]\t完成 SCP 人物卡作成
+        self.scp = """.scp Optional[begin|reset|deal|upgrade]\t完成 SCP 人物卡作成
+\tbegin: 展示基金会基本介绍
+\t\t.scp begin
 \treset Optional[hp|p|enp|rep|card]: 重置人物卡
 \t- 无参数的`.scp reset`指令会重置人物所有附加属性, 包括生命值、熟练值、激励点和声望, 但不会改变已升级的技能和特工等级、类别.
 \t\thp: 重置人物卡生命值为最大生命值

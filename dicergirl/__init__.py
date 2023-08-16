@@ -28,6 +28,7 @@ import logging
 import sys
 import random
 import re
+import asyncio
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -41,14 +42,14 @@ if package == "nonebot2":
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal
+    from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal, begin
     from .scp.attributes import all_alias_dict
 
     from .dnd.adventurer import Adventurer
     from .dnd.dndcards import dnd_cards, dnd_cache_cards
     from .dnd.dndutils import dra
 
-    from .utils.decorators import translate_punctuation
+    from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
     from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
     from .utils.handlers import show_handler, set_handler, del_handler, roll
@@ -59,7 +60,6 @@ if package == "nonebot2":
     from nonebot.plugin import on_startswith, on_message
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
-    from nonebot.adapters.onebot.v12 import Bot as V12Bot
     from nonebot.consts import STARTSWITH_KEY
 
     if driver._adapters.get("OneBot V12"):
@@ -110,8 +110,11 @@ if package == "nonebot2":
     def on_startswith(commands, priority=0, block=True):
         if isinstance(commands, str):
             commands = (commands, )
-        
-        return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+
+        if get_package() == "nonebot2":
+            return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+        elif get_package() == "qqguild":
+            return Commands(name=commands)
 
     testcommand = on_startswith(".test", priority=2, block=True)
     debugcommand = on_startswith(".debug", priority=2, block=True)
@@ -131,7 +134,7 @@ if package == "nonebot2":
     racommand = on_startswith(".ra", priority=2, block=True)
     rhcommand = on_startswith(".rh", priority=2, block=True)
     rhacommand = on_startswith(".rha", priority=1, block=True)
-    rcommand = on_startswith((".r", ".roll"), priority=3, block=True)
+    rollcommand = on_startswith((".r", ".roll"), priority=3, block=True)
     ticommand = on_startswith(".ti", priority=2, block=True)
     licommand = on_startswith(".li", priority=2, block=True)
     sccommand = on_startswith(".sc", priority=2, block=True)
@@ -157,7 +160,7 @@ if package == "nonebot2":
         logger.success("欧若可骰娘初始化完毕.")
 
     @testcommand.handle()
-    async def testhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def testhandler(matcher: Matcher, event: MessageEvent):
         if not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行测试指令.")
             return
@@ -177,7 +180,7 @@ if package == "nonebot2":
 
 
     @debugcommand.handle()
-    async def debughandler(matcher: Matcher, event: GroupMessageEvent):
+    async def debughandler(matcher: Matcher, event: MessageEvent):
         global DEBUG
         args = format_msg(event.get_message(), begin=".debug")
         if not is_super_user(event):
@@ -223,7 +226,7 @@ if package == "nonebot2":
             await matcher.send("[Oracle] 错误, 我无法解析你的指令.")
 
     @superusercommand.handle()
-    async def superuser_handler(matcher: Matcher, event: GroupMessageEvent):
+    async def superuser_handler(matcher: Matcher, event: MessageEvent):
         args = format_str(event.get_message(), begin=(".su", ".sudo"))
         arg = list(filter(None, args.split(" ")))
 
@@ -306,7 +309,12 @@ if package == "nonebot2":
             qid = ""
 
         if len(args) != 0:
-            if args[0] in ["reset", "r"]:
+            if args[0] in ["begin", "start"]:
+                for des in begin():
+                    await matcher.send(des)
+                    await asyncio.sleep(2)
+                return
+            elif args[0] in ["reset", "r"]:
                 if not is_super_user(event):
                     await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
                     return
@@ -350,21 +358,21 @@ if package == "nonebot2":
                         return
 
                     required = int(up * (up + 1) / 2 - level * (level + 1) / 2)
-                    if agt.p[key_name] < required:
+                    if agt.p[anb[key_name]] < required:
                         await matcher.send(f"[Oracle] 你的熟练值不足以支撑你将 {args[1]} 提升到 {up} 级.")
                         return
 
-                    agt.p[key_name] -= required
+                    agt.p[anb[key_name]] -= required
 
                     flt = random.randint(1, 10)
 
                     if flt == 10:
                         flt = 0
 
-                    oldattr[args[1]] = float(up) + flt/10
-                    setattr(agt, anb[args[1]], oldattr)
+                    oldattr[key_name] = float(up) + flt/10
+                    setattr(agt, anb[key_name], oldattr)
                     scp_cards.update(event, agt.__dict__, qid=qid, save=True)
-                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {args[2]} 级.\n该技能的熟练度为 {oldattr[key_name]}.")
+                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {up} 级.\n该技能的熟练度为 {oldattr[key_name]}.")
                     return
                 else:
                     await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")
@@ -433,7 +441,7 @@ if package == "nonebot2":
 
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=".set")
+        args = format_msg(event.get_message(), begin=(".set", ".st"))
         at = get_mentions(event)
 
         if at and not is_super_user(event):
@@ -451,7 +459,7 @@ if package == "nonebot2":
 
 
     @helpcommand.handle()
-    async def rdhelphandler(matcher: Matcher, event: GroupMessageEvent):
+    async def rdhelphandler(matcher: Matcher, event: MessageEvent):
         args = format_msg(str(event.get_message()), begin=(".help", ".h"))
         if args:
             arg = args[0]
@@ -462,7 +470,7 @@ if package == "nonebot2":
 
 
     @modecommand.handle()
-    async def modehandler(matcher: Matcher, event: GroupMessageEvent):
+    async def modehandler(matcher: Matcher, event: MessageEvent):
         global mode
         args = format_msg(event.get_message(), begin=(".mode", ".m"))
         if args:
@@ -507,7 +515,6 @@ if package == "nonebot2":
 
         await matcher.send(sd)
 
-
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".en")
@@ -549,11 +556,11 @@ if package == "nonebot2":
         await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
         await bot.send_private_msg(user_id=event.get_user_id(), message=ra(args, event))
 
-    @rcommand.handle()
-    async def rollhandler(matcher: Matcher, event: GroupMessageEvent):
+    @rollcommand.handle()
+    async def rollhandler(matcher: Matcher, event: MessageEvent):
         args = format_msg(event.get_message(), begin=(".r", ".roll"))
         if not args:
-            await matcher.send(roll(["1d100"]))
+            await matcher.send(roll(["1", "d", "100"]))
             return
 
         if args[0] == "b":
@@ -563,10 +570,10 @@ if package == "nonebot2":
             await matcher.send(rp(args[1:]))
             return
 
-        #try:
-        await matcher.send(roll(args))
-        #except:
-        #    await matcher.send(help_message("r"))
+        try:
+            await matcher.send(roll(args))
+        except:
+            await matcher.send(help_message("r"))
 
 
     @ticommand.handle()
@@ -610,7 +617,7 @@ if package == "nonebot2":
                 await matcher.send(msg)
 
     @chatcommand.handle()
-    async def chathandler(matcher: Matcher, event: GroupMessageEvent):
+    async def chathandler(matcher: Matcher, event: MessageEvent):
         args = format_str(event.get_message(), begin=".chat")
         if not args:
             await matcher.send("[Oracle] 空消息是不被允许的.")
@@ -619,7 +626,7 @@ if package == "nonebot2":
 
 
     @versioncommand.handle()
-    async def versionhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def versionhandler(matcher: Matcher, event: MessageEvent):
         args = format_str(event.get_message(), begin=(".version", ".v"))
         await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.\nCopyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.")
         return

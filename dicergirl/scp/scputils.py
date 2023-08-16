@@ -287,3 +287,19 @@ def scp_en(event, args):
     scp_cards.update(event, agt.__dict__, save=True)
 
     return f"[Oracle] 你的 {args[0]} 受到了 {en} 点激励."
+
+def begin():
+    reply = []
+    reply.append("人类到如今已经繁衍了 250000 年, 只有最近的4000 年是有意义的.")
+    reply.append("所以, 我们在将近 250000 年中在干什么? ")
+    reply.append("我们躲在山洞中, 围坐在小小的篝火边, 畏惧那些我们不懂得的事物——那些关于太阳如何升起的解释, 那些人头鸟身的怪物, 那些有生命的石头.")
+    reply.append("所以我们称他们为“神”和“恶魔”, 并向他们祈求宽恕和祈祷拯救. ")
+    reply.append("之后, 他们的数量在减少, 我们的数量在增加.")
+    reply.append("当我们恐惧的事物越来越少, 我们开始更理智的看待这个世界.")
+    reply.append("然而, 不能解释的事物并没有消失, 就好像宇宙故意要表现出荒谬与不可思议一样.")
+    reply.append("人类不能再生活在恐惧中.")
+    reply.append("没有东西能保护我们, 我们必须保护我们自己.")
+    reply.append("当其他人在阳光下生活时, 我们必须在阴影中和它们战斗, 并防止它们暴露在大众眼中, 这样其他人才能生活在一个理智的, 普通的世界中.")
+    reply.append("我们控制, 我们收容, 我们保护.")
+    reply.append("——The Administrator")
+    return reply

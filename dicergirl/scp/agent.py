@@ -218,13 +218,13 @@ class Agent(object):
         return self.skills_output()
 
     def out_knowledge(self):
-        return self.__skill_output_format("知识", self.knowledge.items()).strip("\n") if self.knowledge else "%s 当前无任何知识数据。" % self.name
+        return self.__skill_output_format("知识", self.knowledge.items()).strip("\n") if self.knowledge else "%s 当前无任何知识数据." % self.name
 
     def out_skills(self):
-        return self.__skill_output_format("技能", self.skills.items()).strip("\n") if self.skills else "%s 当前无任何能力数据。" % self.name
+        return self.__skill_output_format("技能", self.skills.items()).strip("\n") if self.skills else "%s 当前无任何能力数据." % self.name
 
     def out_ability(self):
-        return self.__skill_output_format("能力", self.ability.items()).strip("\n") if self.ability else "%s 当前无任何能力数据。" % self.name
+        return self.__skill_output_format("能力", self.ability.items()).strip("\n") if self.ability else "%s 当前无任何能力数据." % self.name
 
     def out_hp(self):
         return "当前生命值: %d/%d" % (self.hp, self.hp_max)

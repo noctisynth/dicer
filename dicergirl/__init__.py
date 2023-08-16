@@ -350,21 +350,21 @@ if package == "nonebot2":
                         return
 
                     required = int(up * (up + 1) / 2 - level * (level + 1) / 2)
-                    if agt.p[key_name] < required:
+                    if agt.p[anb[key_name]] < required:
                         await matcher.send(f"[Oracle] 你的熟练值不足以支撑你将 {args[1]} 提升到 {up} 级.")
                         return
 
-                    agt.p[key_name] -= required
+                    agt.p[anb[key_name]] -= required
 
                     flt = random.randint(1, 10)
 
                     if flt == 10:
                         flt = 0
 
-                    oldattr[args[1]] = float(up) + flt/10
-                    setattr(agt, anb[args[1]], oldattr)
+                    oldattr[key_name] = float(up) + flt/10
+                    setattr(agt, anb[key_name], oldattr)
                     scp_cards.update(event, agt.__dict__, qid=qid, save=True)
-                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {args[2]} 级.\n该技能的熟练度为 {oldattr[key_name]}.")
+                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {up} 级.\n该技能的熟练度为 {oldattr[key_name]}.")
                     return
                 else:
                     await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")
@@ -433,7 +433,7 @@ if package == "nonebot2":
 
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=".set")
+        args = format_msg(event.get_message(), begin=(".set", ".st"))
         at = get_mentions(event)
 
         if at and not is_super_user(event):

@@ -553,7 +553,7 @@ if package == "nonebot2":
     async def rollhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=(".r", ".roll"))
         if not args:
-            await matcher.send(roll(["1d100"]))
+            await matcher.send(roll(["1", "d", "100"]))
             return
 
         if args[0] == "b":
@@ -563,10 +563,10 @@ if package == "nonebot2":
             await matcher.send(rp(args[1:]))
             return
 
-        #try:
-        await matcher.send(roll(args))
-        #except:
-        #    await matcher.send(help_message("r"))
+        try:
+            await matcher.send(roll(args))
+        except:
+            await matcher.send(help_message("r"))
 
 
     @ticommand.handle()

@@ -238,12 +238,12 @@ def roll(args: str) -> str:
 
     if len(args) > 0:
         if args[0] == "d":
-            args = ["1" + args[0] + args[1]] + args[2:]
+            args = "1" + ''.join(args)
         elif args[1] == "d":
-            args = [''.join(args)]
+            args = ''.join(args)
 
     try:
-        d = Dice(args[0])
+        d = Dice(args)
         r = expr(d, None)
         for _ in range(time-1):
             r += "\n"

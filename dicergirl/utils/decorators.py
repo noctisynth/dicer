@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from functools import wraps
 from typing import Union
-
 try:
     from .settings import get_package
 except ImportError:
     from dicergirl.utils.settings import get_package
+
 import re
+
+qqguild_handlers = []
 
 def translate_punctuation(string):
     punctuation_mapping = {
@@ -35,11 +37,11 @@ class Commands:
     def __init__(self, name: Union[tuple, str]):
         self.commands = name
         self.regex = "[<](.*?)[>]"
-
-    def __call__(self, func):
+    
+    def _handle(self, func):
+        qqguild_handlers.append(func)
         @wraps(func)
         async def decorated(*args, **kwargs):
-            print(get_package())
             if get_package() == "nonebot2":
                 kwargs["begin"] = self.commands
                 return await func(*args, **kwargs)
@@ -56,8 +58,10 @@ class Commands:
                 return await func(*args, **kwargs)
             else:
                 return False
-
         return decorated
+
+    def handle(self):
+        return self._handle
 
 if __name__ == "__main__":
     chinese_string = "你好，世界！这是一个示例；请问：你是谁？"

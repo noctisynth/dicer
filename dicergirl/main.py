@@ -1,9 +1,6 @@
 from botpy.message import Message
-from botpy.types.message import MarkdownPayload
-from botpy.api import BotAPI
 from botpy.logging import get_logger
 from pathlib import Path
-
 from utils.settings import set_package, get_package
 from multilogging import multilogger
 set_package("qqguild")
@@ -30,118 +27,256 @@ from utils.chat import chat
 import botpy
 import logging
 import sys
+import logging
+import sys
+import random
+import re
+import asyncio
+import nonebot
+
+logger = multilogger(name="Dicer Girl", payload="Nonebot2")
+try:
+    driver = nonebot.get_driver()
+    set_package("nonebot2")
+    from nonebot.rule import Rule
+    from nonebot.matcher import Matcher
+    from nonebot.plugin import on_startswith, on_message
+    from nonebot.adapters import Bot as Bot
+    from nonebot.adapters.onebot.v11 import Bot as V11Bot
+    from nonebot.consts import STARTSWITH_KEY
+    if driver._adapters.get("OneBot V12"):
+        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent
+    else:
+        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+except ValueError:
+    set_package("qqguild")
+    class GroupMessageEvent:
+        ...
+    class Matcher:
+        ...
+    class V11Bot:
+        ...
+    class Bot:
+        ...
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
-config = get_config()
 mode = "scp"
-
-logger = multilogger(name="Dicer Girl", payload="QQGuild")
-get_logger().setLevel(logging.CRITICAL)
-logger.remove()
-logger.add(
-    sys.stdout,
-    level = "INFO"
-)
 package = get_package()
+config = get_config()
 
-@Commands(name=(".test"))
-async def testhandler(api: BotAPI, message: Message, params=None):
-    if not is_super_user(message):
-        await message.reply(content="[Oracle] 权限不足, 拒绝执行指令.")
-        return True
-    logger.debug("发送消息:" + str(message.content))
-    logger.debug(message.__repr__())
-    msg = format_msg(message)
+class StartswithRule:
+    __slots__ = ("msg", "ignorecase")
+
+    def __init__(self, msg, ignorecase=False):
+        self.msg = msg
+        self.ignorecase = ignorecase
+
+    def __repr__(self) -> str:
+        return f"Startswith(msg={self.msg}, ignorecase={self.ignorecase})"
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, StartswithRule)
+            and frozenset(self.msg) == frozenset(other.msg)
+            and self.ignorecase == other.ignorecase
+        )
+
+    def __hash__(self) -> int:
+        return hash((frozenset(self.msg), self.ignorecase))
+
+    async def __call__(self, event, state) -> bool:
+        try:
+            text = translate_punctuation(event.get_plaintext())
+        except Exception:
+            return False
+        if match := re.match(
+            f"^(?:{'|'.join(re.escape(prefix) for prefix in self.msg)})",
+            text,
+            re.IGNORECASE if self.ignorecase else 0,
+        ):
+            state[STARTSWITH_KEY] = match.group()
+            return True
+        return False
+
+def startswith(msg, ignorecase=True):
+    if isinstance(msg, str):
+        msg = (msg,)
+
+    return Rule(StartswithRule(msg, ignorecase))
+
+def on_startswith(commands, priority=0, block=True):
+    if isinstance(commands, str):
+        commands = (commands, )
+
+    if get_package() == "nonebot2":
+        return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+    elif get_package() == "qqguild":
+        return Commands(name=commands)
+
+testcommand = on_startswith(".test", priority=2, block=True)
+debugcommand = on_startswith(".debug", priority=2, block=True)
+superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
+botcommand = on_startswith(".bot", priority=1, block=True)
+coccommand = on_startswith(".coc", priority=1, block=True)
+scpcommand = on_startswith(".scp", priority=1, block=True)
+dndcommand = on_startswith(".dnd", priority=1, block=True)
+showcommand = on_startswith((".show", ".display"), priority=2, block=True)
+setcommand = on_startswith((".set", ".st"), priority=2, block=True)
+helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
+modecommand = on_startswith((".mode", ".m"), priority=2, block=True)
+stcommand = on_startswith(".sht", priority=2, block=True)
+attackcommand = on_startswith((".at", ".attack"), priority=2, block=True)
+damcommand = on_startswith((".dam", ".damage"), priority=2, block=True)
+encommand = on_startswith((".en", ".encourage"), priority=2, block=True)
+racommand = on_startswith(".ra", priority=2, block=True)
+rhcommand = on_startswith(".rh", priority=2, block=True)
+rhacommand = on_startswith(".rha", priority=1, block=True)
+rcommand = on_startswith((".r", ".roll"), priority=3, block=True)
+ticommand = on_startswith(".ti", priority=2, block=True)
+licommand = on_startswith(".li", priority=2, block=True)
+sccommand = on_startswith(".sc", priority=2, block=True)
+delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
+chatcommand = on_startswith(".chat", priority=2, block=True)
+versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
+
+if get_package() == "nonebot2":
+    @driver.on_startup
+    async def _():
+        global DEBUG
+        logger.info("欧若可骰娘初始化中...")
+        if DEBUG:
+            logging.getLogger().setLevel(logging.DEBUG)
+            logger.remove()
+            logger.add(
+                sys.stdout,
+                level = "DEBUG"
+            )
+            logger.info("DEBUG 模式已启动.")
+        init()
+        coc_cards.load()
+        scp_cards.load()
+        logger.success("欧若可骰娘初始化完毕.")
+
+@testcommand.handle()
+async def testhandler(matcher: Matcher, event: GroupMessageEvent):
+    if not is_super_user(event):
+        await matcher.send("[Oracle] 权限不足, 拒绝执行测试指令.")
+        return
+
+    logger.info("收到消息:" + str(event.get_message()))
+    msg = format_msg(event.get_message(), begin=".test")
+
     if not msg:
         msg = "[]"
-    if msg[-1] == "markdown":
-        mp = MarkdownPayload(content="#Markdown 消息测试")
-        await api.post_message(channel_id=message.channel_id, msg_id=message.id, markdown=mp)
-        return True
-    await message.reply(content=str(msg))
-    return True
 
-@Commands(name=(".debug"))
-async def debughandler(api: BotAPI, message: Message, params=None):
+    if msg[-1] == "markdown":
+        mp = ""
+        await matcher.send(group_id=event.group_id, message=mp)
+        return
+
+    await matcher.finish(str(msg))
+
+
+@debugcommand.handle()
+async def debughandler(matcher: Matcher, event: GroupMessageEvent):
     global DEBUG
-    args = format_msg(message, begin=".debug")
-    if not is_super_user(message):
-        await message.reply(content="[Oracle] 权限不足, 拒绝执行指令.")
-        return True
+    args = format_msg(event.get_message(), begin=".debug")
+    if not is_super_user(event):
+        await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+        return
 
     if args:
         logger.debug(args)
         if args[0] == "off":
             DEBUG = False
-            get_logger().setLevel(logging.INFO)
+            logging.getLogger().setLevel(logging.INFO)
             logger.remove()
             logger.add(
                 sys.stdout,
                 level = "INFO"
             )
             logger.info("[cocdicer] 输出等级设置为 INFO.")
-            await message.reply(content="[Oracle] DEBUG 模式已关闭.")
-            return True
+            await matcher.send("[Oracle] DEBUG 模式已关闭.")
+            return
     else:
         DEBUG = True
-        get_logger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
         logger.remove()
         logger.add(
             sys.stdout,
             level = "INFO"
         )
         logger.info("[cocdicer] 输出等级设置为 DEBUG.")
-        await message.reply(content="[Oracle] DEBUG 模式已启动.")
-        return True
+        await matcher.send("[Oracle] DEBUG 模式已启动.")
+        return
+
     if args[0] == "on":
         DEBUG = True
-        get_logger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.DEBUG)
         logger.remove()
         logger.add(
             sys.stdout,
             level = "INFO"
         )
         logger.info("[cocdicer] 输出等级设置为 DEBUG.")
-        await message.reply(content="[Oracle] DEBUG 模式已启动.")
+        await matcher.send("[Oracle] DEBUG 模式已启动.")
     else:
-        await message.reply(content="[Oracle] 错误, 我无法解析你的指令.")
-    return True
+        await matcher.send("[Oracle] 错误, 我无法解析你的指令.")
 
-@Commands(name=(".su", ".sudo"))
-async def superuser_handler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=(".su", ".sudo"))
+@superusercommand.handle()
+async def superuser_handler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_str(event.get_message(), begin=(".su", ".sudo"))
     arg = list(filter(None, args.split(" ")))
 
     if len(arg) >= 1:
         if arg[0].lower() == "exit":
-            if not rm_super_user(message):
-                await message.reply(content="[Oracle] 你还不是超级管理员, 无法撤销超级管理员身份.")
-                return True
-            await message.reply(content="[Oracle] 你已撤销超级管理员身份.")
-            return True
+            if not rm_super_user(event):
+                await matcher.send("[Oracle] 你还不是超级管理员, 无法撤销超级管理员身份.")
+                return
+            await matcher.send("[Oracle] 你已撤销超级管理员身份.")
+            return
 
-    if is_super_user(message):
-        await message.reply(content="[Oracle] 你已经是超级管理员.")
-        return True
+    if is_super_user(event):
+        await matcher.send("[Oracle] 你已经是超级管理员.")
+        return
 
     if not args:
         logger.critical(f"超级令牌: {su_uuid}")
-        await message.reply(content="[Oracle] 启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
+        await matcher.send("[Oracle] 启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
     else:
         if not args == su_uuid:
-            await message.reply(content="[Oracle] 鉴权失败!")
+            await matcher.send("[Oracle] 鉴权失败!")
         else:
-            add_super_user(message)
-            await message.reply(content="[Oracle] 你取得了管理员权限.")
-    return True
-    
-@Commands(name=(".coc"))
-async def cochandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".coc")
+            add_super_user(event)
+            await matcher.send("[Oracle] 你取得了管理员权限.")
+
+@botcommand.handle()
+async def bothandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=".bot")
+    if not is_super_user(event):
+        await matcher.send("[Oracle] 你没有管理员权限, 请先执行`.su`开启权限鉴定.")
+        return
+    if len(args) == 1:
+        if args[0] in ["exit", "out", "leave"]:
+            print("退出群聊.")
+            await matcher.send("[Oracle] 欧若可离开群聊.")
+            await bot.set_group_leave(group_id=event.group_id)
+        elif args[0] in ["on", "run", "start"]:
+            await matcher.send("[Oracle] 我运行在非 systemd 平台上, 我将保持启动.")
+        elif args[0] in ["off", "down", "shutdown"]:
+            await matcher.send("[Oracle] 我运行在非 systemd 平台上, 我将保持启动.")
+        else:
+            await matcher.send("[Oracle] 错误的指令.")
+    else:
+        await matcher.send(help_message("bot"))
+
+@coccommand.handle()
+async def cochandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=".coc")
     if len(args) > 1:
         logger.info("指令错误, 驳回.")
-        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
+        await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
         return False
 
     try:
@@ -149,48 +284,118 @@ async def cochandler(api: BotAPI, message: Message, params=None):
             raise ValueError
         args = int(args[0])
     except ValueError:
-        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
+        await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
         args = 20
 
     inv = Investigator()
-    await message.reply(content=inv.age_change(args))
+    await matcher.send(inv.age_change(args))
 
     if 15 <= args and args < 90:
-        cache_cards.update(message, inv.__dict__, save=False)
-        await message.reply(content=str(inv.output()))
-    return True
+        coc_cache_cards.update(event, inv.__dict__, save=False)
+        await matcher.send(str(inv.output()))
 
-@Commands(name=(".scp"))
-async def scp_handler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".scp")
-    if len(args) > 1:
-        logger.info("指令错误, 驳回.")
-        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-        return True
+@scpcommand.handle()
+async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=".scp", zh_en=True)
+    at = get_mentions(event)
 
-    try:
-        if len(args) == 0:
-            raise ValueError
-        args = int(args[0])
-    except ValueError:
-        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-        args = 20
+    if at and not is_super_user(event):
+        return "[Oracle] 权限不足, 无法指定玩家修改人物卡."
+
+    if at:
+        qid = at[0]
+    else:
+        qid = ""
+
+    if len(args) != 0:
+        if args[0] in ["begin", "start"]:
+            for des in begin():
+                await matcher.send(des)
+                await asyncio.sleep(2)
+            return
+        elif args[0] in ["reset", "r"]:
+            if not is_super_user(event):
+                await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
+                return
+
+            agt = Agent().load(scp_cards.get(event, qid=qid))
+
+            if len(args) == 2:
+                try:
+                    exec(f"agt.reset_{args[1]}()")
+                    scp_cards.update(event, agt.__dict__, qid=qid, save=True)
+                    await matcher.send(f"[Oracle] 已重置指定人物卡属性: {args[1]}.")
+                except:
+                    await matcher.send("[Oracle] 指令看起来不存在.")
+                finally:
+                    return
+
+            agt.reset()
+            scp_cards.update(event, agt.__dict__, qid=qid, save=True)
+            await matcher.send(f"[Oracle] 人物卡 {agt.name} 属性已重置.")
+            return
+        elif args[0] in ["upgrade", "u", "up", "study", "learn"]:
+            agt = Agent().load(scp_cards.get(event, qid=qid))
+            anb = agt.all_not_base()
+
+            if args[1] in all_alias_dict.keys():
+                key_name = all_alias_dict[args[1]]
+                oldattr = getattr(agt, anb[key_name])
+                level = int(oldattr[key_name])
+
+                if len(args) <= 2:
+                    up = level + 1
+                else:
+                    try:
+                        up = int(args[2])
+                    except ValueError:
+                        await matcher.send(help_message("scp"))
+                        return
+
+                if level >= up:
+                    await matcher.send(f"[Oracle] 你的 {args[1]} 技能的等级已经是 {level} 级了.")
+                    return
+
+                required = int(up * (up + 1) / 2 - level * (level + 1) / 2)
+                if agt.p[anb[key_name]] < required:
+                    await matcher.send(f"[Oracle] 你的熟练值不足以支撑你将 {args[1]} 提升到 {up} 级.")
+                    return
+
+                agt.p[anb[key_name]] -= required
+
+                flt = random.randint(1, 10)
+
+                if flt == 10:
+                    flt = 0
+
+                oldattr[key_name] = float(up) + flt/10
+                setattr(agt, anb[key_name], oldattr)
+                scp_cards.update(event, agt.__dict__, qid=qid, save=True)
+                await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {up} 级.\n该技能的熟练度为 {oldattr[key_name]}.")
+                return
+            else:
+                await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")
+                return
+        elif args[0] in ["deal", "d", "buy", "b"]:
+            args_for_deal = args[1:]
+            await matcher.send(deal(event, args_for_deal))
+            return 
+        else:
+            await matcher.send(f"[Oracle] 指令 {args[0]} 看起来似乎不存在.")
+            return
 
     agt = Agent()
-    agt.age_check(args)
     agt.init()
-    
-    if 15 <= args and args < 90:
-        scp_cache_cards.update(message, agt.__dict__, save=False)
-        await message.reply(content=str(agt.output()))
-    return True
 
-@Commands(name=(".dnd"))
-async def dnd_handler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".dnd")
+    scp_cache_cards.update(event, agt.__dict__, save=False)
+    await matcher.send(str(agt.output()))
+
+@dndcommand.handle()
+async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=".dnd")
     if len(args) > 1:
         logger.info("指令错误, 驳回.")
-        await message.reply(content="[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
+        await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
         return True
 
     try:
@@ -198,7 +403,7 @@ async def dnd_handler(api: BotAPI, message: Message, params=None):
             raise ValueError
         args = int(args[0])
     except ValueError:
-        await message.reply(content=f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
+        await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
         args = 20
 
     adv = Adventurer()
@@ -206,230 +411,224 @@ async def dnd_handler(api: BotAPI, message: Message, params=None):
     adv.init()
     
     if adv.int[0] <= 8:
-        await message.reply(content="[Orcale] 很遗憾, 检定新的冒险者智力不足, 弱智是不允许成为冒险者的, 请重新进行车卡检定.")
+        await matcher.send("[Orcale] 很遗憾, 检定新的冒险者智力不足, 弱智是不允许成为冒险者的, 请重新进行车卡检定.")
         return True
 
     if 15 <= args and args < 90:
-        dnd_cache_cards.update(message, adv.__dict__, save=False)
-        await message.reply(content=str(adv.output()))
+        dnd_cache_cards.update(event, adv.__dict__, save=False)
+        await matcher.send(str(adv.output()))
     return True
 
-@Commands(name=(".show"))
-async def showhandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=(".show", ".display"))
-    if not args:
-        if mode in modes:
-            try:
-                sh = eval(f"{mode}_show_handler(message, args)")
-            except:
-                sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
-        else:
-            await message.reply(content="未知的跑团模式.")
-            return True
+@showcommand.handle()
+async def showhandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=(".show", ".display"))
+    at = get_mentions(event)
 
-        for msg in sh:
-            await message.reply(content=str(msg))
+    if mode in modes:
+        try:
+            sh = show_handler(event, args, at, mode=mode)
+        except Exception as error:
+            logger.exception(error)
+            sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
+    else:
+        await matcher.send("未知的跑团模式.")
         return True
 
-    if args[0] in modes:
-        args.remove(args[0])
-        sh = eval(f"{args[0]}_show_handler(message, args)")
-    else:
-        try:
-            sh = eval(f"{mode}_show_handler(message, args)")
-        except:
-            sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
-
     for msg in sh:
-        await message.reply(content=str(msg))
-    return True
+        await matcher.send(str(msg))
+    return
 
-@Commands(name=(".set"))
-async def sethandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".set")
-    if not args:
-        args.append(mode)
+@setcommand.handle()
+async def sethandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=(".set", ".st"))
+    at = get_mentions(event)
 
-    if args[0] in modes:
-        try:
-            now = args[0]
-            args.remove(args[0])
-            sh = eval(f"{now}_set_handler(message, args)")
-        except:
-            sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
-    else:
-        sh = [f"[Oracle] 错误: 未知的跑团模式."]
+    if at and not is_super_user(event):
+        await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+        return
 
-    await message.reply(content=sh)
-    return True
+    try:
+        sh = set_handler(event, args, at, mode=mode)
+    except Exception as error:
+        logger.exception(error)
+        sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
 
-@Commands(name=(".help", ".h"))
-async def rdhelphandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=(".help", ".h"))
+    await matcher.send(sh)
+    return
+
+
+@helpcommand.handle()
+async def rdhelphandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(str(event.get_message()), begin=(".help", ".h"))
     if args:
         arg = args[0]
     else:
         arg = ""
-    await message.reply(content=help_message(arg))
-    return True
+    print(arg)
+    await matcher.send(help_message(arg))
 
-@Commands(name=(".mode", ".m"))
-async def modehandler(api: BotAPI, message: Message, params=None):
+
+@modecommand.handle()
+async def modehandler(matcher: Matcher, event: GroupMessageEvent):
     global mode
-    args = format_msg(message, begin=(".mode", ".m"))
+    args = format_msg(event.get_message(), begin=(".mode", ".m"))
     if args:
         if args[0].lower() in modes:
             mode = args[0].lower()
-            await message.reply(content=f"[Oracle] 已切换到 {mode.upper()} 跑团模式.")
+            await matcher.send(f"[Oracle] 已切换到 {mode.upper()} 跑团模式.")
             return True
         else:
-            await message.reply(content="[Oracle] 未知的跑团模式, 忽略.")
-            await message.reply(content=help_message("mode"))
+            await matcher.send("[Oracle] 未知的跑团模式, 忽略.")
+            await matcher.send(help_message("mode"))
             return True
     else:
-        await message.reply(content=f"[Oracle] 当前的跑团模式为 {mode.upper()}.")
-    return True
+        await matcher.send(f"[Oracle] 当前的跑团模式为 {mode.upper()}.")
 
-@Commands(name=(".st"))
-async def stcommandhandler(api: BotAPI, message: Message, params=None):
+@stcommand.handle()
+async def stcommandhandler(matcher: Matcher, event: GroupMessageEvent):
     try:
-        await message.reply(content=st())
+        await matcher.send(st())
     except:
-        await message.reply(content=help_message("st"))
-    return True
+        await matcher.send(help_message("st"))
 
 
-@Commands(name=(".at"))
-async def attackhandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=(".at", ".attack"))
+@attackcommand.handle()
+async def attackhandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_str(event.get_message(), begin=(".at", ".attack"))
     if mode == "coc":
-        await message.reply(content=at(args, message))
+        await matcher.send(at(args, event))
     elif mode == "scp":
-        await message.reply(content=sat(args, message))
-    return True
+        await matcher.send(sat(args, event))
 
 
-@Commands(name=(".dam"))
-async def damhandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=(".dam", ".damage"))
+@damcommand.handle()
+async def damhandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=(".dam", ".damage"))
     if mode == "scp":
-        sd = scp_dam(args, message)
+        sd = scp_dam(args, event)
     elif mode == "coc":
-        sd = dam(args, message)
+        sd = coc_dam(args, event)
     else:
-        await message.reply(content="未知的跑团模式.")
-        return True
+        await matcher.send("未知的跑团模式.")
+        return
 
-    await message.reply(content=sd)
-    return True
+    await matcher.send(sd)
+
+@encommand.handle()
+async def enhandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=".en")
+    at = get_mentions(event)
+
+    if at and not is_super_user(event):
+        await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+        return
+
+    try:
+        en = eval(f"{mode}_en(event, args)")
+    except:
+        en = f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode.upper()} 不存在该指令."
+
+    await matcher.send(en)
 
 
-@Commands(name=(".en"))
-async def enhandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=".en")
-    await message.reply(content=en(args, message))
-    return True
-
-
-@Commands(name=(".ra"))
-async def rahandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".ra")
+@racommand.handle()
+async def rahandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=".ra")
     if mode in ["coc", "scp", "dnd"]:
         if mode == "scp":
-            await message.reply(content=sra(args, message))
+            await matcher.send(sra(args, event))
         elif mode == "coc":
-            await message.reply(content=ra(args, message))
+            await matcher.send(ra(args, event))
         elif mode == "dnd":
-            await message.reply(content=dra(args, message))
-    return True
+            await matcher.send(dra(args, event))
+    return
 
-@Commands(name=(".rh"))
-async def rhhandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=".rh")
-    await message.reply(content="[Oracle] 暗骰: 命运的齿轮在转动.")
-    await api.post_dms(guild_id=message.guild_id, msg_id=message.id, content=rd0(args))
+@rhcommand.handle()
+async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
+    args = format_str(event.get_message(), begin=".rh")
+    await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
+    await bot.send_private_msg(user_id=event.get_user_id(), message=roll(args))
 
-@Commands(name=(".rha"))
-async def rhahandler(api: BotAPI, message: Message, params=None):
-    args = format_msg(message, begin=".rha")
-    await message.reply(content="[Oracle] 暗骰: 命运的骰子在滚动.")
-    await api.post_dms(guild_id=message.guild_id, msg_id=message.id, content=ra(args, message))
+@rhacommand.handle()
+async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=".rha")
+    await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
+    await bot.send_private_msg(user_id=event.get_user_id(), message=ra(args, event))
 
-@Commands(name=(".r"))
-async def rdcommandhandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=".r")
+@rcommand.handle()
+async def rollhandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_msg(event.get_message(), begin=(".r", ".roll"))
+    if not args:
+        await matcher.send(roll(["1", "d", "100"]))
+        return
+
     if args[0] == "b":
-        args = args[1:]
-        await message.reply(content=rb(args))
+        await matcher.send(rb(args[1:]))
         return
-    if args[0] == "p":
-        args = args[1:]
-        await message.reply(content=rp(args))
+    elif args[0] == "p":
+        await matcher.send(rp(args[1:]))
         return
+
     try:
-        await message.reply(content=rd0(args))
+        await matcher.send(roll(args))
     except:
-        await message.reply(content=help_message("r"))
-    return True
+        await matcher.send(help_message("r"))
 
 
-@Commands(name=(".ti"))
-async def ticommandhandler(api: BotAPI, message: Message, params=None):
+@ticommand.handle()
+async def ticommandhandler(matcher: Matcher, event: GroupMessageEvent):
     try:
-        await message.reply(content=ti())
+        await matcher.send(ti())
     except:
-        await message.reply(content=help_message("ti"))
-    return True
+        await matcher.send(help_message("ti"))
 
 
-@Commands(name=(".li"))
-async def licommandhandler(api: BotAPI, message: Message, params=None):
+@licommand.handle()
+async def licommandhandler(matcher: Matcher, event: GroupMessageEvent):
     try:
-        await message.reply(content=li())
+        await matcher.send(li())
     except:
-        await message.reply(content=help_message("li"))
-    return True
+        await matcher.send(help_message("li"))
 
 
-@Commands(name=(".sc"))
-async def schandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=".sc")
-    scrs = sc(args, message)
+@sccommand.handle()
+async def schandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_str(event.get_message(), begin=".sc")
+    scrs = sc(args, event)
 
     if isinstance(scrs, list):
         for scr in scrs:
-            await message.reply(content=scr)
+            await matcher.send(scr)
     else:
-        await message.reply(content=scrs)
-    return True
+        await matcher.send(scrs)
 
-@Commands(name=(".sa"))
-async def sahandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=".sa")
-    await message.reply(content=sa_handler(message, args))
+@delcommand.handle()
+async def delhandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_str(event.get_message(), begin=(".del", ".delete"))
+    at = get_mentions(event)
 
-@Commands(name=(".del", ".delete"))
-async def delhandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=(".del", ".delete"))
+    if at and not is_super_user(event):
+        await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+        return
+
     if mode in modes:
-        for msg in eval(f"{mode}_del_handler(message, args)"):
-            await message.reply(content=msg)
-    return True
+        for msg in del_handler(event, args, at, mode=mode):
+            await matcher.send(msg)
 
-@Commands(name=(".chat"))
-async def chathandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=".chat")
+@chatcommand.handle()
+async def chathandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_str(event.get_message(), begin=".chat")
     if not args:
-        await message.reply(content="[Oracle] 空消息是不被允许的.")
-        return True
-    await message.reply(content=chat(args))
-    return True
+        await matcher.send("[Oracle] 空消息是不被允许的.")
+        return
+    await matcher.send(chat(args))
 
-@Commands(name=(".version", ".v"))
-async def versionhandler(api: BotAPI, message: Message, params=None):
-    args = format_str(message, begin=(".version", ".v"))
-    await message.reply(content=f"欧若可骰娘 版本 {version}, 未知访客版权所有.\nCopyright © 2011-2023 Unknown Visitor. All Rights Reserved.")
-    return True
+
+@versioncommand.handle()
+async def versionhandler(matcher: Matcher, event: GroupMessageEvent):
+    args = format_str(event.get_message(), begin=(".version", ".v"))
+    await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.\nCopyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.")
+    return
 
 class OracleClient(botpy.Client):
     handlers = get_handlers(__import__(__name__))
@@ -445,7 +644,7 @@ class OracleClient(botpy.Client):
             )
             logger.info("DEBUG 模式已启动.")
         init()
-        cards.load()
+        coc_cards.load()
         scp_cards.load()
         dnd_cards.load()
         logger.success("机器人启动成功, 将进行心跳维持链接.")

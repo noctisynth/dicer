@@ -281,9 +281,9 @@ def scp_en(event, args):
     
     if not is_validated_skill:
         return f"[Oracle] 不存在的基础属性 {args[0]} 无法被激励."
-    
-    card_data["enp"] -= en
-    agt.en[to_en] = en 
-    scp_cards.update(event, agt.__dict__)
+
+    agt.enp -= en
+    agt.en[to_en] = en
+    scp_cards.update(event, agt.__dict__, save=True)
 
     return f"[Oracle] 你的 {args[0]} 受到了 {en} 点激励."

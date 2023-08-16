@@ -42,6 +42,7 @@ if package == "nonebot2":
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
     from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal
+    from .scp.attributes import all_alias_dict
 
     from .dnd.adventurer import Adventurer
     from .dnd.dndcards import dnd_cards, dnd_cache_cards
@@ -330,10 +331,11 @@ if package == "nonebot2":
                 agt = Agent().load(scp_cards.get(event, qid=qid))
                 anb = agt.all_not_base()
 
-                if args[1] in anb.keys():
-                    oldattr = getattr(agt, anb[args[1]])
-                    level = int(oldattr[args[1]])
-                    
+                if args[1] in all_alias_dict.keys():
+                    key_name = all_alias_dict[args[1]]
+                    oldattr = getattr(agt, anb[key_name])
+                    level = int(oldattr[key_name])
+
                     if len(args) <= 2:
                         up = level + 1
                     else:
@@ -348,11 +350,11 @@ if package == "nonebot2":
                         return
 
                     required = int(up * (up + 1) / 2 - level * (level + 1) / 2)
-                    if agt.p[anb[args[1]]] < required:
+                    if agt.p[key_name] < required:
                         await matcher.send(f"[Oracle] 你的熟练值不足以支撑你将 {args[1]} 提升到 {up} 级.")
                         return
 
-                    agt.p[anb[args[1]]] -= required
+                    agt.p[key_name] -= required
 
                     flt = random.randint(1, 10)
 
@@ -362,7 +364,7 @@ if package == "nonebot2":
                     oldattr[args[1]] = float(up) + flt/10
                     setattr(agt, anb[args[1]], oldattr)
                     scp_cards.update(event, agt.__dict__, qid=qid, save=True)
-                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {args[2]} 级.\n该技能的熟练度为 {oldattr[args[1]]}.")
+                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {args[2]} 级.\n该技能的熟练度为 {oldattr[key_name]}.")
                     return
                 else:
                     await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")

@@ -507,7 +507,6 @@ if package == "nonebot2":
 
         await matcher.send(sd)
 
-
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".en")

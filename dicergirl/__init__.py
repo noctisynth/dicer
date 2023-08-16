@@ -134,7 +134,7 @@ if package == "nonebot2":
     racommand = on_startswith(".ra", priority=2, block=True)
     rhcommand = on_startswith(".rh", priority=2, block=True)
     rhacommand = on_startswith(".rha", priority=1, block=True)
-    rcommand = on_startswith((".r", ".roll"), priority=3, block=True)
+    rollcommand = on_startswith((".r", ".roll"), priority=3, block=True)
     ticommand = on_startswith(".ti", priority=2, block=True)
     licommand = on_startswith(".li", priority=2, block=True)
     sccommand = on_startswith(".sc", priority=2, block=True)
@@ -160,7 +160,7 @@ if package == "nonebot2":
         logger.success("欧若可骰娘初始化完毕.")
 
     @testcommand.handle()
-    async def testhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def testhandler(matcher: Matcher, event: MessageEvent):
         if not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行测试指令.")
             return
@@ -180,7 +180,7 @@ if package == "nonebot2":
 
 
     @debugcommand.handle()
-    async def debughandler(matcher: Matcher, event: GroupMessageEvent):
+    async def debughandler(matcher: Matcher, event: MessageEvent):
         global DEBUG
         args = format_msg(event.get_message(), begin=".debug")
         if not is_super_user(event):
@@ -226,7 +226,7 @@ if package == "nonebot2":
             await matcher.send("[Oracle] 错误, 我无法解析你的指令.")
 
     @superusercommand.handle()
-    async def superuser_handler(matcher: Matcher, event: GroupMessageEvent):
+    async def superuser_handler(matcher: Matcher, event: MessageEvent):
         args = format_str(event.get_message(), begin=(".su", ".sudo"))
         arg = list(filter(None, args.split(" ")))
 
@@ -459,7 +459,7 @@ if package == "nonebot2":
 
 
     @helpcommand.handle()
-    async def rdhelphandler(matcher: Matcher, event: GroupMessageEvent):
+    async def rdhelphandler(matcher: Matcher, event: MessageEvent):
         args = format_msg(str(event.get_message()), begin=(".help", ".h"))
         if args:
             arg = args[0]
@@ -470,7 +470,7 @@ if package == "nonebot2":
 
 
     @modecommand.handle()
-    async def modehandler(matcher: Matcher, event: GroupMessageEvent):
+    async def modehandler(matcher: Matcher, event: MessageEvent):
         global mode
         args = format_msg(event.get_message(), begin=(".mode", ".m"))
         if args:
@@ -556,8 +556,8 @@ if package == "nonebot2":
         await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
         await bot.send_private_msg(user_id=event.get_user_id(), message=ra(args, event))
 
-    @rcommand.handle()
-    async def rollhandler(matcher: Matcher, event: GroupMessageEvent):
+    @rollcommand.handle()
+    async def rollhandler(matcher: Matcher, event: MessageEvent):
         args = format_msg(event.get_message(), begin=(".r", ".roll"))
         if not args:
             await matcher.send(roll(["1", "d", "100"]))
@@ -617,7 +617,7 @@ if package == "nonebot2":
                 await matcher.send(msg)
 
     @chatcommand.handle()
-    async def chathandler(matcher: Matcher, event: GroupMessageEvent):
+    async def chathandler(matcher: Matcher, event: MessageEvent):
         args = format_str(event.get_message(), begin=".chat")
         if not args:
             await matcher.send("[Oracle] 空消息是不被允许的.")
@@ -626,7 +626,7 @@ if package == "nonebot2":
 
 
     @versioncommand.handle()
-    async def versionhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def versionhandler(matcher: Matcher, event: MessageEvent):
         args = format_str(event.get_message(), begin=(".version", ".v"))
         await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.\nCopyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.")
         return

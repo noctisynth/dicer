@@ -257,9 +257,9 @@ def sra(args, event):
 
     if is_skill or skill_only:
         if r.judge == 1:
-            card_data[skill_name[1]] += 0.1
+            card_data["p"][skill_name[1]] += 0.1
         elif r.judge > 1:
-            card_data[skill_name[1]] += 1
+            card_data["p"][skill_name[1]] += 1
         scp_cards.update(event, card_data)
 
     return r.detail

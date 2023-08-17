@@ -7,7 +7,7 @@ import nonebot
 
 __plugin_meta__ = PluginMetadata(
     name="欧若可骰娘",
-    description="完善的跑团机器人, 支持 COC/DND/SCP 等跑团模式.",
+    description="完善的可拓展跑团机器人, 支持 COC/DND/SCP 等跑团模式.",
     usage="安装即可使用.",
     type="application",
     homepage="https://gitee.com/unvisitor/dicer",
@@ -63,9 +63,9 @@ if package == "nonebot2":
     from nonebot.consts import STARTSWITH_KEY
 
     if driver._adapters.get("OneBot V12"):
-        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent
+        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, MessageSegment
     else:
-        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, MessageSegment
 
     class StartswithRule:
         __slots__ = ("msg", "ignorecase")

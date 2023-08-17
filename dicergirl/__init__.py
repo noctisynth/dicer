@@ -314,6 +314,14 @@ if package == "nonebot2":
                     await matcher.send(des)
                     await asyncio.sleep(2)
                 return
+            elif args[0] in ["level", "levelup", "lu"]:
+                agt = Agent().load(scp_cards.get(event, qid=qid))
+
+                if agt.ach >= 10:
+                    agt.ach -= 10
+                    agt.level += 1
+                else:
+                    ...
             elif args[0] in ["reset", "r"]:
                 if not is_super_user(event):
                     await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
@@ -537,11 +545,11 @@ if package == "nonebot2":
         args = format_msg(event.get_message(), begin=".ra")
         if mode in ["coc", "scp", "dnd"]:
             if mode == "scp":
-                await matcher.send(sra(args, event))
+                await matcher.send(str(sra(args, event)))
             elif mode == "coc":
-                await matcher.send(ra(args, event))
+                await matcher.send(str(ra(args, event)))
             elif mode == "dnd":
-                await matcher.send(dra(args, event))
+                await matcher.send(str(dra(args, event)))
         return
 
     @rhcommand.handle()

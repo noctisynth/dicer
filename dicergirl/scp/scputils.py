@@ -1,13 +1,15 @@
 try:
+    from ..utils.docimasy import expr, scp_doc
     from ..utils.messages import help_messages, help_message
-    from ..utils.dicer import Dice, scp_doc, expr
+    from ..utils.dicer import Dice
     from .scpcards import scp_cards
     from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from .agent import Agent
     from ..utils.multilogging import multilogger
 except ImportError:
+    from dicergirl.utils.docimasy import expr, scp_doc
     from dicergirl.utils.messages import help_messages, help_message
-    from dicergirl.utils.dicer import Dice, scp_doc, expr
+    from dicergirl.utils.dicer import Dice
     from dicergirl.scp.scpcards import scp_cards
     from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from dicergirl.scp.agent import Agent
@@ -49,8 +51,6 @@ def at(args, event):
         args = "".join(args)
 
         upper = {name.upper(): [tool, name] for name, tool in agt.tools.items()}
-        print(upper.keys())
-        print(args.upper())
         if not args.upper() in upper.keys():
             return f"[Oracle] 看起来该特工并未购置 {args.upper()}."
 
@@ -71,9 +71,9 @@ def deal(event, args):
             reply += f"Level {lvl+1} 准允购置的装备:"
             for weapon in weapons[lvl+1].keys():
                 reply += f"\n  {weapon}: {weapons[lvl+1][weapon]['price']}￥"
-            
+
             reply += "\n"
-        
+
         return reply
     
     allowed_upper = {}
@@ -144,7 +144,7 @@ def sra(args, event):
         return help_message("sra")
     elif len(args) > 4:
         return "[Oracle] 错误: 参数过多(最多4需要但%d给予)." % len(args)
-    
+
     try:
         difficulty = int(args[-1])
         args.remove(args[-1])

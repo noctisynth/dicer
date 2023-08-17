@@ -1,13 +1,15 @@
 from typing import Optional
 try:
+    from ..utils.docimasy import expr
     from ..utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
-    from ..utils.dicer import Dice, expr
+    from ..utils.dicer import Dice
     from ..utils.multilogging import multilogger
     from .coccards import coc_cards, coc_attrs_dict
     from .investigator import Investigator
 except ImportError:
+    from dicergirl.utils.docimasy import expr
     from dicergirl.utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
-    from dicergirl.utils.dicer import Dice, expr
+    from dicergirl.utils.dicer import Dice
     from dicergirl.utils.multilogging import multilogger
     from dicergirl.coc.coccards import coc_cards, coc_attrs_dict
     from dicergirl.coc.investigator import Investigator

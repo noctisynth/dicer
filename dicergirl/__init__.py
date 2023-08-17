@@ -306,16 +306,33 @@ if package == "nonebot2":
                 return
             toroll = int(commands["roll"])
 
+        if "name" in commands.keys():
+            name = commands["name"]
+        else:
+            name = None
+
         reply = ""
-        coc_rolls[qid] = {}
+        if qid in coc_rolls.keys():
+            rolled = len(coc_rolls[qid].keys())
+        else:
+            coc_rolls[qid] = {}
+            rolled = 0
+
         for i in range(toroll):
             inv = Investigator()
             inv.age_change(age)
-            coc_rolls[qid][i] = inv.__dict__
+
+            if name:
+                inv.name = name
+
+            coc_rolls[qid][rolled+i] = inv.__dict__
             count = inv.rollcount()
-            reply += f"天命编号: {i}\n"
+            reply += f"天命编号: {rolled+i}\n"
             reply += inv.output() + "\n"
             reply += f"共计: {count[0]}/{count[1]}\n"
+
+        if toroll == 1:
+            coc_cache_cards.update(event, inv.__dict__, save=False)
 
         reply.rstrip("\n")
         await matcher.send(reply)

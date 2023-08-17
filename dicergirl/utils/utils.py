@@ -217,7 +217,7 @@ class ShellCommand:
             else:
                 if not self.args[i].isdigit():
                     self.results[self.args[i]] = self.args[i+1]
-    
+
     def __dict__(self):
         return self.results
 

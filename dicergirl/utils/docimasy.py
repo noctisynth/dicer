@@ -73,19 +73,19 @@ def expr(dice: Dice, anum):
             docimasy += "大成功！"
             docimasy.set_judge("critical success")
         elif result <= anum // 5:
-            docimasy += f"检定值: {anum} {result}≤{anum//5}\n"
+            docimasy += f"检定值: {anum} {result}≤{anum//5}"
             docimasy += "检定结果: 极难成功."
             docimasy.set_judge("very hard success")
         elif result <= anum // 2:
-            docimasy += f"检定值: {anum} {result}≤{anum//2}\n"
+            docimasy += f"检定值: {anum} {result}≤{anum//2}"
             docimasy += "检定结果: 困难成功."
             docimasy.set_judge("hard success")
         elif result <= anum:
-            docimasy += f"检定值: {anum} {result}≤{anum}\n"
+            docimasy += f"检定值: {anum} {result}≤{anum}"
             docimasy += "检定结果: 成功."
             docimasy.set_judge("success")
         else:
-            docimasy += f"检定值: {anum} {result}>{anum}\n"
+            docimasy += f"检定值: {anum} {result}>{anum}"
             docimasy += "检定结果: 失败."
             docimasy.set_judge("fail")
     return docimasy

@@ -208,7 +208,8 @@ def del_handler(message, args, at, mode=None):
                     r.append("[Oracle] 已清空暂存人物卡数据.")
                 else:
                     r.append("[Oracle] 错误: 未知错误.")
-            r.append("[Oracle] 暂无缓存人物卡数据.")
+            else:
+                r.append("[Oracle] 暂无缓存人物卡数据.")
         elif arg == "card":
             if cards.get(message):
                 if cards.delete(message):

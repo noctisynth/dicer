@@ -320,8 +320,12 @@ if package == "nonebot2":
                 if agt.ach >= 10:
                     agt.ach -= 10
                     agt.level += 1
+                    scp_cards.update(event, inv_dict=agt.__dict__, save=True)
+                    await matcher.send(f"[Oracle] {agt.name} 特工权限提升至 {agt.level} 级.")
+                    return
                 else:
-                    ...
+                    await matcher.send(f"[Oracle] 特工 {agt.name} 功勋不足, 无法申请提升权限等级.")
+                    return
             elif args[0] in ["reset", "r"]:
                 if not is_super_user(event):
                     await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")

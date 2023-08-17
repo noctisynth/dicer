@@ -99,7 +99,7 @@ class Dice:
             self.b = int(match.group(2))
             self.db = f"{self.a}D{self.b}"
             self.dices += [f"D{self.b}"] * self.a
-        
+
         self.method = sub_match.group(2) if sub_match.group(2) else "+"
 
         if sub_match.group(3):
@@ -201,7 +201,7 @@ class Dice:
             if isinstance(result, int):
                 length += 1
                 continue
-            
+
             length += len(result)
 
         if length > 10:

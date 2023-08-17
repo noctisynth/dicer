@@ -121,7 +121,6 @@ def scp_dam(args, message):
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
 
     if card["hp"] <= 0:
-        card["hp"] = 0
         r += f", 特工 {card['name']} 已死亡."
     elif (max_hp * 0.8 <= card["hp"]) and (card["hp"] < max_hp):
         r += f", 特工 {card['name']} 具有轻微伤势."
@@ -181,6 +180,7 @@ def sra(args, event):
 
             anb = inv.all_not_base()
             if args[2] in anb.keys() and is_validated_skill:
+                skill_name = [args[2], anb[args[2]]]
                 exp = getattr(inv, anb[args[2]])[args[2]]
                 is_skill = True
             elif not is_validated_skill:
@@ -188,7 +188,7 @@ def sra(args, event):
             else:
                 return f"[Oracle] 错误: 技能、知识或能力 {args[2]} 不存在."
         else:
-            return help_messages.sra
+            return help_messages.ra
     elif not is_base and len(args) == 1:
         if args[0] in all_alias:
             anb = inv.all_not_base()
@@ -209,11 +209,12 @@ def sra(args, event):
                 dices = [dice for dice in (inv.dices[to_en])]
             else:
                 skill_only = False
+            skill_name = [key_name, anb[key_name]]
 
     if not is_base and not is_skill and not skill_only:
         if args[0] in inv.skills.keys():
             exp = inv.skills[args[0]]
-            return expr(Dice(), int(exp))
+            return str(expr(Dice(), int(exp)))
         else:
             return "[Oracle] 错误: 没有这个数据或技能."
 
@@ -253,7 +254,15 @@ def sra(args, event):
             break
 
     r = scp_doc(result, difficulty, encourage=encourage, agent=inv.name, great=great)
-    return r
+
+    if is_skill or skill_only:
+        if r.judge == 1:
+            card_data[skill_name[1]] += 0.1
+        elif r.judge > 1:
+            card_data[skill_name[1]] += 1
+        scp_cards.update(event, card_data)
+
+    return r.detail
 
 def scp_en(event, args):
     if not args:

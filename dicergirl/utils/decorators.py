@@ -10,7 +10,7 @@ import re
 
 qqguild_handlers = []
 
-def translate_punctuation(string):
+def translate_punctuation(string) -> str:
     punctuation_mapping = {
         '，': ',',
         '。': '.',

@@ -226,6 +226,7 @@ def del_handler(message, args, at, mode=None):
     return r
 
 def roll(args: str) -> str:
+    print(args)
     time = 1
     if args[0] == "#":
         if len(args) == 1:
@@ -247,9 +248,10 @@ def roll(args: str) -> str:
     try:
         d = Dice(args)
         r = expr(d, None)
+
         for _ in range(time-1):
-            r += "\n"
             r += expr(d, None)
-        return r
+
+        return r.detail
     except ValueError:
         return help_messages.r

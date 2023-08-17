@@ -59,7 +59,7 @@ class Docimasy:
 
 def expr(dice: Dice, anum):
     result = dice.roll().calc()
-    docimasy = Docimasy(f"掷骰: {dice.db}\n")
+    docimasy = Docimasy(f"掷骰: {dice.db}")
     docimasy += dice.description()
 
     if anum:

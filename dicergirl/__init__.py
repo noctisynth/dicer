@@ -89,7 +89,7 @@ if package == "nonebot2":
 
         async def __call__(self, event, state) -> bool:
             try:
-                text = translate_punctuation(event.get_plaintext())
+                text = translate_punctuation(event.get_plaintext()).strip()
             except Exception:
                 return False
             if match := re.match(

@@ -51,7 +51,8 @@ if package == "nonebot2":
 
     from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
-    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions, ShellCommand
+    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
+    from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.handlers import show_handler, set_handler, del_handler, roll
     from .utils.chat import chat
 
@@ -275,41 +276,34 @@ if package == "nonebot2":
     @coccommand.handle()
     async def cochandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".coc")
-        commands = ShellCommand(args, auto=True).results
         qid = event.get_user_id()
+        commands = CommandParser(
+            Commands([
+                Only("cache", False),
+                Optional("set", int),
+                Optional("age", int, 20),
+                Optional("name", str),
+                Optional("sex", str, "女"),
+                Optional("roll", int, 1)
+                ]),
+            args=args,
+            auto=True
+            ).results
+        toroll = commands["roll"]
 
-        if "set" in commands.keys():
-            if not commands["set"].isdigit():
-                await matcher.send('卡序数应当为整型数.')
-                return
-            toset = int(commands["set"])
-            coc_cards.update(event, coc_rolls[qid][toset], save=True)
-            inv = Investigator().load(coc_rolls[qid][toset])
-            await matcher.send(f"使用序列 {toset} 卡:\n{inv.output()}")
+        if commands["set"]:
+            coc_cards.update(event, coc_rolls[qid][commands["set"]], save=True)
+            inv = Investigator().load(coc_rolls[qid][commands["set"]])
+            await matcher.send(f"使用序列 {commands['set']} 卡:\n{inv.output()}")
             coc_rolls[qid] = {}
             return
 
-        if not "age" in commands.keys():
-            await matcher.send('未设置年龄参数, 使用 20 作为默认年龄.')
-            age = 20
-        else:
-            age = int(commands["age"])
-            if not (15 <= age and age < 90):
-                await matcher.send(Investigator().age_change(age))
-                return
+        age = commands["age"]
+        name = commands["name"]
 
-        if not "roll" in commands.keys():
-            toroll = 1
-        else:
-            if not commands["roll"].isdigit():
-                await matcher.send('天命数应当为整型数.')
-                return
-            toroll = int(commands["roll"])
-
-        if "name" in commands.keys():
-            name = commands["name"]
-        else:
-            name = None
+        if not (15 <= age and age < 90):
+            await matcher.send(Investigator().age_change(age))
+            return
 
         reply = ""
         if qid in coc_rolls.keys():

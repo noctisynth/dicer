@@ -177,9 +177,8 @@ def ra(args, event):
             pass
     r = expr(d, anum)
     for _ in range(time-1):
-        r += "\n"
         r += expr(d, anum)
-    return r
+    return r.detail
 
 def ti():
     i = random.randint(1, 10)

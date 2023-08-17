@@ -195,12 +195,12 @@ class Agent(object):
         if not self.skills and not self.knowledge and not self.ability:
             return "%s 当前无任何技能数据。" % self.name
 
-        r = "\n" + self.__skill_output_format("知识", self.knowledge.items()) + "\n"
+        r = self.__skill_output_format("知识", self.knowledge.items()) + "\n"
         r += "\n" + self.__skill_output_format("技巧", self.skills.items()) + "\n"
         r += "\n" + self.__skill_output_format("能力", self.ability.items())
 
         return r
-    
+
     def __skill_output_format(self, name, items):
         r = f"{self.name} {name}"
         count = 0
@@ -229,7 +229,7 @@ class Agent(object):
         anb.update(nba)
         return anb
 
-    def out_allskills(self):
+    def out_skills(self):
         return self.skills_output()
 
     def out_x(self):

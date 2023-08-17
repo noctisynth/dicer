@@ -152,14 +152,13 @@ def show_handler(message, args, at, mode=None):
             card_data = cards.get(message, qid=qid)
             inv = charactor().load(card_data)
             data = "[Oracle] 使用中人物卡: \n" 
-            data += inv.output() + "\n"
-            data += inv.skills_output()
+            data += inv.output()
             r.append(data)
         if cache_cards.get(message, qid=qid):
             card_data = cache_cards.get(message, qid=qid)
             inv = charactor().load(card_data)
             r.append("[Oracle] 已暂存人物卡: \n" + inv.output())
-    elif args[0] in ["skill", "s", "skills"]:
+    elif args[0] in ["detail", "de", "details"]:
         if cards.get(message, qid=qid):
             card_data = cards.get(message, qid=qid)
             inv = charactor().load(card_data)

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, List
 
 import json
 import sys
@@ -199,3 +199,32 @@ def is_super_user(message):
             su = True
             break
     return su
+
+class ShellCommand:
+    def __init__(self, args: List[str], requires: list=None, auto=False):
+        self.results: Dict[str, str] = {}
+        self.args = args
+        self.requires = requires
+
+        if auto:
+            self.shlex()
+
+    def shlex(self):
+        for i in range(len(self.args)):
+            if self.requires:
+                if self.args[i] in self.requires:
+                    self.results[self.args[i]] = self.args[i+1]
+            else:
+                if not self.args[i].isdigit():
+                    self.results[self.args[i]] = self.args[i+1]
+    
+    def __dict__(self):
+        return self.results
+
+if __name__ == "__main__":
+    sc = ShellCommand(["roll", "5", "age", "20", "set", "7"], auto=True).results
+    print(sc["age"])
+    print(sc.keys())
+    sc = ShellCommand(["roll", "5", "age", "2222"], auto=True).results
+    print(sc.keys())
+    print(sc["age"])

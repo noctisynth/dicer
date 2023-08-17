@@ -89,3 +89,4 @@ coc_attrs_dict: Dict[str, List[str]] = {
     "理智": ["san", "理智", "精神状态", "san值"],
     "生命": ["hp", "生命"]
 }
+coc_rolls = {}

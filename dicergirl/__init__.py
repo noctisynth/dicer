@@ -37,7 +37,7 @@ package = get_package()
 
 if package == "nonebot2":
     from .coc.investigator import Investigator
-    from .coc.coccards import coc_cards, coc_cache_cards
+    from .coc.coccards import coc_cards, coc_cache_cards, coc_rolls
     from .coc.cocutils import sc, st, at, coc_dam, coc_en, ra, ti, li, rb, rp
 
     from .scp.agent import Agent
@@ -51,7 +51,7 @@ if package == "nonebot2":
 
     from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
-    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
+    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions, ShellCommand
     from .utils.handlers import show_handler, set_handler, del_handler, roll
     from .utils.chat import chat
 
@@ -275,25 +275,50 @@ if package == "nonebot2":
     @coccommand.handle()
     async def cochandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".coc")
-        if len(args) > 1:
-            logger.info("指令错误, 驳回.")
-            await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-            return False
+        commands = ShellCommand(args, auto=True).results
+        qid = event.get_user_id()
 
-        try:
-            if len(args) == 0:
-                raise ValueError
-            args = int(args[0])
-        except ValueError:
-            await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-            args = 20
+        if "set" in commands.keys():
+            if not commands["set"].isdigit():
+                await matcher.send('卡序数应当为整型数.')
+                return
+            toset = int(commands["set"])
+            coc_cards.update(event, coc_rolls[qid][toset], save=True)
+            inv = Investigator().load(coc_rolls[qid][toset])
+            await matcher.send(f"使用序列 {toset} 卡:\n{inv.output()}")
+            coc_rolls[qid] = {}
+            return
 
-        inv = Investigator()
-        await matcher.send(inv.age_change(args))
+        if not "age" in commands.keys():
+            await matcher.send('未设置年龄参数, 使用 20 作为默认年龄.')
+            age = 20
+        else:
+            age = int(commands["age"])
+            if not (15 <= age and age < 90):
+                await matcher.send(Investigator().age_change(age))
+                return
 
-        if 15 <= args and args < 90:
-            coc_cache_cards.update(event, inv.__dict__, save=False)
-            await matcher.send(str(inv.output()))
+        if not "roll" in commands.keys():
+            toroll = 1
+        else:
+            if not commands["roll"].isdigit():
+                await matcher.send('天命数应当为整型数.')
+                return
+            toroll = int(commands["roll"])
+
+        reply = ""
+        coc_rolls[qid] = {}
+        for i in range(toroll):
+            inv = Investigator()
+            inv.age_change(age)
+            coc_rolls[qid][i] = inv.__dict__
+            count = inv.rollcount()
+            reply += f"天命编号: {i}\n"
+            reply += inv.output() + "\n"
+            reply += f"共计: {count[0]}/{count[1]}\n"
+
+        reply.rstrip("\n")
+        await matcher.send(reply)
 
     @scpcommand.handle()
     async def scp_handler(matcher: Matcher, event: GroupMessageEvent):

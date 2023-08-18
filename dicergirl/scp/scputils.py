@@ -1,6 +1,5 @@
 try:
     from ..utils.docimasy import expr, scp_doc
-    from ..utils.messages import help_messages, help_message
     from ..utils.dicer import Dice
     from .scpcards import scp_cards
     from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
@@ -8,7 +7,6 @@ try:
     from ..utils.multilogging import multilogger
 except ImportError:
     from dicergirl.utils.docimasy import expr, scp_doc
-    from dicergirl.utils.messages import help_messages, help_message
     from dicergirl.utils.dicer import Dice
     from dicergirl.scp.scpcards import scp_cards
     from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
@@ -138,11 +136,11 @@ def scp_dam(args, message):
     scp_cards.update(message, card)
     return r
 
-def sra(args, event):
+def sra(args: list, event):
     if len(args) == 0:
-        return help_message("sra")
+        return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
     elif len(args) > 4:
-        return "[Oracle] 错误: 参数过多(最多4需要但%d给予)." % len(args)
+        return "[Oracle] 错误: 参数过多(最多4需要但%d给予).\n使用`.help ra`指令查看指令使用方法." % len(args)
 
     try:
         difficulty = int(args[-1])
@@ -188,7 +186,7 @@ def sra(args, event):
             else:
                 return f"[Oracle] 错误: 技能、知识或能力 {args[2]} 不存在."
         else:
-            return help_messages.ra
+            return "[Oracle] 我无法解析你的语法, 你可以使用`.help ra`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
     elif not is_base and len(args) == 1:
         if args[0] in all_alias:
             anb = inv.all_not_base()
@@ -266,14 +264,14 @@ def sra(args, event):
 
 def scp_en(event, args):
     if not args:
-        return help_messages.en
+        return "[Oracle] 错误: 你没有给定需要激励的基础属性.\n使用`.help en`指令查看指令使用方法."
 
     try:
         en = int(args[1])
         if not en:
             return f"[Oracle] 无法进行发起 {en} 点激励."
     except ValueError:
-        return help_messages.en
+        return "[Oracle] 错误: 给定需要消耗的激励点应当为整型数.\n使用`.help en`指令查看指令使用方法."
 
     card_data = scp_cards.get(event)
 

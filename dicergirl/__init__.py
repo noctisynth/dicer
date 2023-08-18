@@ -1,5 +1,7 @@
 from pathlib import Path
+from datetime import datetime
 from nonebot.plugin import PluginMetadata
+from typing import Dict
 from .utils.settings import set_package, get_package
 from .utils.multilogging import multilogger
 
@@ -29,6 +31,7 @@ import sys
 import random
 import re
 import asyncio
+import json
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -51,22 +54,23 @@ if package == "nonebot2":
 
     from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
-    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
+    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, modes, get_mentions
+    from .utils.utils import get_loggers, loggers, add_logger, log_dir, get_group_id
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.handlers import show_handler, set_handler, del_handler, roll
     from .utils.chat import chat
 
     from nonebot.rule import Rule
     from nonebot.matcher import Matcher
-    from nonebot.plugin import on_startswith, on_message
+    from nonebot.plugin import on_startswith, on_message, on
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
     from nonebot.consts import STARTSWITH_KEY
 
     if driver._adapters.get("OneBot V12"):
-        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, MessageSegment
+        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, MessageSegment, Event
     else:
-        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, MessageSegment
+        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, MessageSegment, Event
 
     class StartswithRule:
         __slots__ = ("msg", "ignorecase")
@@ -121,6 +125,9 @@ if package == "nonebot2":
     debugcommand = on_startswith(".debug", priority=2, block=True)
     superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
     botcommand = on_startswith(".bot", priority=1, block=True)
+    logcommand = on_startswith(".log", priority=1, block=True)
+    loghandlercommand = on_startswith("", priority=1, block=False)
+    selflogcommand = on("message_sent", priority=1, block=False)
     coccommand = on_startswith(".coc", priority=1, block=True)
     scpcommand = on_startswith(".scp", priority=1, block=True)
     dndcommand = on_startswith(".dnd", priority=1, block=True)
@@ -158,6 +165,7 @@ if package == "nonebot2":
         init()
         coc_cards.load()
         scp_cards.load()
+        dnd_cards.load()
         logger.success("欧若可骰娘初始化完毕.")
 
     @testcommand.handle()
@@ -273,9 +281,117 @@ if package == "nonebot2":
         else:
             await matcher.send(help_message("bot"))
 
+    @logcommand.handle()
+    async def loghandler(matcher: Matcher, event: Event):
+        args = format_msg(event.get_message(), begin=".log")
+        commands = CommandParser(
+            Commands([
+                Only("show"),
+                Only("add"),
+                Optional("name", str),
+                Optional("stop", int),
+                Optional("start", int),
+                Optional("remove", int)
+                ]),
+            args=args,
+            auto=True
+            ).results
+
+        if commands["show"]:
+            #if not str(event.group_id) in saved_loggers.keys():
+            #    await matcher.send("该群组暂无日志.")
+            #    saved_loggers[event.group_id] = {}
+            #    return
+
+            gl = get_loggers(event)
+            if len(gl) == 0:
+                await matcher.send("暂无存储的日志.")
+                return
+
+            reply = "该群聊所有日志:\n"
+            for i in range(len(gl)):
+                reply += f"序列 {i} : {gl[i]}\n"
+            reply.strip("\n")
+
+            await matcher.send(reply)
+            return
+
+        if commands["add"]:
+            if commands["name"]:
+                logname = str(log_dir/(commands["name"]+".trpg.log"))
+            else:
+                logname = str(log_dir/(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")+".trpg.log"))
+
+            new_logger = multilogger(name="DG Msg Logger", payload="TRPG")
+            new_logger.remove()
+            new_logger.add(logname, encoding='utf-8', format="{message}", level="INFO")
+            if not get_group_id(event) in loggers.keys():
+                loggers[get_group_id(event)] = {}
+
+            keys = loggers[get_group_id(event)].keys()
+            if len(keys) == 0:
+                index = 1
+            else:
+                index = max(keys) + 1
+
+            loggers[get_group_id(event)][index] = [new_logger, logname]
+            if not add_logger(event, logname):
+                raise IOError("无法新增日志.")
+            await matcher.send(f"[Oracle] 新增日志序列: {index}\n日志文件: {logname}")
+            return
+
+        if commands["stop"]:
+            if not get_group_id(event) in loggers.keys():
+                await matcher.send("该群组从未设置过日志.")
+                loggers[get_group_id(event)] = {}
+                return
+
+            if not commands["stop"] in loggers[get_group_id(event)]:
+                await matcher.send("目标日志不存在.")
+                return
+
+            loggers[get_group_id(event)][commands["stop"]][0].remove()
+            await matcher.send(f"日志序列 {commands['stop']} 已停止记录.")
+            return
+
+        if commands["remove"]:
+            gl = get_loggers(event)
+            if not get_group_id(event) in loggers.keys():
+                await matcher.send("该群组从未设置过日志.")
+                loggers[get_group_id(event)] = {}
+                return
+
+            #if not commands["remove"] in loggers[get_group_id(event)]:
+            #    await matcher.send("目标日志不存在.")
+            #    return
+
+            loggers[get_group_id(event)][commands["remove"]][0].remove()
+            Path(loggers[get_group_id(event)][commands["remove"]][1]).unlink()
+            loggers[get_group_id(event)].pop([commands["remove"]])
+            await matcher.send(f"日志序列 {commands['remove']} 已删除.")
+            return
+
+        await matcher.send("骰娘日志管理系统, 使用`.help log`指令详细信息.")
+
+    def trpg_log(event):
+        if not get_group_id(event) in loggers.keys():
+            return
+
+        for log in loggers[get_group_id(event)].keys():
+            if isinstance(event, GroupMessageEvent):
+                message = event.get_user_id() + ": " + event.get_message()
+            elif isinstance(event, Event):
+                message = "Oracle: " + event.raw_message
+            loggers[get_group_id(event)][log][0].info(message)
+
+    @selflogcommand.handle()
+    @loghandlercommand.handle()
+    def loggerhandler(event: Event):
+        trpg_log(event)
+
     @coccommand.handle()
     async def cochandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=".coc")
+        args = format_msg(event.get_message(), begin=".coc", zh_en=True)
         qid = event.get_user_id()
         commands = CommandParser(
             Commands([
@@ -315,6 +431,7 @@ if package == "nonebot2":
         for i in range(toroll):
             inv = Investigator()
             inv.age_change(age)
+            inv.sex = commands["sex"]
 
             if name:
                 inv.name = name
@@ -443,7 +560,7 @@ if package == "nonebot2":
     async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".dnd")
         if len(args) > 1:
-            logger.info("指令错误, 驳回.")
+            logger.warning("指令错误, 驳回.")
             await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
             return True
 

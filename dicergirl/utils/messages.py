@@ -11,23 +11,24 @@ class Help_Messages():
 感谢 灵冬-老孙 提供相关技术支持.
 感谢 @Github: abrahum, 本项目中 COC 模式有部分移植了 @Github: abrahum 的 nonebot_plugin_cocdicer 项目.
 
-.help\t帮助信息
-.su\t进行超级管理员鉴权
+.help/.h\t帮助信息
+.su/.sudo\t进行超级管理员鉴权
 .bot\t机器人管理
-.mode\t切换当前跑团模式
+.mode/.m\t切换当前跑团模式
 .coc\t进行车卡, 完成 COC 角色作成
 .scp\t进行车卡, 完成 SCP 角色作成
 .dnd\t进行车卡, 完成 DND 角色作成
-.set\t角色卡设定
-.show\t角色卡查询
+.set/.st\t角色卡设定
+.show/.st show\t角色卡查询
 .r\t掷骰检定指令
-.dam\t调查员或特工承伤检定
-.at\t调查员或特工伤害检定
+.dam/.damage\t调查员或特工承伤检定
+.at/.attack\t调查员或特工伤害检定
 .sc\t疯狂检定
 .ti\t临时疯狂症状
 .li\t总结疯狂症状
-.en\t技能成长
-.del\t删除数据
+.en/.encourage\t技能成长
+.del/.delete\t删除数据
+.log\t日志管理
 输入`.help [指令名]`获取该指令的详细信息
 注1: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
 注2: 该骰娘使用正则表达式对指令解析, 指令参数传递为弱空格需求.
@@ -44,13 +45,22 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0."""
         self.bot = """.bot\t机器人管理
 \t.bot on\t机器人启用
 \t.bot off\t机器人禁用
+\t.bot status\t机器人当前状态
 \t.bot exit\t机器人退出群聊"""
         self.mode = """.mode [str: mode]\t切换跑团模式
-\t.mode coc\t切换到 COC 跑团模式
+\tmode: 跑团模式缩略式
+\t\t.mode coc\t切换到 COC 跑团模式
 \t- 如果骰娘管理员加入了第三方跑团插件, `mode`参数应该设置为该插件中`__init__.py`的`__name__`参数, 不区分大小写.
 \t- 默认的跑团模式为`SCP`, 每一次机器人重启或更新后, 跑团模式都会更改为`SCP`."""
-        self.coc = """.coc Optional[str: age]\t完成 COC 人物作成
-\tage: 调查员年龄(可选参数)
+        self.coc = """.coc [age] [roll] [name] [sex] Optioanl[cache]\t完成 COC 人物作成
+\tage: 调查员年龄
+\troll: 天命次数
+\tname: 调查员姓名
+\tsex: 调查员性别
+\t- 以上参数均可缺省
+\t\t.coc age 20 roll 5 name 欧若可 sex 女\t进行5次姓名为`欧若可`的20岁女性调查员天命
+\tcache: 展示已天命的人物卡
+\t\t.coc cache
 \t- 值得注意的是, 调查员的年龄与调查员的外貌、教育值相关."""
         self.scp = """.scp Optional[begin|reset|deal|upgrade]\t完成 SCP 人物卡作成
 \tbegin: 展示基金会基本介绍
@@ -93,7 +103,7 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0."""
 \t- 值得注意的是, 录卡一般常见于 COC 跑团和 DND 跑团, SCP 模式是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡.
 注意, 虽然该指令同样为弱空格指令解析, 即你不需要在参数之间键入空格, 但是这样的指令是不允许的:
 \t.set名字阿斯塔特
-欧若可将会将该指令识别为同一个参数, 你可以使用`.setname阿斯塔特`来解决弱空格指令中的中文混合或英文混合导致的参数数量问题."""
+欧若可将会将该指令识别为同一个参数."""
         self.show = """.show [skill|all|str: attribute] Optional[CQ:at]\t人物卡展示
 \tskill: 查看自身人物卡技能
 \tall: 查询所有存储的人物卡
@@ -164,6 +174,14 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0."""
 \tcard: 删除使用中的人物卡(谨慎使用)
 \ttalent: 删除指定的自定义技能
 \t- 删除自定义技能时, 支持多个参数, 可以一次指定多个技能名."""
+        self.log = """.log [add|remove|start|stop|clear] [str: name]
+\tadd: 新增日志
+\t\tname: 指定日志文件名
+\tremove: 删除日志
+\tstart: 启动停止记录的日志
+\tstop: 中止正在记录的日志
+\tclear: 删除所有日志(慎用)
+"""
 
 help_messages = Help_Messages()
 

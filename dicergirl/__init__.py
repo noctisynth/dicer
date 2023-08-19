@@ -587,8 +587,12 @@ if package == "nonebot2":
         return True
 
     @showcommand.handle()
-    async def showhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=(".show", ".display"))
+    async def showhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
+        if not isinstance(args, list):
+            args = format_msg(event.get_message(), begin=(".show", ".display"))
+        else:
+            args = args
+
         at = get_mentions(event)
 
         if mode in modes:
@@ -612,20 +616,24 @@ if package == "nonebot2":
         commands = CommandParser(
             Commands([
                 Only("show"),
-                Optional("del", str),
+                Only("del"),
                 Only("clear")
             ]),
-        )
+            args,
+            auto=True
+        ).results
 
         if at and not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
 
         if commands["show"]:
-            return await showhandler(matcher, event)
+            args.remove("show")
+            return await showhandler(matcher, event, args=args)
 
         if commands["del"]:
-            return await delhandler(matcher, event)
+            args.remove("del")
+            return await delhandler(matcher, event, args=args)
 
         try:
             sh = set_handler(event, args, at, mode=mode)
@@ -737,9 +745,9 @@ if package == "nonebot2":
 
     @rollcommand.handle()
     async def rollhandler(matcher: Matcher, event: MessageEvent):
-        args = format_msg(event.get_message(), begin=(".r", ".roll"))
+        args = format_str(event.get_message(), begin=(".r", ".roll"))
         if not args:
-            await matcher.send(roll(["1", "d", "100"]))
+            await matcher.send(roll("1d100"))
             return
 
         if args[0] == "b":
@@ -751,8 +759,9 @@ if package == "nonebot2":
 
         try:
             await matcher.send(roll(args))
-        except:
-            await matcher.send(help_message("r"))
+        except Exception as error:
+            logger.exception(error)
+            await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
 
 
     @ticommand.handle()
@@ -783,8 +792,12 @@ if package == "nonebot2":
             await matcher.send(scrs)
 
     @delcommand.handle()
-    async def delhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=(".del", ".delete"))
+    async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
+        if not isinstance(args, list):
+            args = format_msg(event.get_message(), begin=(".del", ".delete"))
+        else:
+            args = args
+
         at = get_mentions(event)
 
         if at and not is_super_user(event):

@@ -225,7 +225,6 @@ def del_handler(message, args, at, mode=None):
     return r
 
 def roll(args: str) -> str:
-    print(args)
     time = 1
     if "#" in args:
         args = args.split("#")

@@ -42,11 +42,11 @@ package = get_package()
 if package == "nonebot2":
     from .coc.investigator import Investigator
     from .coc.coccards import coc_cards, coc_cache_cards, coc_rolls
-    from .coc.cocutils import sc, st, at, coc_dam, coc_en, ra, ti, li, rb, rp
+    from .coc.cocutils import sc, st, at, coc_dam, coc_en, coc_ra, ti, li, rb, rp
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal, begin
+    from .scp.scputils import scp_ra, scp_dam, scp_en, at as sat, deal, begin
     from .scp.attributes import all_alias_dict
 
     from .dnd.adventurer import Adventurer
@@ -758,17 +758,19 @@ if package == "nonebot2":
 
         await matcher.send(en)
 
-
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".ra")
-        if mode in ["coc", "scp", "dnd"]:
-            if mode == "scp":
-                await matcher.send(str(sra(args, event)))
-            elif mode == "coc":
-                await matcher.send(str(ra(args, event)))
-            elif mode == "dnd":
-                await matcher.send(str(dra(args, event)))
+        if mode in modes:
+            ras = eval(f"{mode}_ra(args, event)")
+            if isinstance(ras, list):
+                for ra in ras:
+                    await matcher.send(ra)
+                return
+
+            await matcher.send(ras)
+        else:
+            await matcher.send("[Oracle] 当前处于未知的跑团模式.")
         return
 
     @rhcommand.handle()
@@ -781,7 +783,7 @@ if package == "nonebot2":
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".rha")
         await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
-        await bot.send_private_msg(user_id=event.get_user_id(), message=ra(args, event))
+        await bot.send_private_msg(user_id=event.get_user_id(), message=eval(f"{mode}_(args, event)"))
 
     @rollcommand.handle()
     async def rollhandler(matcher: Matcher, event: MessageEvent):

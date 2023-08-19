@@ -756,19 +756,19 @@ if package == "nonebot2":
 
 
     @ticommand.handle()
-    async def ticommandhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def ticommandhandler(matcher: Matcher):
         try:
             await matcher.send(ti())
         except:
-            await matcher.send(help_message("ti"))
+            await matcher.send("[Oracle] 未知错误, 执行`.debug on`获得更多信息.")
 
 
     @licommand.handle()
-    async def licommandhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def licommandhandler(matcher: Matcher):
         try:
             await matcher.send(li())
         except:
-            await matcher.send(help_message("li"))
+            await matcher.send("[Oracle] 未知错误, 执行`.debug on`获得更多信息.")
 
 
     @sccommand.handle()

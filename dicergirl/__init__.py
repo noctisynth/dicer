@@ -31,7 +31,8 @@ import sys
 import random
 import re
 import asyncio
-import json
+import platform
+import psutil
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -41,11 +42,11 @@ package = get_package()
 if package == "nonebot2":
     from .coc.investigator import Investigator
     from .coc.coccards import coc_cards, coc_cache_cards, coc_rolls
-    from .coc.cocutils import sc, st, at, coc_dam, coc_en, ra, ti, li, rb, rp
+    from .coc.cocutils import sc, st, at, coc_dam, coc_en, coc_ra, ti, li, rb, rp
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import sra, scp_dam, scp_en, at as sat, deal, begin
+    from .scp.scputils import scp_ra, scp_dam, scp_en, at as sat, deal, begin
     from .scp.attributes import all_alias_dict
 
     from .dnd.adventurer import Adventurer
@@ -66,6 +67,7 @@ if package == "nonebot2":
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
     from nonebot.consts import STARTSWITH_KEY
+    from nonebot.internal.matcher.matcher import Matcher
 
     if driver._adapters.get("OneBot V12"):
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, MessageSegment, Event
@@ -106,13 +108,13 @@ if package == "nonebot2":
                 return True
             return False
 
-    def startswith(msg, ignorecase=True):
+    def startswith(msg, ignorecase=True) -> Rule:
         if isinstance(msg, str):
             msg = (msg,)
 
         return Rule(StartswithRule(msg, ignorecase))
 
-    def on_startswith(commands, priority=0, block=True):
+    def on_startswith(commands, priority=0, block=True) -> Matcher:
         if isinstance(commands, str):
             commands = (commands, )
 
@@ -264,22 +266,61 @@ if package == "nonebot2":
     @botcommand.handle()
     async def bothandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".bot")
-        if not is_super_user(event):
-            await matcher.send("[Oracle] 你没有管理员权限, 请先执行`.su`开启权限鉴定.")
-            return
-        if len(args) == 1:
-            if args[0] in ["exit", "out", "leave"]:
-                print("退出群聊.")
-                await matcher.send("[Oracle] 欧若可离开群聊.")
-                await bot.set_group_leave(group_id=event.group_id)
-            elif args[0] in ["on", "run", "start"]:
-                await matcher.send("[Oracle] 我运行在非 systemd 平台上, 我将保持启动.")
-            elif args[0] in ["off", "down", "shutdown"]:
-                await matcher.send("[Oracle] 我运行在非 systemd 平台上, 我将保持启动.")
-            else:
-                await matcher.send("[Oracle] 错误的指令.")
+        commands = CommandParser(
+            Commands([
+                Only(("version", "v", "bot")),
+                Only(("exit", "bye", "leave")),
+                Only(("on", "run", "start")),
+                Only(("off", "down", "shutdown")),
+                Only(("status"))
+            ]),
+            args=args,
+            auto=True
+        )
+
+        if commands.nothing or commands.results["version"]:
+            return await versionhandler(matcher=matcher)
         else:
-            await matcher.send(help_message("bot"))
+            commands = commands.results
+
+        if commands["exit"]:
+            if not is_super_user(event):
+                await matcher.send("[Oracle] 你没有管理员权限, 请先执行`.su`开启权限鉴定.")
+                return
+
+            logger.info(f"欧若可退出群聊: {event.group_id}")
+            await matcher.send("[Oracle] 欧若可离开群聊.")
+            await bot.set_group_leave(group_id=event.group_id)
+            return
+
+        if commands["on"]:
+            await matcher.send("[Oracle] 我运行在非 systemd 平台上, 我将保持启动.")
+            return
+
+        if commands["off"]:
+            await matcher.send("[Oracle] 我运行在非 systemd 平台上, 我将保持启动.")
+            return
+
+        if commands["status"]:
+            try:
+                system = platform.freedesktop_os_release()["PRETTY_NAME"]
+            except KeyError or FileNotFoundError:
+                system = platform.platform()
+
+            memi = psutil.Process().memory_info()
+            rss = memi.rss / 1024 / 1024
+            total = psutil.virtual_memory().total / 1024 / 1024
+
+            reply = f"欧若可骰娘 {version}, {'正常运行'}\n"
+            reply += f"操作系统: {system}\n"
+            reply += f"CPU 核心: {psutil.cpu_count()} 核心\n"
+            reply += f"Python 版本: {platform.python_version()}\n"
+            reply += "系统内存占用: %.2fMB/%.2fMB\n" % (rss, total)
+            reply += f"漏洞检测模式: {'on' if DEBUG else 'off'}"
+            await matcher.send(reply)
+            return
+
+        await matcher.send("[Oracle] 未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @logcommand.handle()
     async def loghandler(matcher: Matcher, event: Event):
@@ -575,7 +616,7 @@ if package == "nonebot2":
         adv = Adventurer()
         adv.age_check(args)
         adv.init()
-        
+
         if adv.int[0] <= 8:
             await matcher.send("[Orcale] 很遗憾, 检定新的冒险者智力不足, 弱智是不允许成为冒险者的, 请重新进行车卡检定.")
             return True
@@ -586,8 +627,12 @@ if package == "nonebot2":
         return True
 
     @showcommand.handle()
-    async def showhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=(".show", ".display"))
+    async def showhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
+        if not isinstance(args, list):
+            args = format_msg(event.get_message(), begin=(".show", ".display"))
+        else:
+            args = args
+
         at = get_mentions(event)
 
         if mode in modes:
@@ -608,10 +653,27 @@ if package == "nonebot2":
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=(".set", ".st"))
         at = get_mentions(event)
+        commands = CommandParser(
+            Commands([
+                Only("show"),
+                Only("del"),
+                Only("clear")
+            ]),
+            args,
+            auto=True
+        ).results
 
         if at and not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
+
+        if commands["show"]:
+            args.remove("show")
+            return await showhandler(matcher, event, args=args)
+
+        if commands["del"]:
+            args.remove("del")
+            return await delhandler(matcher, event, args=args)
 
         try:
             sh = set_handler(event, args, at, mode=mode)
@@ -696,17 +758,19 @@ if package == "nonebot2":
 
         await matcher.send(en)
 
-
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".ra")
-        if mode in ["coc", "scp", "dnd"]:
-            if mode == "scp":
-                await matcher.send(str(sra(args, event)))
-            elif mode == "coc":
-                await matcher.send(str(ra(args, event)))
-            elif mode == "dnd":
-                await matcher.send(str(dra(args, event)))
+        if mode in modes:
+            ras = eval(f"{mode}_ra(args, event)")
+            if isinstance(ras, list):
+                for ra in ras:
+                    await matcher.send(ra)
+                return
+
+            await matcher.send(ras)
+        else:
+            await matcher.send("[Oracle] 当前处于未知的跑团模式.")
         return
 
     @rhcommand.handle()
@@ -719,13 +783,13 @@ if package == "nonebot2":
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".rha")
         await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
-        await bot.send_private_msg(user_id=event.get_user_id(), message=ra(args, event))
+        await bot.send_private_msg(user_id=event.get_user_id(), message=eval(f"{mode}_(args, event)"))
 
     @rollcommand.handle()
     async def rollhandler(matcher: Matcher, event: MessageEvent):
-        args = format_msg(event.get_message(), begin=(".r", ".roll"))
+        args = format_str(event.get_message(), begin=(".r", ".roll"))
         if not args:
-            await matcher.send(roll(["1", "d", "100"]))
+            await matcher.send(roll("1d100"))
             return
 
         if args[0] == "b":
@@ -737,9 +801,9 @@ if package == "nonebot2":
 
         try:
             await matcher.send(roll(args))
-        except:
-            await matcher.send(help_message("r"))
-
+        except Exception as error:
+            logger.exception(error)
+            await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
 
     @ticommand.handle()
     async def ticommandhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -769,8 +833,12 @@ if package == "nonebot2":
             await matcher.send(scrs)
 
     @delcommand.handle()
-    async def delhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=(".del", ".delete"))
+    async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
+        if not isinstance(args, list):
+            args = format_msg(event.get_message(), begin=(".del", ".delete"))
+        else:
+            args = args
+
         at = get_mentions(event)
 
         if at and not is_super_user(event):
@@ -791,8 +859,7 @@ if package == "nonebot2":
 
 
     @versioncommand.handle()
-    async def versionhandler(matcher: Matcher, event: MessageEvent):
-        args = format_str(event.get_message(), begin=(".version", ".v"))
+    async def versionhandler(matcher: Matcher):
         await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.\nCopyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.")
         return
 elif package == "qqguild":

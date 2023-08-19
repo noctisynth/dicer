@@ -7,7 +7,6 @@ try:
     from ..scp.attributes import scp_attrs_dict
     from ..dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from .. import coc, scp, dnd
-    from .messages import help_messages
     from .dicer import Dice
 except ImportError:
     from dicergirl.utils.docimasy import expr
@@ -17,7 +16,6 @@ except ImportError:
     from dicergirl.scp.attributes import scp_attrs_dict
     from dicergirl.dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from dicergirl import coc, scp, dnd
-    from dicergirl.utils.messages import help_messages
     from dicergirl.utils.dicer import Dice
 
 def __set_plus_format(args: list):
@@ -50,8 +48,10 @@ def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, c
                 try:
                     if not args[1].startswith(("-", "+")):
                         cha.__dict__[alias[0]] = int(args[1])
-                    else:
+                    elif args[1].startswith("+"):
                         cha.__dict__[alias[0]] += int(args[1][1:])
+                    elif args[1].startswith("-"):
+                        cha.__dict__[alias[0]] -= int(args[1][1:])
                 except ValueError:
                     return "基础数据 %s 要求正整数数据, 但你传入了 %s." % (args[0], args[1])
             cards.update(event, cha.__dict__, qid=qid)
@@ -61,8 +61,10 @@ def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid
     try:
         if not args[1].startswith(("-", "+")):
             cha.skills[args[0]] = int(args[1])
-        else:
+        elif args[1].startswith("+"):
             cha.skills[args[0]] += int(args[1][1:])
+        elif args[1].startswith("-"):
+            cha.skills[args[0]] -= int(args[1][1:])
         cards.update(event, cha.__dict__, qid=qid)
         reply.append("设置%s %s 技能为: %s." % (module.__cname__, args[0], cha.skills[args[0]]))
     except ValueError:
@@ -194,11 +196,6 @@ def del_handler(message, args, at, mode=None):
         qid = ""
 
     r = []
-    args = args.split(" ")
-    if args:
-        args = list(filter(None, args))
-    else:
-        args = None
     for arg in args:
         if not arg:
             pass
@@ -221,29 +218,28 @@ def del_handler(message, args, at, mode=None):
         else:
             if cards.delete_skill(message, arg):
                 r.append(f"已删除技能 {arg}.")
+
     if not r:
-        r.append(help_messages.del_)
+        r.append("[Oracle] 使用`.help del`获得指令使用帮助.")
+
     return r
 
 def roll(args: str) -> str:
-    print(args)
     time = 1
-    if args[0] == "#":
-        if len(args) == 1:
-            return "[Oracle] 参数错误, `#`提示符后应当跟随整型数."
+    if "#" in args:
+        args = args.split("#")
 
         try:
-            time = int(args[1])
+            time = int(args[0].strip())
         except ValueError:
-            return "[Oracle] 参数错误, `#`提示符后应当跟随整型数."
+            return "[Oracle] 参数错误, `#`提示符前应当跟随整型数."
 
-        args = args[2:]
-
-    if len(args) > 0:
-        if args[0] == "d":
-            args = "1" + ''.join(args)
-        elif args[1] == "d":
-            args = ''.join(args)
+        if len(args) == 1:
+            args = "1d100"
+        else:
+            args = args[1]
+    else:
+        args = args.strip()
 
     try:
         d = Dice(args)
@@ -254,4 +250,4 @@ def roll(args: str) -> str:
 
         return r.detail
     except ValueError:
-        return help_messages.r
+        return "[Oracle] 出现错误, 请检查你的掷骰表达式.\n使用`.help r`获得掷骰指令使用帮助."

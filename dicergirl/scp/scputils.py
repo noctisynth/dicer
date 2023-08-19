@@ -136,7 +136,7 @@ def scp_dam(args, message):
     scp_cards.update(message, card)
     return r
 
-def sra(args: list, event):
+def scp_ra(args: list, event):
     if len(args) == 0:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
     elif len(args) > 4:

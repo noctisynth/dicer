@@ -30,6 +30,8 @@ class Agent(object):
             "skills": 14,
             "ability": 10
         }
+        self.ix = 1
+        self.rx = 1
         self.tools = {}
 
     def init(self):
@@ -58,16 +60,29 @@ class Agent(object):
             attr[p] = dice.dices
 
         self.dices = attr
-        self.reset_hp()
-        self.reset_enp()
-        self.reset_p()
-        self.reset_rep()
-    
+        self.reset()
+
     def reset(self):
         self.reset_hp()
         self.reset_enp()
         self.reset_p()
         self.reset_rep()
+        self.reset_x()
+
+    def reset_x(self):
+        self.ix = 1
+        self.rx = 1
+        for d in self.dices["str"]:
+            if d == "D10":
+                self.ix += 1
+            elif d == "D12":
+                self.ix += 1
+
+        for d in self.dices["per"]:
+            if d == "D10":
+                self.rx += 1
+            elif d == "D12":
+                self.rx += 1
 
     def reset_card(self):
         self.reset()
@@ -180,12 +195,12 @@ class Agent(object):
         if not self.skills and not self.knowledge and not self.ability:
             return "%s 当前无任何技能数据。" % self.name
 
-        r = "\n" + self.__skill_output_format("知识", self.knowledge.items()) + "\n"
+        r = self.__skill_output_format("知识", self.knowledge.items()) + "\n"
         r += "\n" + self.__skill_output_format("技巧", self.skills.items()) + "\n"
         r += "\n" + self.__skill_output_format("能力", self.ability.items())
 
         return r
-    
+
     def __skill_output_format(self, name, items):
         r = f"{self.name} {name}"
         count = 0
@@ -214,8 +229,11 @@ class Agent(object):
         anb.update(nba)
         return anb
 
-    def out_allskills(self):
+    def out_skills(self):
         return self.skills_output()
+
+    def out_x(self):
+        return f"角色近战系数: {self.ix}\n角色远程系数: {self.rx}"
 
     def out_knowledge(self):
         return self.__skill_output_format("知识", self.knowledge.items()).strip("\n") if self.knowledge else "%s 当前无任何知识数据." % self.name

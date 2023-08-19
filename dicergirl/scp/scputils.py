@@ -1,13 +1,13 @@
 try:
-    from ..utils.messages import help_messages, help_message
-    from ..utils.dicer import Dice, scp_doc, expr
+    from ..utils.docimasy import expr, scp_doc
+    from ..utils.dicer import Dice
     from .scpcards import scp_cards
     from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from .agent import Agent
     from ..utils.multilogging import multilogger
 except ImportError:
-    from dicergirl.utils.messages import help_messages, help_message
-    from dicergirl.utils.dicer import Dice, scp_doc, expr
+    from dicergirl.utils.docimasy import expr, scp_doc
+    from dicergirl.utils.dicer import Dice
     from dicergirl.scp.scpcards import scp_cards
     from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from dicergirl.scp.agent import Agent
@@ -49,8 +49,6 @@ def at(args, event):
         args = "".join(args)
 
         upper = {name.upper(): [tool, name] for name, tool in agt.tools.items()}
-        print(upper.keys())
-        print(args.upper())
         if not args.upper() in upper.keys():
             return f"[Oracle] 看起来该特工并未购置 {args.upper()}."
 
@@ -71,9 +69,9 @@ def deal(event, args):
             reply += f"Level {lvl+1} 准允购置的装备:"
             for weapon in weapons[lvl+1].keys():
                 reply += f"\n  {weapon}: {weapons[lvl+1][weapon]['price']}￥"
-            
+
             reply += "\n"
-        
+
         return reply
     
     allowed_upper = {}
@@ -121,7 +119,6 @@ def scp_dam(args, message):
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
 
     if card["hp"] <= 0:
-        card["hp"] = 0
         r += f", 特工 {card['name']} 已死亡."
     elif (max_hp * 0.8 <= card["hp"]) and (card["hp"] < max_hp):
         r += f", 特工 {card['name']} 具有轻微伤势."
@@ -139,12 +136,12 @@ def scp_dam(args, message):
     scp_cards.update(message, card)
     return r
 
-def sra(args, event):
+def sra(args: list, event):
     if len(args) == 0:
-        return help_message("sra")
+        return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
     elif len(args) > 4:
-        return "[Oracle] 错误: 参数过多(最多4需要但%d给予)." % len(args)
-    
+        return "[Oracle] 错误: 参数过多(最多4需要但%d给予).\n使用`.help ra`指令查看指令使用方法." % len(args)
+
     try:
         difficulty = int(args[-1])
         args.remove(args[-1])
@@ -181,6 +178,7 @@ def sra(args, event):
 
             anb = inv.all_not_base()
             if args[2] in anb.keys() and is_validated_skill:
+                skill_name = [args[2], anb[args[2]]]
                 exp = getattr(inv, anb[args[2]])[args[2]]
                 is_skill = True
             elif not is_validated_skill:
@@ -188,7 +186,7 @@ def sra(args, event):
             else:
                 return f"[Oracle] 错误: 技能、知识或能力 {args[2]} 不存在."
         else:
-            return help_messages.sra
+            return "[Oracle] 我无法解析你的语法, 你可以使用`.help ra`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
     elif not is_base and len(args) == 1:
         if args[0] in all_alias:
             anb = inv.all_not_base()
@@ -209,11 +207,12 @@ def sra(args, event):
                 dices = [dice for dice in (inv.dices[to_en])]
             else:
                 skill_only = False
+            skill_name = [key_name, anb[key_name]]
 
     if not is_base and not is_skill and not skill_only:
         if args[0] in inv.skills.keys():
             exp = inv.skills[args[0]]
-            return expr(Dice(), int(exp))
+            return str(expr(Dice(), int(exp)))
         else:
             return "[Oracle] 错误: 没有这个数据或技能."
 
@@ -253,18 +252,26 @@ def sra(args, event):
             break
 
     r = scp_doc(result, difficulty, encourage=encourage, agent=inv.name, great=great)
-    return r
+
+    if is_skill or skill_only:
+        if r.judge == 1:
+            card_data["p"][skill_name[1]] += 0.1
+        elif r.judge > 1:
+            card_data["p"][skill_name[1]] += 1
+        scp_cards.update(event, card_data)
+
+    return r.detail
 
 def scp_en(event, args):
     if not args:
-        return help_messages.en
+        return "[Oracle] 错误: 你没有给定需要激励的基础属性.\n使用`.help en`指令查看指令使用方法."
 
     try:
         en = int(args[1])
         if not en:
             return f"[Oracle] 无法进行发起 {en} 点激励."
     except ValueError:
-        return help_messages.en
+        return "[Oracle] 错误: 给定需要消耗的激励点应当为整型数.\n使用`.help en`指令查看指令使用方法."
 
     card_data = scp_cards.get(event)
 

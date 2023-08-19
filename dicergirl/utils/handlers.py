@@ -1,14 +1,16 @@
 from typing import Optional
 try:
+    from .docimasy import expr
     from ..utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
     from ..coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
     from ..scp.scpcards import scp_cache_cards, scp_cards
     from ..scp.attributes import scp_attrs_dict
     from ..dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from .. import coc, scp, dnd
-    from ..utils.messages import help_messages
-    from ..utils.dicer import Dice, expr
+    from .messages import help_messages
+    from .dicer import Dice
 except ImportError:
+    from dicergirl.utils.docimasy import expr
     from dicergirl.utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
     from dicergirl.coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
     from dicergirl.scp.scpcards import scp_cache_cards, scp_cards
@@ -16,7 +18,7 @@ except ImportError:
     from dicergirl.dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from dicergirl import coc, scp, dnd
     from dicergirl.utils.messages import help_messages
-    from dicergirl.utils.dicer import Dice, expr
+    from dicergirl.utils.dicer import Dice
 
 def __set_plus_format(args: list):
     while True:
@@ -150,14 +152,13 @@ def show_handler(message, args, at, mode=None):
             card_data = cards.get(message, qid=qid)
             inv = charactor().load(card_data)
             data = "[Oracle] 使用中人物卡: \n" 
-            data += inv.output() + "\n"
-            data += inv.skills_output()
+            data += inv.output()
             r.append(data)
         if cache_cards.get(message, qid=qid):
             card_data = cache_cards.get(message, qid=qid)
             inv = charactor().load(card_data)
             r.append("[Oracle] 已暂存人物卡: \n" + inv.output())
-    elif args[0] in ["skill", "s", "skills"]:
+    elif args[0] in ["detail", "de", "details"]:
         if cards.get(message, qid=qid):
             card_data = cards.get(message, qid=qid)
             inv = charactor().load(card_data)
@@ -207,7 +208,8 @@ def del_handler(message, args, at, mode=None):
                     r.append("[Oracle] 已清空暂存人物卡数据.")
                 else:
                     r.append("[Oracle] 错误: 未知错误.")
-            r.append("[Oracle] 暂无缓存人物卡数据.")
+            else:
+                r.append("[Oracle] 暂无缓存人物卡数据.")
         elif arg == "card":
             if cards.get(message):
                 if cards.delete(message):
@@ -224,6 +226,7 @@ def del_handler(message, args, at, mode=None):
     return r
 
 def roll(args: str) -> str:
+    print(args)
     time = 1
     if args[0] == "#":
         if len(args) == 1:
@@ -245,9 +248,10 @@ def roll(args: str) -> str:
     try:
         d = Dice(args)
         r = expr(d, None)
+
         for _ in range(time-1):
-            r += "\n"
             r += expr(d, None)
-        return r
+
+        return r.detail
     except ValueError:
         return help_messages.r

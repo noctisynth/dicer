@@ -1,13 +1,15 @@
 from typing import Optional
 try:
-    from ..utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
-    from ..utils.dicer import Dice, expr
+    from ..utils.docimasy import expr
+    from ..utils.messages import temporary_madness, madness_end, phobias, manias
+    from ..utils.dicer import Dice
     from ..utils.multilogging import multilogger
     from .coccards import coc_cards, coc_attrs_dict
     from .investigator import Investigator
 except ImportError:
-    from dicergirl.utils.messages import help_messages, temporary_madness, madness_end, phobias, manias, help_message
-    from dicergirl.utils.dicer import Dice, expr
+    from dicergirl.utils.docimasy import expr
+    from dicergirl.utils.messages import temporary_madness, madness_end, phobias, manias
+    from dicergirl.utils.dicer import Dice
     from dicergirl.utils.multilogging import multilogger
     from dicergirl.coc.coccards import coc_cards, coc_attrs_dict
     from dicergirl.coc.investigator import Investigator
@@ -65,7 +67,7 @@ def sc(arg, event):
             coc_cards.update(event, card)
         return reply
     except:
-        return help_messages.sc
+        return "[Oracle] 产生了未知的错误, 你可以使用`.help ra`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
 
 def st():
     result = random.randint(1, 20)
@@ -137,7 +139,7 @@ def coc_dam(args, message):
 
 def ra(args, event):
     if len(args) == 0:
-        return help_message("ra")
+        return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
     if len(args) > 2:
         return "[Oracle] 错误: 参数过多(2需要 %d给予)." % len(args)
 
@@ -175,9 +177,8 @@ def ra(args, event):
             pass
     r = expr(d, anum)
     for _ in range(time-1):
-        r += "\n"
         r += expr(d, anum)
-    return r
+    return r.detail
 
 def ti():
     i = random.randint(1, 10)
@@ -256,12 +257,12 @@ def rp(args):
 
 def coc_en(event, args):
     if not args:
-        return help_messages.en
+        return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
 
     try:
         arg = int(args[1])
     except ValueError:
-        return help_messages.en
+        return "[Oracle] 错误: 给定需要消耗的激励点应当为整型数.\n使用`.help ra`指令查看指令使用方法."
 
     check = random.randint(1, 100)
 

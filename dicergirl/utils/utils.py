@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Dict, List
 
 import json
 import sys
@@ -24,13 +24,17 @@ version = "3.1.26"
 current_dir = Path(__file__).resolve().parent
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"
+log_dir = dicer_girl_dir / "log"
 _coc_cachepath = data_dir / "coc_cards.json"
 _scp_cachepath = data_dir / "scp_cards.json"
 _dnd_cachepath = data_dir / "dnd_cards.json"
 _super_user = data_dir / "super_user.json"
+_loggers_cachepath = data_dir / "loggers.json"
 logger = multilogger(name="Dicer Girl", payload="utils")
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
 modes = {module.split(".")[-1]: sys.modules[module] for module in sys.modules if hasattr(sys.modules[module], "__type__")}
+loggers: Dict[str, dict] = {}
+saved_loggers: Dict[str, dict]
 
 if package == "nonebot2":
     class Message:
@@ -56,12 +60,20 @@ elif package == "qqguild":
             pass
 
 def init():
+    global saved_loggers
     if not dicer_girl_dir.exists():
         logger.info("Dicer Girl 文件夹未建立, 建立它.")
         dicer_girl_dir.mkdir()
     if not data_dir.exists():
         logger.info("Dicer Girl 数据文件夹未建立, 建立它.")
         data_dir.mkdir()
+    if not log_dir.exists():
+        logger.info("Dicer Girl 日志文件夹未建立, 建立它.")
+        log_dir.mkdir()
+    if not _loggers_cachepath.exists():
+        logger.info("日志管理文件未建立, 建立它.")
+        with open(_loggers_cachepath, "w", encoding="utf-8") as f:
+            f.write("{}")
     if not _coc_cachepath.exists():
         logger.info("COC 存储文件未建立, 建立它.")
         with open(_coc_cachepath, "w", encoding="utf-8") as f:
@@ -78,6 +90,29 @@ def init():
         logger.info("超级用户存储文件未建立, 建立它.")
         with open(_super_user, "w", encoding="utf-8") as f:
             f.write("{}")
+    saved_loggers = load_loggers()
+
+def load_loggers():
+    return json.loads(open(_loggers_cachepath, "r").read())
+
+def get_loggers(event):
+    got_loggers = json.load(open(_loggers_cachepath, "r"))
+    if not get_group_id(event) in got_loggers:
+        return []
+
+    return got_loggers[get_group_id(event)]
+
+def add_logger(event: GroupMessageEvent, logname):
+    global saved_loggers
+    if not get_group_id(event) in saved_loggers.keys():
+        saved_loggers[get_group_id(event)] = []
+
+    try:
+        saved_loggers[get_group_id(event)].append(logname)
+        json.dump(saved_loggers, open(_loggers_cachepath, "w"))
+        return True
+    except:
+        return False
 
 def set_config(appid, token):
     return setconfig(appid, token, path=dicer_girl_dir, filename="config.yaml")

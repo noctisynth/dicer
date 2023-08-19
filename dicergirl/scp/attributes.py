@@ -1,3 +1,6 @@
+DEFAULT_DURABILITY = 10000
+GUN_DEFAULT_DURABILITY = 1000000
+
 scp_attrs_dict = {
     "名字": ["name", "名字", "名称", "姓名"],
     "性别": ["sex", "性别"],
@@ -95,100 +98,138 @@ weapons = {
         "泰瑟枪": {
             "base": "1d4",
             "x": "0",
-            "price": 210
+            "price": 210,
+            "durability": DEFAULT_DURABILITY,
+            "using": "remote"
         },
         "弩": {
             "base": "1d10",
             "x": "3d8",
-            "price": 48
+            "price": 48,
+            "durability": DEFAULT_DURABILITY,
+            "using": "remote"
         },
         "鲁格手枪": {
             "base": "1d6",
             "x": "1d6",
-            "price": 480
+            "price": 480,
+            "durability": DEFAULT_DURABILITY,
+            "using": "infight"
         },
         "M206": {
             "base": "2d6",
             "x": "1d6",
-            "price": 360
+            "price": 360,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
         },
         "RM380": {
             "base": "1d8",
             "x": "1d4",
-            "price": 360
+            "price": 360,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
         },
         "沃尔特-RPK": {
             "base": "1d6",
             "x": "1d8",
-            "price": 900
+            "price": 900,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
         },
         "棒球棍": {
             "base": "0",
             "x": "2d8",
-            "price": 24
+            "price": 24,
+            "durability": DEFAULT_DURABILITY,
+            "using": "infight"
         },
         "指虎": {
             "base": "1d6",
             "x": "1d8",
-            "price": 25
+            "price": 25,
+            "durability": DEFAULT_DURABILITY,
+            "using": "infight"
         },
         "撬棍": {
             "base": "1d12",
             "x": "1d10",
-            "price": 96
+            "price": 96,
+            "durability": DEFAULT_DURABILITY,
+            "using": "infight"
         },
         "甩棍": {
             "base": "1d8",
             "x": "1d4",
-            "price": 510
+            "price": 510,
+            "durability": DEFAULT_DURABILITY,
+            "using": "infight"
         },
         "生存小刀": {
             "base": "1d8",
             "x": "1d6",
-            "price": 120
+            "price": 120,
+            "durability": DEFAULT_DURABILITY,
+            "using": "infight"
         },
         "鞭子": {
             "base": "1d10",
             "x": "1d6",
-            "price": 168
+            "price": 168,
+            "durability": DEFAULT_DURABILITY,
+            "using": "infight"
         },
         "燃烧瓶": {
             "base": "4d10",
             "x": "0",
-            "price": 96
+            "price": 96,
+            "durability": 1,
+            "using": "throw"
         }
     },
     2: {
-       "克洛克-19": {
-           "base": "2d6",
-           "x": "1d8+3",
-           "price": 750
-       },
-       "M1911": {
-           "base": "2d8",
-           "x": "1d10+3",
-           "price": 1500
-       },
-       "M4A1": {
-           "base": "4d8",
-           "x": "2d6",
-           "price": 4500
-       },
-       "马林-336C": {
-           "base": "2d8",
-           "x": "2d8+2",
-           "price": 750
-       },
-       "和平使者": {
-           "base": "2d8",
-           "x": "1d8",
-           "price": 1050
-       },
-       "SAKO-Finnlight": {
-           "base": "2d8",
-           "x": "3d8",
-           "price": 1650
-       }
+        "克洛克-19": {
+            "base": "2d6",
+            "x": "1d8+3",
+            "price": 750,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
+        },
+        "M1911": {
+            "base": "2d8",
+            "x": "1d10+3",
+            "price": 1500,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
+        },
+        "M4A1": {
+            "base": "4d8",
+            "x": "2d6",
+            "price": 4500,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
+        },
+        "马林-336C": {
+            "base": "2d8",
+            "x": "2d8+2",
+            "price": 750,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
+        },
+        "和平使者": {
+            "base": "2d8",
+            "x": "1d8",
+            "price": 1050,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
+        },
+        "SAKO-Finnlight": {
+            "base": "2d8",
+            "x": "3d8",
+            "price": 1650,
+            "durability": GUN_DEFAULT_DURABILITY,
+            "using": "remote"
+        }
     }
 }
 

@@ -165,6 +165,12 @@ class Investigator(object):
     def output(self) -> str:
         return self.__repr__()
 
+    def rollcount(self) -> tuple:
+        return (self.__count(), self.__count() + self.luc)
+
+    def __count(self):
+        return self.str + self.con + self.siz + self.dex + self.app + self.int + self.pow + self.edu
+
     def load(self, data: dict):
         self.__dict__.update(data)
         return self

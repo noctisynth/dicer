@@ -1,5 +1,7 @@
 from pathlib import Path
+from datetime import datetime
 from nonebot.plugin import PluginMetadata
+from typing import Dict
 from .utils.settings import set_package, get_package
 from .utils.multilogging import multilogger
 
@@ -7,7 +9,7 @@ import nonebot
 
 __plugin_meta__ = PluginMetadata(
     name="欧若可骰娘",
-    description="完善的跑团机器人, 支持 COC/DND/SCP 等跑团模式.",
+    description="完善的可拓展跑团机器人, 支持 COC/DND/SCP 等跑团模式.",
     usage="安装即可使用.",
     type="application",
     homepage="https://gitee.com/unvisitor/dicer",
@@ -29,6 +31,7 @@ import sys
 import random
 import re
 import asyncio
+import json
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -37,7 +40,7 @@ package = get_package()
 
 if package == "nonebot2":
     from .coc.investigator import Investigator
-    from .coc.coccards import coc_cards, coc_cache_cards
+    from .coc.coccards import coc_cards, coc_cache_cards, coc_rolls
     from .coc.cocutils import sc, st, at, coc_dam, coc_en, ra, ti, li, rb, rp
 
     from .scp.agent import Agent
@@ -51,21 +54,23 @@ if package == "nonebot2":
 
     from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
-    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, get_handlers, get_config, modes, get_mentions
+    from .utils.utils import init, is_super_user, add_super_user, rm_super_user, su_uuid, format_msg, format_str, modes, get_mentions
+    from .utils.utils import get_loggers, loggers, add_logger, log_dir, get_group_id
+    from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.handlers import show_handler, set_handler, del_handler, roll
     from .utils.chat import chat
 
     from nonebot.rule import Rule
     from nonebot.matcher import Matcher
-    from nonebot.plugin import on_startswith, on_message
+    from nonebot.plugin import on_startswith, on_message, on
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
     from nonebot.consts import STARTSWITH_KEY
 
     if driver._adapters.get("OneBot V12"):
-        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent
+        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, MessageSegment, Event
     else:
-        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, MessageSegment, Event
 
     class StartswithRule:
         __slots__ = ("msg", "ignorecase")
@@ -89,7 +94,7 @@ if package == "nonebot2":
 
         async def __call__(self, event, state) -> bool:
             try:
-                text = translate_punctuation(event.get_plaintext())
+                text = translate_punctuation(event.get_plaintext()).strip()
             except Exception:
                 return False
             if match := re.match(
@@ -120,6 +125,9 @@ if package == "nonebot2":
     debugcommand = on_startswith(".debug", priority=2, block=True)
     superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
     botcommand = on_startswith(".bot", priority=1, block=True)
+    logcommand = on_startswith(".log", priority=1, block=True)
+    loghandlercommand = on_startswith("", priority=1, block=False)
+    selflogcommand = on("message_sent", priority=1, block=False)
     coccommand = on_startswith(".coc", priority=1, block=True)
     scpcommand = on_startswith(".scp", priority=1, block=True)
     dndcommand = on_startswith(".dnd", priority=1, block=True)
@@ -157,6 +165,7 @@ if package == "nonebot2":
         init()
         coc_cards.load()
         scp_cards.load()
+        dnd_cards.load()
         logger.success("欧若可骰娘初始化完毕.")
 
     @testcommand.handle()
@@ -272,28 +281,172 @@ if package == "nonebot2":
         else:
             await matcher.send(help_message("bot"))
 
+    @logcommand.handle()
+    async def loghandler(matcher: Matcher, event: Event):
+        args = format_msg(event.get_message(), begin=".log")
+        commands = CommandParser(
+            Commands([
+                Only("show"),
+                Only("add"),
+                Optional("name", str),
+                Optional("stop", int),
+                Optional("start", int),
+                Optional("remove", int)
+                ]),
+            args=args,
+            auto=True
+            ).results
+
+        if commands["show"]:
+            #if not str(event.group_id) in saved_loggers.keys():
+            #    await matcher.send("该群组暂无日志.")
+            #    saved_loggers[event.group_id] = {}
+            #    return
+
+            gl = get_loggers(event)
+            if len(gl) == 0:
+                await matcher.send("暂无存储的日志.")
+                return
+
+            reply = "该群聊所有日志:\n"
+            for i in range(len(gl)):
+                reply += f"序列 {i} : {gl[i]}\n"
+            reply.strip("\n")
+
+            await matcher.send(reply)
+            return
+
+        if commands["add"]:
+            if commands["name"]:
+                logname = str(log_dir/(commands["name"]+".trpg.log"))
+            else:
+                logname = str(log_dir/(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")+".trpg.log"))
+
+            new_logger = multilogger(name="DG Msg Logger", payload="TRPG")
+            new_logger.remove()
+            new_logger.add(logname, encoding='utf-8', format="{message}", level="INFO")
+            if not get_group_id(event) in loggers.keys():
+                loggers[get_group_id(event)] = {}
+
+            keys = loggers[get_group_id(event)].keys()
+            if len(keys) == 0:
+                index = 1
+            else:
+                index = max(keys) + 1
+
+            loggers[get_group_id(event)][index] = [new_logger, logname]
+            if not add_logger(event, logname):
+                raise IOError("无法新增日志.")
+            await matcher.send(f"[Oracle] 新增日志序列: {index}\n日志文件: {logname}")
+            return
+
+        if commands["stop"]:
+            if not get_group_id(event) in loggers.keys():
+                await matcher.send("该群组从未设置过日志.")
+                loggers[get_group_id(event)] = {}
+                return
+
+            if not commands["stop"] in loggers[get_group_id(event)]:
+                await matcher.send("目标日志不存在.")
+                return
+
+            loggers[get_group_id(event)][commands["stop"]][0].remove()
+            await matcher.send(f"日志序列 {commands['stop']} 已停止记录.")
+            return
+
+        if commands["remove"]:
+            gl = get_loggers(event)
+            if not get_group_id(event) in loggers.keys():
+                await matcher.send("该群组从未设置过日志.")
+                loggers[get_group_id(event)] = {}
+                return
+
+            #if not commands["remove"] in loggers[get_group_id(event)]:
+            #    await matcher.send("目标日志不存在.")
+            #    return
+
+            loggers[get_group_id(event)][commands["remove"]][0].remove()
+            Path(loggers[get_group_id(event)][commands["remove"]][1]).unlink()
+            loggers[get_group_id(event)].pop([commands["remove"]])
+            await matcher.send(f"日志序列 {commands['remove']} 已删除.")
+            return
+
+        await matcher.send("骰娘日志管理系统, 使用`.help log`指令详细信息.")
+
+    def trpg_log(event):
+        if not get_group_id(event) in loggers.keys():
+            return
+
+        for log in loggers[get_group_id(event)].keys():
+            if isinstance(event, GroupMessageEvent):
+                message = event.get_user_id() + ": " + event.get_message()
+            elif isinstance(event, Event):
+                message = "Oracle: " + event.raw_message
+            loggers[get_group_id(event)][log][0].info(message)
+
+    @selflogcommand.handle()
+    @loghandlercommand.handle()
+    def loggerhandler(event: Event):
+        trpg_log(event)
+
     @coccommand.handle()
     async def cochandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_msg(event.get_message(), begin=".coc")
-        if len(args) > 1:
-            logger.info("指令错误, 驳回.")
-            await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-            return False
+        args = format_msg(event.get_message(), begin=".coc", zh_en=True)
+        qid = event.get_user_id()
+        commands = CommandParser(
+            Commands([
+                Only("cache", False),
+                Optional("set", int),
+                Optional("age", int, 20),
+                Optional("name", str),
+                Optional("sex", str, "女"),
+                Optional("roll", int, 1)
+                ]),
+            args=args,
+            auto=True
+            ).results
+        toroll = commands["roll"]
 
-        try:
-            if len(args) == 0:
-                raise ValueError
-            args = int(args[0])
-        except ValueError:
-            await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-            args = 20
+        if commands["set"]:
+            coc_cards.update(event, coc_rolls[qid][commands["set"]], save=True)
+            inv = Investigator().load(coc_rolls[qid][commands["set"]])
+            await matcher.send(f"使用序列 {commands['set']} 卡:\n{inv.output()}")
+            coc_rolls[qid] = {}
+            return
 
-        inv = Investigator()
-        await matcher.send(inv.age_change(args))
+        age = commands["age"]
+        name = commands["name"]
 
-        if 15 <= args and args < 90:
+        if not (15 <= age and age < 90):
+            await matcher.send(Investigator().age_change(age))
+            return
+
+        reply = ""
+        if qid in coc_rolls.keys():
+            rolled = len(coc_rolls[qid].keys())
+        else:
+            coc_rolls[qid] = {}
+            rolled = 0
+
+        for i in range(toroll):
+            inv = Investigator()
+            inv.age_change(age)
+            inv.sex = commands["sex"]
+
+            if name:
+                inv.name = name
+
+            coc_rolls[qid][rolled+i] = inv.__dict__
+            count = inv.rollcount()
+            reply += f"天命编号: {rolled+i}\n"
+            reply += inv.output() + "\n"
+            reply += f"共计: {count[0]}/{count[1]}\n"
+
+        if toroll == 1:
             coc_cache_cards.update(event, inv.__dict__, save=False)
-            await matcher.send(str(inv.output()))
+
+        reply.rstrip("\n")
+        await matcher.send(reply)
 
     @scpcommand.handle()
     async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
@@ -314,6 +467,18 @@ if package == "nonebot2":
                     await matcher.send(des)
                     await asyncio.sleep(2)
                 return
+            elif args[0] in ["level", "levelup", "lu"]:
+                agt = Agent().load(scp_cards.get(event, qid=qid))
+
+                if agt.ach >= 10:
+                    agt.ach -= 10
+                    agt.level += 1
+                    scp_cards.update(event, inv_dict=agt.__dict__, save=True)
+                    await matcher.send(f"[Oracle] {agt.name} 特工权限提升至 {agt.level} 级.")
+                    return
+                else:
+                    await matcher.send(f"[Oracle] 特工 {agt.name} 功勋不足, 无法申请提升权限等级.")
+                    return
             elif args[0] in ["reset", "r"]:
                 if not is_super_user(event):
                     await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
@@ -395,7 +560,7 @@ if package == "nonebot2":
     async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=".dnd")
         if len(args) > 1:
-            logger.info("指令错误, 驳回.")
+            logger.warning("指令错误, 驳回.")
             await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
             return True
 
@@ -537,11 +702,11 @@ if package == "nonebot2":
         args = format_msg(event.get_message(), begin=".ra")
         if mode in ["coc", "scp", "dnd"]:
             if mode == "scp":
-                await matcher.send(sra(args, event))
+                await matcher.send(str(sra(args, event)))
             elif mode == "coc":
-                await matcher.send(ra(args, event))
+                await matcher.send(str(ra(args, event)))
             elif mode == "dnd":
-                await matcher.send(dra(args, event))
+                await matcher.send(str(dra(args, event)))
         return
 
     @rhcommand.handle()

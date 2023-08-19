@@ -1,12 +1,14 @@
 from typing import Dict, List
 try:
+    from ..utils.docimasy import expr
     from ..utils.messages import help_messages
-    from ..utils.dicer import Dice, expr
+    from ..utils.dicer import Dice
     from ..utils.utils import _coc_cachepath as _cachepath, get_group_id, get_user_id
     from ..utils.multilogging import multilogger
 except ImportError:
+    from dicergirl.utils.docimasy import expr
     from dicergirl.utils.messages import help_messages
-    from dicergirl.utils.dicer import Dice, expr
+    from dicergirl.utils.dicer import Dice
     from dicergirl.utils.utils import _coc_cachepath as _cachepath, get_group_id, get_user_id
     from dicergirl.utils.multilogging import multilogger
 
@@ -87,3 +89,4 @@ coc_attrs_dict: Dict[str, List[str]] = {
     "理智": ["san", "理智", "精神状态", "san值"],
     "生命": ["hp", "生命"]
 }
+coc_rolls = {}

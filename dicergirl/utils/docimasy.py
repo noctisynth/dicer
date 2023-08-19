@@ -46,6 +46,10 @@ class Docimasy:
                 self.detail += "\n" + toadd
         elif isinstance(toadd, int):
             self.judge += toadd
+        elif isinstance(toadd, Docimasy):
+            self.detail += "\n" + toadd
+        else:
+            raise NotImplementedError
         return self
 
     def __int__(self):

@@ -145,39 +145,37 @@ def ra(args, event):
 
     card_data = coc_cards.get(event)
     if not card_data:
-        return "[Oracle] 在执行参数检定前, 请先执行`.coc`车卡并执行`.set`保存."
+        if len(args) == 1:
+            return "[Oracle] 你尚未保存人物卡, 请先执行`.coc`车卡并执行`.set`保存.\n如果你希望快速检定, 请执行`.ra [str: 技能名] [int: 技能值]`."
+    
+        return str(expr())
+
     inv = Investigator().load(card_data)
+
     is_base = False
     for _, alias in coc_attrs_dict.items():
         if args[0] in alias:
-            v = int(eval("inv.{prop}".format(prop=alias[0])))
+            exp = int(getattr(inv, alias[0]))
             is_base = True
             break
+
     if not is_base:
         for skill in inv.skills:
             if args[0] == skill:
-                v = inv.skills[skill]
+                exp = inv.skills[skill]
                 break
             else:
-                v = False
-    if not v:
+                exp = False
+
+    if not exp:
         return "[Oracle] 未知的参数或技能."
-    d = Dice()
+
     time = 1
-    if len(args) > 0:
-        try:
-            time = 1
-        except:
-            pass
-    anum: Optional[int] = None
-    if len(args) > 0:
-        try:
-            anum = int(v)
-        except ValueError:
-            pass
-    r = expr(d, anum)
+    r = expr(Dice(), exp)
+
     for _ in range(time-1):
-        r += expr(d, anum)
+        r += str(expr(Dice(), exp))
+
     return r.detail
 
 def ti():

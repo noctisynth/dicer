@@ -50,8 +50,10 @@ def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, c
                 try:
                     if not args[1].startswith(("-", "+")):
                         cha.__dict__[alias[0]] = int(args[1])
-                    else:
+                    elif args[1].startswith("+"):
                         cha.__dict__[alias[0]] += int(args[1][1:])
+                    elif args[1].startswith("-"):
+                        cha.__dict__[alias[0]] -= int(args[1][1:])
                 except ValueError:
                     return "基础数据 %s 要求正整数数据, 但你传入了 %s." % (args[0], args[1])
             cards.update(event, cha.__dict__, qid=qid)
@@ -61,8 +63,10 @@ def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid
     try:
         if not args[1].startswith(("-", "+")):
             cha.skills[args[0]] = int(args[1])
-        else:
+        elif args[1].startswith("+"):
             cha.skills[args[0]] += int(args[1][1:])
+        elif args[1].startswith("-"):
+            cha.skills[args[0]] -= int(args[1][1:])
         cards.update(event, cha.__dict__, qid=qid)
         reply.append("设置%s %s 技能为: %s." % (module.__cname__, args[0], cha.skills[args[0]]))
     except ValueError:

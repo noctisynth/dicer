@@ -66,6 +66,7 @@ if package == "nonebot2":
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
     from nonebot.consts import STARTSWITH_KEY
+    from nonebot.internal.matcher.matcher import Matcher
 
     if driver._adapters.get("OneBot V12"):
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, MessageSegment, Event
@@ -106,13 +107,13 @@ if package == "nonebot2":
                 return True
             return False
 
-    def startswith(msg, ignorecase=True):
+    def startswith(msg, ignorecase=True) -> Rule:
         if isinstance(msg, str):
             msg = (msg,)
 
         return Rule(StartswithRule(msg, ignorecase))
 
-    def on_startswith(commands, priority=0, block=True):
+    def on_startswith(commands, priority=0, block=True) -> Matcher:
         if isinstance(commands, str):
             commands = (commands, )
 
@@ -575,7 +576,7 @@ if package == "nonebot2":
         adv = Adventurer()
         adv.age_check(args)
         adv.init()
-        
+
         if adv.int[0] <= 8:
             await matcher.send("[Orcale] 很遗憾, 检定新的冒险者智力不足, 弱智是不允许成为冒险者的, 请重新进行车卡检定.")
             return True
@@ -608,10 +609,23 @@ if package == "nonebot2":
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
         args = format_msg(event.get_message(), begin=(".set", ".st"))
         at = get_mentions(event)
+        commands = CommandParser(
+            Commands([
+                Only("show"),
+                Optional("del", str),
+                Only("clear")
+            ]),
+        )
 
         if at and not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
+
+        if commands["show"]:
+            return await showhandler(matcher, event)
+
+        if commands["del"]:
+            return await delhandler(matcher, event)
 
         try:
             sh = set_handler(event, args, at, mode=mode)

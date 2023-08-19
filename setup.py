@@ -32,7 +32,8 @@ setuptools.setup(
         'loguru',
         'pyyaml',
         'openai',
-        'multilogging'
+        'multilogging',
+        'psutil'
     ],
     python_requires=">=3",
 )

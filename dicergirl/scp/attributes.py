@@ -18,6 +18,7 @@ scp_attrs_dict = {
     "余额": ["money", "金钱", "余额", "金额"],
     "等级": ["level", "等级"]
 }
+""" SCP 基础属性 """
 
 knowledge_data = {
     "解剖": ["解剖", "急救"],
@@ -47,6 +48,7 @@ knowledge_data = {
     "技术": ["技术"],
     "视觉信号": ["视觉信号", "手势语言"],
 }
+""" SCP 知识 """
 
 skills_data = {
     "近战": ["近战"],
@@ -73,6 +75,7 @@ skills_data = {
     "摔跤": ["摔跤", "缴械"],
     "写作": ["写作"],
 }
+""" SCP 技能 """
 
 ability_data = {
     "意识": ["意识", "反应"],
@@ -92,6 +95,7 @@ ability_data = {
     "疼痛抗性": ["疼痛抗性"],
     "自我控制": ["自我控制"],
 }
+""" SCP 能力 """
 
 weapons = {
     1: {
@@ -232,6 +236,7 @@ weapons = {
         }
     }
 }
+""" SCP 武器 """
 
 all_names = list(set().union(scp_attrs_dict, knowledge_data, skills_data, ability_data))
 all_alias = []

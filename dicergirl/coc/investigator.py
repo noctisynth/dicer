@@ -12,6 +12,7 @@ def randattr(time: int = 3, ex: int = 0):
     return (r+ex)*5
 
 class Investigator(object):
+    """ COC 调查员人物卡 """
     def __init__(self) -> None:
         self.name = "无名调查员"
         self.age = 20

@@ -5,6 +5,7 @@ except ImportError:
     from errors import NoneTypeCommandError, CommandRequired, TooManyAliasCommandError
 
 class Optional:
+    """ 可选指令 """
     def __init__(self, key: str, cls: type, default: Any=None):
         if not key:
             raise NoneTypeCommandError("Optional parameter must not be `None`.")
@@ -20,6 +21,7 @@ class Optional:
         return self.key[0]
 
 class Required:
+    """ 必选指令 """
     def __init__(self, key, cls: type, default: Any=None):
         if not key:
             raise NoneTypeCommandError("Required parameter must not be `None`.")
@@ -35,6 +37,7 @@ class Required:
         return self.key[0]
 
 class Only:
+    """ 布尔指令 """
     def __init__(self, key, default: bool=None):
         if not key:
             raise NoneTypeCommandError("Bool parameter must not be `None`.")
@@ -49,6 +52,7 @@ class Only:
         return self.key[0]
 
 class Commands(list):
+    """ 指令集合 """
     def __init__(self, *args, **kwargs):
         super(Commands, self).__init__(*args, **kwargs)
 
@@ -74,6 +78,19 @@ def optional(commands: Commands):
     return commands.__optional__()
 
 class CommandParser:
+    """指令解析类
+    示例:
+        ```python
+        cp = CommandParser(
+            Commands([Optional("optional"), Required("required"), Only("bool"), ...]),
+            args = ["required", "valueofrequired", "bool"],
+            auto = True # 自动解析指令, `auto=True`时, `args`不得为空
+            ).results
+        print(cp["optional"]) # 输出为`None`
+        print(cp["required"]) # 输出为`valueofrequired`
+        print(cp["bool"]) # 输出为`True`
+        ```
+    """
     def __init__(self, commands: Commands=None, args: List[str]=None, auto: bool=False):
         self.results: Dict[str, str] = {}
 
@@ -90,6 +107,7 @@ class CommandParser:
             self.shlex()
 
     def shlex(self, args: List[str]=None):
+        """ 开始拆析指令集合 """
         if not args:
             args = self.args
 

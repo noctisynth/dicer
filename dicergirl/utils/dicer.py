@@ -16,6 +16,17 @@ def is_digit(number):
         return False
 
 class Dice:
+    """掷骰类
+    参数:
+        roll_string: 标准掷骰表达式
+        explode: SCP 用, 爆炸骰方法
+    示例:
+        ```python
+        dice = Dice("1d10")
+        dice.roll()
+        print(dice.total) # 输出`1d10`投掷结果
+        ```
+    """
     def __init__(self, roll_string="", explode=False, first=True):
         self.roll_string = roll_string
         self.dices = []

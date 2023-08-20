@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Callable
+from loguru._logger import Logger
 
 import json
 import sys
@@ -10,31 +11,40 @@ import json
 
 try:
     from dicergirl.utils.decorators import translate_punctuation
-    from dicergirl.utils.settings import get_package, setconfig, getconfig
+    from dicergirl.utils.settings import get_package, setconfig, getconfig, change_status, load_status_settings
     from dicergirl.utils.multilogging import multilogger
     from dicergirl import coc, scp, dnd
 except ImportError:
     from .decorators import translate_punctuation
-    from .settings import get_package, setconfig, getconfig
+    from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
     from .multilogging import multilogger
     from .. import coc, scp, dnd
 
 package = get_package()
+""" 当前 Dicer Girl 运行平台 """
 version = "3.1.27"
+""" Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
+""" Dicer Girl 当前目录 """
 dicer_girl_dir = Path.home() / ".dicergirl"
 data_dir = dicer_girl_dir / "data"
 log_dir = dicer_girl_dir / "log"
+_dicer_girl_status = data_dir / "status.json"
 _coc_cachepath = data_dir / "coc_cards.json"
 _scp_cachepath = data_dir / "scp_cards.json"
 _dnd_cachepath = data_dir / "dnd_cards.json"
+_hsr_cache_path = data_dir / "hsr.json"
 _super_user = data_dir / "super_user.json"
 _loggers_cachepath = data_dir / "loggers.json"
 logger = multilogger(name="Dicer Girl", payload="utils")
+""" `utils.py`日志系统 """
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
 modes = {module.split(".")[-1]: sys.modules[module] for module in sys.modules if hasattr(sys.modules[module], "__type__")}
-loggers: Dict[str, dict] = {}
+""" 已导入的跑团模块 """
+loggers: Dict[str, Dict[int, List[Logger | str]]] = {}
+""" 正在运行的日志 """
 saved_loggers: Dict[str, dict]
+""" 存储的日志 """
 
 if package == "nonebot2":
     class Message:
@@ -59,50 +69,46 @@ elif package == "qqguild":
         class Message:
             pass
 
-def init():
+def init() -> None:
+    """ 骰娘初始化 """
     global saved_loggers
-    if not dicer_girl_dir.exists():
-        logger.info("Dicer Girl 文件夹未建立, 建立它.")
-        dicer_girl_dir.mkdir()
-    if not data_dir.exists():
-        logger.info("Dicer Girl 数据文件夹未建立, 建立它.")
-        data_dir.mkdir()
-    if not log_dir.exists():
-        logger.info("Dicer Girl 日志文件夹未建立, 建立它.")
-        log_dir.mkdir()
-    if not _loggers_cachepath.exists():
-        logger.info("日志管理文件未建立, 建立它.")
-        with open(_loggers_cachepath, "w", encoding="utf-8") as f:
-            f.write("{}")
-    if not _coc_cachepath.exists():
-        logger.info("COC 存储文件未建立, 建立它.")
-        with open(_coc_cachepath, "w", encoding="utf-8") as f:
-            f.write("{}")
-    if not _scp_cachepath.exists():
-        logger.info("SCP 存储文件未建立, 建立它.")
-        with open(_scp_cachepath, "w", encoding="utf-8") as f:
-            f.write("{}")
-    if not _dnd_cachepath.exists():
-        logger.info("DND 存储文件未建立, 建立它.")
-        with open(_dnd_cachepath, "w", encoding="utf-8") as f:
-            f.write("{}")
-    if not _super_user.exists():
-        logger.info("超级用户存储文件未建立, 建立它.")
-        with open(_super_user, "w", encoding="utf-8") as f:
-            f.write("{}")
+    dirs: Dict[str, List[Path, list]] = {
+        "Dicer Girl": [dicer_girl_dir, "dir"],
+        "Dicer Girl 数据": [data_dir, "dir"],
+        "Dicer Girl 日志": [log_dir, "dir"],
+        "Dicer Girl 状态管理": [_dicer_girl_status, "file"],
+        "日志管理": [_loggers_cachepath, "file"],
+        "COC 存储": [_coc_cachepath, "file"],
+        "SCP 存储": [_scp_cachepath, "file"],
+        "DND 存储": [_dnd_cachepath, "file"],
+        "HSR 存储": [_hsr_cache_path, "file"],
+        "超级用户存储": [_super_user, "file"]
+    }
+    for name, dir in dirs.items():
+        if not dir[0].exists():
+            logger.info(f"{name}{'文件夹' if dir[1] == 'dir' else '文件'}未建立, 建立它.")
+            if dir[1] == "dir":
+                dir[0].mkdir()
+            else:
+                with open(dir[0], "w", encoding="utf-8") as f:
+                    f.write("{}")
     saved_loggers = load_loggers()
+    load_status()
 
-def load_loggers():
+def load_loggers() -> Dict[str, list]:
+    """ 加载所有的已存储的日志 """
     return json.loads(open(_loggers_cachepath, "r").read())
 
-def get_loggers(event):
+def get_loggers(event) -> List[str]:
+    """ 获取`event`所指向的群聊中所有的日志 """
     got_loggers = json.load(open(_loggers_cachepath, "r"))
     if not get_group_id(event) in got_loggers:
         return []
 
     return got_loggers[get_group_id(event)]
 
-def add_logger(event: GroupMessageEvent, logname):
+def add_logger(event: GroupMessageEvent, logname) -> bool:
+    """ 新增日志序列 """
     global saved_loggers
     if not get_group_id(event) in saved_loggers.keys():
         saved_loggers[get_group_id(event)] = []
@@ -114,13 +120,22 @@ def add_logger(event: GroupMessageEvent, logname):
     except:
         return False
 
-def set_config(appid, token):
+def remove_logger(event: GroupMessageEvent, id: int) -> Dict[str, list]:
+    """ 从存储的`loggers.json`中移除指定`logger` """
+    saved_loggers[get_group_id(event)].pop(id)
+    json.dump(saved_loggers, open(_loggers_cachepath, "w"))
+    return saved_loggers
+
+def set_config(appid, token) -> dict:
+    """ 在`QQGuild`模式中设置频道机器人`appid`以及`token`. """
     return setconfig(appid, token, path=dicer_girl_dir, filename="config.yaml")
 
 def get_config() -> dict:
+    """ 获取`QQGuild`模式中频道机器人的`appid`以及`token`. """
     return getconfig(path=dicer_girl_dir, filename="config.yaml")
 
-def format_msg(message, begin=None, zh_en=False):
+def format_msg(message, begin=None, zh_en=False) -> list:
+    """ 骰娘指令拆析为`list`的方法 """
     msg = format_str(message, begin=begin).split(" ")
     outer = []
     regex = r'(\d+)|([a-zA-Z\u4e00-\u9fa5]+)' if not zh_en else r"(\d+)|([a-zA-Z]+)|([\u4e00-\u9fa5]+)"
@@ -135,7 +150,8 @@ def format_msg(message, begin=None, zh_en=False):
     logger.debug(msg)
     return msg
 
-def format_str(message: Union[Message, str], begin=None):
+def format_str(message: Union[Message, str], begin=None) -> str:
+    """ 骰娘指令转义及解析 """
     regex = r"[<\[](.*?)[\]>]"
     content = message.content if isinstance(message, Message) else message
     msg = re.sub("\s+", " ", re.sub(regex, "", str(content).lower())).strip(" ")
@@ -155,7 +171,8 @@ def format_str(message: Union[Message, str], begin=None):
     logger.debug(msg)
     return msg
 
-def get_mentions(event: GroupMessageEvent):
+def get_mentions(event: GroupMessageEvent) -> List[str]:
+    """ 获取`event`指向的消息所有被`@`的用户 QQ 号 """
     mentions = []
     message = json.loads(event.json())["message"]
 
@@ -165,7 +182,8 @@ def get_mentions(event: GroupMessageEvent):
 
     return mentions
 
-def get_handlers(main):
+def get_handlers(main) -> List[Callable]:
+    """ 获取目前所有的指令触发函数方法 """
     commands_functions = []
 
     for _, obj in vars(main).items():
@@ -176,7 +194,8 @@ def get_handlers(main):
 
     return commands_functions
 
-def get_group_id(event):
+def get_group_id(event) -> str:
+    """ 获取`event`指向的群聊`ID` """
     try:
         if package == "qqguild":
             return str(event.channel_id)
@@ -186,7 +205,8 @@ def get_group_id(event):
         logger.warning(f"超出预计的 package: {package}, 将 Group ID 设置为 0.")
         return "0"
 
-def get_user_id(event):
+def get_user_id(event) -> str:
+    """ 获取`event`指向的用户`ID` """
     try:
         if package == "qqguild":
             return eval(str(event.author))["id"]
@@ -196,7 +216,8 @@ def get_user_id(event):
         logger.warning(f"超出预计的 package: {package}, 将 User ID 设置为 0.")
         return "0"
 
-def add_super_user(message):
+def add_super_user(message) -> bool:
+    """ 新增超级管理员 """
     with open(_super_user, "w+") as _su:
         sr = _su.read()
         if not sr:
@@ -207,7 +228,8 @@ def add_super_user(message):
         _su.write(json.dumps(sudos))
     return True
 
-def rm_super_user(message):
+def rm_super_user(message) -> bool:
+    """ 删除超级管理员 """
     rsu = open(_super_user, "r")
     sr = rsu.read()
     if not sr:
@@ -221,7 +243,8 @@ def rm_super_user(message):
     _su.write(json.dumps(sudos))
     return True
 
-def is_super_user(message):
+def is_super_user(event) -> bool:
+    """ 判断`event`所指向的用户是否为超级管理员 """
     su = False
     with open(_super_user, "r") as _su:
         sr = _su.read()
@@ -230,7 +253,38 @@ def is_super_user(message):
         else:
             sudos = json.loads(sr)
     for sudo in sudos.keys():
-        if get_user_id(message) == sudo:
+        if get_user_id(event) == sudo:
             su = True
             break
     return su
+
+def botoff(event):
+    """ 机器人在`event`所指向的群聊中开启指令限制 """
+    status = load_status_settings()
+    status[get_group_id(event)] = False
+    change_status(status)
+    f = open(_dicer_girl_status, "w")
+    json.dump(status, f)
+
+def boton(event):
+    """ 机器人在`event`所指向的群聊中开启完全功能 """
+    status = load_status_settings()
+    status[get_group_id(event)] = True
+    change_status(status)
+    f = open(_dicer_girl_status, "w")
+    json.dump(status, f)
+
+def get_status(event):
+    """ 判断机器人在`event`所指向的群聊中是否处于完全功能状态 """
+    status = load_status_settings()
+    if not get_group_id(event) in status.keys():
+        status[get_group_id(event)] = True
+        f = open(_dicer_girl_status, "w")
+        json.dump(status, f)
+        return True
+
+    return status[get_group_id(event)]
+
+def load_status():
+    """ 导入目前所存储的机器人在各群聊中状态 """
+    change_status(json.load(open(_dicer_girl_status, "r")))

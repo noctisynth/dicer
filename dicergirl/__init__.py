@@ -33,6 +33,7 @@ import re
 import asyncio
 import platform
 import psutil
+import html
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
@@ -76,9 +77,9 @@ if package == "nonebot2":
     from nonebot.internal.matcher.matcher import Matcher
 
     if driver._adapters.get("OneBot V12"):
-        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, MessageSegment, Event
+        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, Event, MessageSegment
     else:
-        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, MessageSegment, Event
+        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
 
     class StartswithRule:
         __slots__ = ("msg", "ignorecase")
@@ -331,16 +332,17 @@ if package == "nonebot2":
         await matcher.send("[Oracle] 未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @logcommand.handle()
-    async def loghandler(matcher: Matcher, event: Event):
+    async def loghandler(bot: V11Bot, matcher: Matcher, event: Event):
         args = format_msg(event.get_message(), begin=".log")
         commands = CommandParser(
             Commands([
                 Only("show"),
-                Only("add"),
+                Only(("add", "new")),
                 Optional("name", str),
                 Optional("stop", int),
                 Optional("start", int),
-                Optional("remove", int)
+                Optional(("remove", "rm"), int),
+                Optional(("download", "load"), int)
                 ]),
             args=args,
             auto=True
@@ -364,6 +366,23 @@ if package == "nonebot2":
             reply.strip("\n")
 
             await matcher.send(reply)
+            return
+
+        if commands["download"] or commands["download"] == 0:
+            gl = get_loggers(event)
+            if commands["download"] > len(gl)-1:
+                await matcher.send(f"目标日志序列 {commands['download']} 不存在.")
+                return
+
+            path = Path(gl[commands["download"]])
+            await bot.call_api(
+                "upload_group_file",
+                **{
+                    "group_id": get_group_id(event),
+                    "file": str(path),
+                    "name": path.name
+                }
+            )
             return
 
         if commands["add"]:
@@ -435,7 +454,7 @@ if package == "nonebot2":
                 if commands["remove"] in loggers[get_group_id(event)].keys():
                     await matcher.send(f"目标日志序列 {commands['remove']} 正在运行, 开始中止...")
                     loggers[get_group_id(event)][commands["remove"]][0].remove()
-                    loggers[get_group_id(event)].pop([commands["remove"]])
+                    loggers[get_group_id(event)].pop(commands["remove"])
 
             Path(gl[commands["remove"]]).unlink()
             remove_logger(event, commands["remove"])
@@ -447,12 +466,11 @@ if package == "nonebot2":
     def trpg_log(event):
         if not get_group_id(event) in loggers.keys():
             return
-
         for log in loggers[get_group_id(event)].keys():
             if isinstance(event, GroupMessageEvent):
                 message = event.get_user_id() + ": " + event.get_message()
             elif isinstance(event, Event):
-                message = "Oracle: " + event.raw_message
+                message = "欧若可: " + html.unescape(event.message)
             loggers[get_group_id(event)][log][0].info(message)
 
     @selflogcommand.handle()

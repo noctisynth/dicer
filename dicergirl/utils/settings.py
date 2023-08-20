@@ -1,5 +1,5 @@
 from pathlib import Path
-
+from typing import List, Dict
 try:
     from dicergirl.utils.multilogging import multilogger
 except ImportError:
@@ -8,9 +8,10 @@ except ImportError:
 import sys
 import yaml
 
-package = None
-allowed_packages = ["nonebot2", "qqguild"]
+package: str = None
+allowed_packages: List[str] = ["nonebot2", "qqguild"]
 logger = multilogger(name="Dicer Girl", payload="Settings")
+status: Dict[str, bool] = {}
 
 def set_package(pkg: str):
     global package
@@ -44,6 +45,14 @@ def getconfig(path=Path.home()/".dicergirl", filename="config.yaml"):
     configfile = open(path / filename, "r")
     config = yaml.safe_load(configfile.read())
     return config
+
+def change_status(var):
+    global status
+    status = var
+    return True
+
+def load_status_settings():
+    return status
 
 if __name__ == "__main__":
     set_package("?")

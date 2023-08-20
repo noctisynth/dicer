@@ -82,6 +82,11 @@ if package == "nonebot2":
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
 
     class StartswithRule:
+        """自定义的指令检查方法
+        允许:
+            1. 无视中英文字符串
+            2. 无视前后多余空字符
+        """
         __slots__ = ("msg", "ignorecase")
 
         def __init__(self, msg, ignorecase=False):
@@ -116,12 +121,14 @@ if package == "nonebot2":
             return False
 
     def startswith(msg, ignorecase=True) -> Rule:
+        """ 实例化指令检查方法 """
         if isinstance(msg, str):
             msg = (msg,)
 
         return Rule(StartswithRule(msg, ignorecase))
 
-    def on_startswith(commands, priority=0, block=True) -> Matcher:
+    def on_startswith(commands, priority=0, block=True) -> Matcher | Commands:
+        """ 获得`Nonebot2`指令检查级参数注入方法 """
         if isinstance(commands, str):
             commands = (commands, )
 
@@ -130,6 +137,7 @@ if package == "nonebot2":
         elif get_package() == "qqguild":
             return Commands(name=commands)
 
+    # 指令装饰器实例化
     testcommand = on_startswith(".test", priority=2, block=True)
     debugcommand = on_startswith(".debug", priority=2, block=True)
     superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
@@ -161,6 +169,7 @@ if package == "nonebot2":
 
     @driver.on_startup
     async def _():
+        """ `Nonebot2`核心加载完成后的初始化方法 """
         global DEBUG
         logger.info("欧若可骰娘初始化中...")
         if DEBUG:
@@ -179,6 +188,7 @@ if package == "nonebot2":
 
     @testcommand.handle()
     async def testhandler(matcher: Matcher, event: MessageEvent):
+        """ 测试指令 """
         if not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行测试指令.")
             return
@@ -199,6 +209,7 @@ if package == "nonebot2":
 
     @debugcommand.handle()
     async def debughandler(matcher: Matcher, event: MessageEvent):
+        """ 漏洞检测指令 """
         global DEBUG
         args = format_msg(event.get_message(), begin=".debug")
         if not is_super_user(event):
@@ -245,6 +256,7 @@ if package == "nonebot2":
 
     @superusercommand.handle()
     async def superuser_handler(matcher: Matcher, event: MessageEvent):
+        """ 超级用户管理指令 """
         args = format_str(event.get_message(), begin=(".su", ".sudo"))
         arg = list(filter(None, args.split(" ")))
 
@@ -272,6 +284,7 @@ if package == "nonebot2":
 
     @botcommand.handle()
     async def bothandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+        """ 机器人管理指令 """
         args = format_msg(event.get_message(), begin=".bot")
         commands = CommandParser(
             Commands([
@@ -333,6 +346,7 @@ if package == "nonebot2":
 
     @logcommand.handle()
     async def loghandler(bot: V11Bot, matcher: Matcher, event: Event):
+        """ 日志管理指令 """
         args = format_msg(event.get_message(), begin=".log")
         commands = CommandParser(
             Commands([
@@ -464,6 +478,7 @@ if package == "nonebot2":
         await matcher.send("骰娘日志管理系统, 使用`.help log`指令详细信息.")
 
     def trpg_log(event):
+        """ 外置的日志记录方法 """
         if not get_group_id(event) in loggers.keys():
             return
         for log in loggers[get_group_id(event)].keys():
@@ -476,10 +491,12 @@ if package == "nonebot2":
     @selflogcommand.handle()
     @loghandlercommand.handle()
     def loggerhandler(event: Event):
+        """ 消息记录日志指令 """
         trpg_log(event)
 
     @coccommand.handle()
     async def cochandler(matcher: Matcher, event: GroupMessageEvent):
+        """ COC 车卡指令 """
         if not get_status(event):
             return
 
@@ -542,6 +559,7 @@ if package == "nonebot2":
 
     @scpcommand.handle()
     async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
+        """ SCP 车卡指令 """
         if not get_status(event):
             return
 
@@ -653,6 +671,7 @@ if package == "nonebot2":
 
     @dndcommand.handle()
     async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
+        """ DND 车卡指令 """
         if not get_status(event):
             return
 
@@ -685,6 +704,7 @@ if package == "nonebot2":
 
     @showcommand.handle()
     async def showhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
+        """ 角色卡展示指令 """
         if not get_status(event):
             return
 
@@ -711,6 +731,7 @@ if package == "nonebot2":
 
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
+        """ 角色卡设置指令 """
         if not get_status(event):
             return
 
@@ -750,6 +771,7 @@ if package == "nonebot2":
 
     @helpcommand.handle()
     async def rdhelphandler(matcher: Matcher, event: MessageEvent):
+        """ 帮助指令 """
         if not get_status(event):
             return
 
@@ -764,6 +786,7 @@ if package == "nonebot2":
 
     @modecommand.handle()
     async def modehandler(matcher: Matcher, event: MessageEvent):
+        """ 跑团模式切换指令 """
         if not get_status(event):
             return
 
@@ -783,6 +806,7 @@ if package == "nonebot2":
 
     @stcommand.handle()
     async def stcommandhandler(matcher: Matcher, event: GroupMessageEvent):
+        """ 射击检定指令 """
         if not get_status(event):
             return
 
@@ -790,6 +814,7 @@ if package == "nonebot2":
 
     @attackcommand.handle()
     async def attackhandler(matcher: Matcher, event: GroupMessageEvent):
+        """ 伤害检定指令 """
         if not get_status(event):
             return
 
@@ -802,6 +827,7 @@ if package == "nonebot2":
 
     @damcommand.handle()
     async def damhandler(matcher: Matcher, event: GroupMessageEvent):
+        """ 承伤检定指令 """
         if not get_status(event):
             return
 
@@ -818,6 +844,7 @@ if package == "nonebot2":
 
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
+        """ 属性或技能激励指令 """
         if not get_status(event):
             return
 
@@ -837,6 +864,7 @@ if package == "nonebot2":
 
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
+        """ 属性或技能检定指令 """
         if not get_status(event):
             return
 
@@ -855,6 +883,7 @@ if package == "nonebot2":
 
     @rhcommand.handle()
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
+        """ 暗骰指令 """
         if not get_status(event):
             return
 
@@ -864,6 +893,7 @@ if package == "nonebot2":
 
     @rhacommand.handle()
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
+        """ 暗骰技能检定指令 """
         if not get_status(event):
             return
 
@@ -873,6 +903,7 @@ if package == "nonebot2":
 
     @rollcommand.handle()
     async def rollhandler(matcher: Matcher, event: MessageEvent):
+        """ 标准掷骰指令 """
         if not get_status(event):
             return
 
@@ -896,6 +927,7 @@ if package == "nonebot2":
 
     @ticommand.handle()
     async def ticommandhandler(matcher: Matcher, event: MessageEvent):
+        """ COC 临时疯狂检定指令 """
         if not get_status(event):
             return
 
@@ -907,6 +939,7 @@ if package == "nonebot2":
 
     @licommand.handle()
     async def licommandhandler(matcher: Matcher, event: MessageEvent):
+        """ COC 总结疯狂检定指令 """
         if not get_status(event):
             return
 
@@ -918,6 +951,7 @@ if package == "nonebot2":
 
     @sccommand.handle()
     async def schandler(matcher: Matcher, event: GroupMessageEvent):
+        """ COC 疯狂检定指令 """
         if not get_status(event):
             return
 
@@ -932,6 +966,7 @@ if package == "nonebot2":
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
+        """ 角色卡或角色卡技能删除指令 """
         if not get_status(event):
             return
 
@@ -952,6 +987,7 @@ if package == "nonebot2":
 
     @chatcommand.handle()
     async def chathandler(matcher: Matcher, event: MessageEvent):
+        """ chatGPT 对话指令 """
         args = format_str(event.get_message(), begin=".chat")
         if not args:
             await matcher.send("[Oracle] 空消息是不被允许的.")
@@ -961,6 +997,7 @@ if package == "nonebot2":
 
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher):
+        """ 骰娘版本及开源声明指令 """
         await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.\nCopyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.")
         return
 elif package == "qqguild":

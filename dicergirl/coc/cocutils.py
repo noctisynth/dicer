@@ -20,6 +20,7 @@ import re
 logger = multilogger(name="Dicer Girl", payload="COCUtil")
 
 def sc(arg, event):
+    """ COC 疯狂检定 """
     reply = []
     try:
         args = arg.split(" ")
@@ -70,6 +71,7 @@ def sc(arg, event):
         return "[Oracle] 产生了未知的错误, 你可以使用`.help ra`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
 
 def st():
+    """ COC 射击检定 """
     result = random.randint(1, 20)
     if result < 4:
         rstr = "右腿"
@@ -88,6 +90,7 @@ def st():
     return "D20=%d: 命中了%s" % (result, rstr)
 
 def at(args, event):
+    """ COC 伤害检定 """
     inv = Investigator().load(coc_cards.get(event))
     method = "+"
 
@@ -109,6 +112,7 @@ def at(args, event):
     return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})\n造成了 {d.total+dbtotal}点 伤害."
 
 def coc_dam(args, message):
+    """ COC 承伤检定 """
     card = coc_cards.get(message)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.coc`指令进行车卡生成角色卡并`.set`进行保存."
@@ -138,6 +142,7 @@ def coc_dam(args, message):
     return r
 
 def coc_ra(args, event):
+    """ COC 技能检定 """
     if len(args) == 0:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
     if len(args) > 2:
@@ -193,6 +198,7 @@ def coc_ra(args, event):
     return r.detail
 
 def ti():
+    """ COC 临时疯狂检定 """
     i = random.randint(1, 10)
     r = "临时疯狂判定1D10=%d\n" % i
     r += temporary_madness[i-1]
@@ -208,6 +214,7 @@ def ti():
     return r
 
 def li():
+    """ COC 总结疯狂检定 """
     i = random.randint(1, 10)
     r = "总结疯狂判定1D10=%d\n" % i
     r += madness_end[i-1]
@@ -224,6 +231,7 @@ def li():
     return r
 
 def rb(args):
+    """ COC 奖励骰 """
     if args:
         match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
     else:
@@ -246,6 +254,7 @@ def rb(args):
     return f"{reason}奖励骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
 def rp(args):
+    """ COC 惩罚骰 """
     if args:
         match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
     else:
@@ -268,6 +277,7 @@ def rp(args):
     return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
 def coc_en(event, args):
+    """ COC 技能成长检定 """
     if not args:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
 

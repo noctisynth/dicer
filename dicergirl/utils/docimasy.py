@@ -6,7 +6,7 @@ except ImportError:
 
 class Docimasy:
     """
-        检定结果类
+        检定结果解析类
     """
     judge_dict = {
         "critical success": 4,
@@ -61,7 +61,8 @@ class Docimasy:
     def __str__(self):
         return self.detail
 
-def expr(dice: Dice, anum):
+def expr(dice: Dice, anum) -> Docimasy:
+    """ COC 技能检定结果 """
     result = dice.roll().calc()
     docimasy = Docimasy(f"掷骰: {dice.db}")
     docimasy += dice.description()
@@ -94,7 +95,8 @@ def expr(dice: Dice, anum):
             docimasy.set_judge("fail")
     return docimasy
 
-def scp_doc(result, difficulty, encourage=None, agent=None, great=False):
+def scp_doc(result, difficulty, encourage=None, agent=None, great=False) -> Docimasy:
+    """ SCP 技能检定结果 """
     if not agent:
         agent = "该特工"
 
@@ -150,6 +152,7 @@ def scp_doc(result, difficulty, encourage=None, agent=None, great=False):
     return r
 
 def dnd_doc(result, dc, adventurer=None):
+    """ DND 技能检定结果 """
     if not adventurer:
         adventurer = "该冒险者"
     r = f"事件难度: {dc}\n"

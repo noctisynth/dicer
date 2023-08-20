@@ -5,7 +5,7 @@ import re
 
 def multilogger(
         sink = sys.stdout,
-        name: str = "UV Attack",
+        name: str = "",
         payload: str = "",
         format: str = "<!time>[<level>{level}</level>] <cyan><!name></cyan> | <!payload><!module><level>{message}</level>",
         colorize: bool = True,
@@ -14,6 +14,7 @@ def multilogger(
         *args,
         **kwargs
 ) -> Logger:
+    """ 日志管理系统 """
     module = "" if level != "DEBUG" else "<cyan>{module}</cyan>.<cyan>{name}</cyan>:{line} | "
     payload = f"<red>{payload}</red> | " if payload else ""
     time = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> " if not notime else ""

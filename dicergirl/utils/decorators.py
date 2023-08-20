@@ -11,6 +11,7 @@ import re
 qqguild_handlers = []
 
 def translate_punctuation(string) -> str:
+    """ 中文字符转换为英文字符 """
     punctuation_mapping = {
         '，': ',',
         '。': '.',
@@ -34,6 +35,7 @@ def translate_punctuation(string) -> str:
     return string
 
 class Commands:
+    """ `QQGuild`模式下指令应答检查装饰器 """
     def __init__(self, name: Union[tuple, str]):
         self.commands = name
         self.regex = "[<](.*?)[>]"

@@ -1,4 +1,3 @@
-from typing import Optional
 try:
     from .docimasy import expr
     from ..utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
@@ -19,6 +18,7 @@ except ImportError:
     from dicergirl.utils.dicer import Dice
 
 def __set_plus_format(args: list):
+    """ `.set 技能 +3`语法解析 """
     while True:
         try:
             index = args.index("+")
@@ -38,6 +38,7 @@ def __set_plus_format(args: list):
     return args
 
 def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, cha=None, qid=None) -> bool:
+    """ 技能或属性设置 """
     for attr, alias in attrs_dict.items():
         if args[0] in alias:
             if attr in ["名字", "性别"]:
@@ -58,6 +59,7 @@ def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, c
             return "[Oracle] 设置%s %s 为: %s" % (module.__cname__, attr, cha.__dict__[alias[0]])
 
 def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid=None):
+    """ 设置技能 """
     try:
         if not args[1].startswith(("-", "+")):
             cha.skills[args[0]] = int(args[1])
@@ -73,6 +75,7 @@ def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid
         return reply
 
 def set_handler(message, args, at, mode=None):
+    """ 兼容所有模式的`.set`指令后端方法 """
     cards = eval(f"{mode}_cards")
     cache_cards = eval(f"{mode}_cache_cards")
     charactor = eval(mode).__charactor__
@@ -139,6 +142,7 @@ def set_handler(message, args, at, mode=None):
             return "[Oracle] 参数错误, 可能是由于传输的数据数量错误.\n此外, 这看起来不像是来源于我的错误."
 
 def show_handler(message, args, at, mode=None):
+    """ 兼容所有模式的`.show`指令后端方法 """
     cards = eval(f"{mode}_cards")
     cache_cards = eval(f"{mode}_cache_cards")
     charactor = eval(mode).__charactor__
@@ -187,6 +191,7 @@ def show_handler(message, args, at, mode=None):
     return r
 
 def del_handler(message, args, at, mode=None):
+    """ 兼容所有模式的`.del`指令后端方法 """
     cache_cards = eval(f"{mode}_cache_cards")
     cards = eval(f"{mode}_cards")
 
@@ -225,6 +230,7 @@ def del_handler(message, args, at, mode=None):
     return r
 
 def roll(args: str) -> str:
+    """ 标准掷骰指令后端方法 """
     time = 1
     if "#" in args:
         args = args.split("#")

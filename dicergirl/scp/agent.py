@@ -8,6 +8,7 @@ except ImportError:
 import random
 
 class Agent(object):
+    """ SCP 特工人物卡 """
     def __init__(self) -> None:
         self.name = "无名特工"
         self.age = 20

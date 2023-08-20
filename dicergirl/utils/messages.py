@@ -4,6 +4,7 @@ except ImportError:
     from dicergirl.utils.utils import version
 
 class Help_Messages():
+    """ 骰娘帮助信息 """
     def __init__(self):
         self.main = f"""欧若可骰娘 Version {version}
 此骰娘基于腾讯 QQ频道(qq-botpy) 及 Nonebot2 搭建.
@@ -186,6 +187,7 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0."""
 help_messages = Help_Messages()
 
 def help_message(args: str):
+    """ `.help`指令后端方法 """
     if args in help_messages.__dict__.keys():
         return help_messages.__dict__[args]
     else:
@@ -203,6 +205,8 @@ temporary_madness = [
     "9) 恐惧: 调查员通过一次D100或者由守密人选择, 来从恐惧症状表中选择一个恐惧源, 就算这一恐惧的事物是并不存在的, 调查员的症状会持续1D10轮。",
     "10) 躁狂: 调查员通过一次D100或者由守密人选择, 来从躁狂症状表中选择一个躁狂的诱因, 这个症状将会持续1D10轮。"
 ]
+""" 临时疯狂内容 """
+
 madness_end = [
     "1) 失忆(Amnesia) : 回过神来, 调查员们发现自己身处一个陌生的地方, 并忘记了自己是谁。记忆会随时间恢复。",
     "2) 被窃(Robbed) : 调查员在1D10小时后恢复清醒, 发觉自己被盗, 身体毫发无损。如果调查员携带着宝贵之物(见调查员背景) , 做幸运检定来决定其是否被盗。所有有价值的东西无需检定自动消失。",
@@ -215,6 +219,8 @@ madness_end = [
     "9) 恐惧(Phobia) : 调查员患上一个新的恐惧症状。在表Ⅸ: 恐惧症状表上骰1个D100来决定症状, 或由守秘人选择一个。调查员在1D10小时后回过神来, 并开始为避开恐惧源而采取任何措施。",
     "10) 狂躁(Mania) : 调查员患上一个新的狂躁症状。在表Ⅹ: 狂躁症状表上骰1个D100来决定症状, 或由守秘人选择一个。调查员会在1D10小时后恢复理智。在这次疯狂发作中, 调查员将完全沉浸于其新的狂躁症状。这症状是否会表现给旁人则取决于守秘人和此调查员。"
 ]
+""" 总结疯狂检定 """
+
 phobias = [
     "1) 洗澡恐惧症(Ablutophobia) : 对于洗涤或洗澡的恐惧。",
     "2) 恐高症(Acrophobia) : 对于身处高处的恐惧。",
@@ -317,6 +323,8 @@ phobias = [
     "99) 异域恐惧症(Xenophobia) : 对陌生人或外国人的恐惧。",
     "100) 动物恐惧症(Zoophobia) : 对动物的恐惧。"
 ]
+""" 恐惧症疯狂内容 """
+
 manias = [
     "1) 沐浴癖(Ablutomania) : 执着于清洗自己。",
     "2) 犹豫癖(Aboulomania) : 病态地犹豫不定。",
@@ -419,6 +427,7 @@ manias = [
     "99) 嗜外狂(Xenomania) : 痴迷于异国的事物。",
     "100) 喜兽癖(Zoomania) : 对待动物的态度近乎疯狂地友好。"
 ]
+""" 狂躁疯狂内容 """
 
 if __name__ == "__main__":
     print(help_message("main"))

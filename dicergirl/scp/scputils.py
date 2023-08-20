@@ -18,6 +18,7 @@ import random
 logger = multilogger(name="Dicer Girl", payload="SCPUtil")
 
 def at(args, event):
+    """ SCP 伤害检定 """
     card = scp_cards.get(event)
     agt = Agent().load(card)
     all_dices = []
@@ -55,6 +56,7 @@ def at(args, event):
         return f"[Oracle] 特工使用 {upper[args.upper()][1]} 发起攻击, 检定造成了 {Dice(upper[args.upper()][0]['base']).roll().calc()} 点 伤害."
 
 def deal(event, args):
+    """ SCP 武器交易系统 """
     if len(args) > 0:
         args = "".join(args).upper()
 
@@ -92,6 +94,7 @@ def deal(event, args):
         return f"[Oracle] 装备 {real_name} 不存在或特工权限不足."
 
 def scp_dam(args, message):
+    """ SCP 承伤检定 """
     card = scp_cards.get(message)
 
     if not card:
@@ -137,6 +140,7 @@ def scp_dam(args, message):
     return r
 
 def scp_ra(args: list, event):
+    """ SCP 属性或技能检定 """
     if len(args) == 0:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
     elif len(args) > 4:
@@ -263,6 +267,7 @@ def scp_ra(args: list, event):
     return r.detail
 
 def scp_en(event, args):
+    """ SCP 属性激励 """
     if not args:
         return "[Oracle] 错误: 你没有给定需要激励的基础属性.\n使用`.help en`指令查看指令使用方法."
 
@@ -296,6 +301,7 @@ def scp_en(event, args):
     return f"[Oracle] 你的 {args[0]} 受到了 {en} 点激励."
 
 def begin():
+    """ SCP 起始语 """
     reply = []
     reply.append("人类到如今已经繁衍了 250000 年, 只有最近的4000 年是有意义的.")
     reply.append("所以, 我们在将近 250000 年中在干什么? ")

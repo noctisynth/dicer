@@ -517,9 +517,9 @@ if package == "nonebot2":
                 raw_json = json.loads(event.json())
                 if raw_json['sender']['card']:
                     if raw_json['sender']['card'].lower() == "ob":
-                        role_or_name = f"[旁观者 - {raw_json['sender']['card']}]"
+                        role_or_name = f"[旁观者 - {raw_json['sender']['nickname']}]"
                     elif raw_json['sender']['card'].lower() == "kp":
-                        role_or_name = f"[主持人 - {raw_json['sender']['card']}]"
+                        role_or_name = f"[主持人 - {raw_json['sender']['nickname']}]"
                     else:
                         role_or_name = f"[{raw_json['sender']['card']}]"
                 elif raw_json['sender']['nickname']:
@@ -527,9 +527,10 @@ if package == "nonebot2":
                 else:
                     role_or_name = f"[未知访客 - {str(event.get_user_id())}]"
 
-                message = role_or_name + ": " + event.get_message()
+                message = role_or_name + ": " + html.unescape(str(event.get_message()))
             elif isinstance(event, Event):
                 message = "[欧若可]: " + html.unescape(event.message)
+
             loggers[get_group_id(event)][log][0].info(message)
 
     @selflogcommand.handle()
@@ -1061,9 +1062,15 @@ if package == "nonebot2":
     @roleobcommand.handle()
     async def roleobcommand(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ OB 身份组认证 """
+        import json
         roleob(event)
-        await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
-        await matcher.send("[Oracle] 身份组设置为旁观者 (OB).")
+
+        if json.loads(event.json())['sender']['card'] == "ob":
+            await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id())
+            await matcher.send("[Oracle] 取消旁观者 (OB) 身份.")
+        else:
+            await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
+            await matcher.send("[Oracle] 身份组设置为旁观者 (OB).")
 
     @chatcommand.handle()
     async def chathandler(matcher: Matcher, event: MessageEvent):

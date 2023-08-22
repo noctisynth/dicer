@@ -33,7 +33,8 @@ setuptools.setup(
         'pyyaml',
         'openai',
         'multilogging',
-        'psutil'
+        'psutil',
+        'nonebot_plugin_apscheduler'
     ],
     python_requires=">=3",
 )

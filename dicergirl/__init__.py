@@ -129,7 +129,7 @@ if package == "nonebot2":
         return Rule(StartswithRule(msg, ignorecase))
 
     def on_startswith(commands, priority=0, block=True) -> Matcher | Commands:
-        """ 获得`Nonebot2`指令检查级参数注入方法 """
+        """ 获得`Nonebot2`指令检查及参数注入方法 """
         if isinstance(commands, str):
             commands = (commands, )
 
@@ -169,6 +169,9 @@ if package == "nonebot2":
     roleobcommand = on_startswith(".ob", priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
+
+    # 定时任务
+    scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 
     @driver.on_startup
     async def _():
@@ -513,11 +516,16 @@ if package == "nonebot2":
             if isinstance(event, GroupMessageEvent):
                 raw_json = json.loads(event.json())
                 if raw_json['sender']['card']:
-                    role_or_name = "[" + raw_json['sender']['card'] + "]"
+                    if raw_json['sender']['card'].lower() == "ob":
+                        role_or_name = f"[旁观者 - {raw_json['sender']['card']}]"
+                    elif raw_json['sender']['card'].lower() == "kp":
+                        role_or_name = f"[主持人 - {raw_json['sender']['card']}]"
+                    else:
+                        role_or_name = f"[{raw_json['sender']['card']}]"
                 elif raw_json['sender']['nickname']:
-                    role_or_name = "[" + raw_json['sender']['nickname'] + "]"
+                    role_or_name = f"[未知访客 - {raw_json['sender']['nickname']}]"
                 else:
-                    role_or_name = "[" + str(event.get_user_id()) + "]"
+                    role_or_name = f"[未知访客 - {str(event.get_user_id())}]"
 
                 message = role_or_name + ": " + event.get_message()
             elif isinstance(event, Event):
@@ -1024,6 +1032,28 @@ if package == "nonebot2":
     @rolekpcommand.handle()
     async def rolekphandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ KP 身份组认证 """
+        args = format_msg(event.get_message(), begin=(".kp"))
+        cp = CommandParser(
+            Commands([
+                Optional(("time", "schedule"), int),
+                Optional(("minute", "min"), int, 0)
+            ]),
+            args=args,
+            auto=True
+        ).results
+
+        if cp["time"]:
+            @scheduler.scheduled_job("cron", hour=cp["time"], minute=cp["minute"], id="timer")
+            async def _():
+                await bot.send_group_msg(group_id=event.group_id, message="抵达 KP 设定的跑团启动时间.")
+
+            try:
+                scheduler.start()
+            except:
+                pass
+            await matcher.send(f"定时任务: {cp['time']}: {cp['minute'] if len(str(cp['minute'])) > 1 else '0'+str(cp['minute'])}")
+            return
+
         rolekp(event)
         await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="KP")
         await matcher.send("[Oracle] 身份组设置为主持人 (KP).")

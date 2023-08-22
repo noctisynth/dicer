@@ -62,7 +62,8 @@ if package == "nonebot2":
         format_msg, format_str,
         modes, get_mentions,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
-        get_status, boton, botoff
+        get_status, boton, botoff,
+        rolekp, roleob
         )
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.handlers import show_handler, set_handler, del_handler, roll
@@ -164,6 +165,8 @@ if package == "nonebot2":
     licommand = on_startswith(".li", priority=2, block=True)
     sccommand = on_startswith(".sc", priority=2, block=True)
     delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
+    rolekpcommand = on_startswith(".kp", priority=2, block=True)
+    roleobcommand = on_startswith(".ob", priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
 
@@ -189,12 +192,36 @@ if package == "nonebot2":
     @testcommand.handle()
     async def testhandler(matcher: Matcher, event: MessageEvent):
         """ 测试指令 """
+        args = format_msg(event.get_message(), begin=".test")
+        cp = CommandParser(
+            Commands([
+                Only("all"),
+                Only("split"),
+                Only("markdown")
+            ]),
+            args=args,
+            auto=True
+        )
+
         if not is_super_user(event):
             await matcher.send("[Oracle] 权限不足, 拒绝执行测试指令.")
             return
 
-        logger.info("收到消息:" + str(event.get_message()))
-        msg = format_msg(event.get_message(), begin=".test")
+        reply = ""
+        if cp.nothing or cp.results["all"]:
+            import json
+            reply += f"收到消息: {event.get_message()}\n"
+            reply += f"消息来源: {event.group_id} - {event.get_user_id()}\n"
+            reply += f"消息拆析: {args}\n"
+            reply += f"指令拆析: {cp.results}\n"
+            reply += f"消息原始内容: {event.get_plaintext()}\n"
+            reply += f"消息json数据: {event.json()}\n"
+            reply += f"消息发送者json信息: {json.loads(event.json())['sender']}\n"
+            reply += f"发送者昵称: {json.loads(event.json())['sender']['nickname']}"
+            await matcher.send(reply)
+            return
+
+        logger.debug("收到消息:" + str(event.get_message()))
 
         if not msg:
             msg = "[]"
@@ -204,7 +231,7 @@ if package == "nonebot2":
             await matcher.send(group_id=event.group_id, message=mp)
             return
 
-        await matcher.finish(str(msg))
+        await matcher.send(None)
 
 
     @debugcommand.handle()
@@ -479,13 +506,22 @@ if package == "nonebot2":
 
     def trpg_log(event):
         """ 外置的日志记录方法 """
+        import json
         if not get_group_id(event) in loggers.keys():
             return
         for log in loggers[get_group_id(event)].keys():
             if isinstance(event, GroupMessageEvent):
-                message = event.get_user_id() + ": " + event.get_message()
+                raw_json = json.loads(event.json())
+                if raw_json['sender']['card']:
+                    role_or_name = "[" + raw_json['sender']['card'] + "]"
+                elif raw_json['sender']['nickname']:
+                    role_or_name = "[" + raw_json['sender']['nickname'] + "]"
+                else:
+                    role_or_name = "[" + str(event.get_user_id()) + "]"
+
+                message = role_or_name + ": " + event.get_message()
             elif isinstance(event, Event):
-                message = "欧若可: " + html.unescape(event.message)
+                message = "[欧若可]: " + html.unescape(event.message)
             loggers[get_group_id(event)][log][0].info(message)
 
     @selflogcommand.handle()
@@ -984,6 +1020,20 @@ if package == "nonebot2":
         if mode in modes:
             for msg in del_handler(event, args, at, mode=mode):
                 await matcher.send(msg)
+
+    @rolekpcommand.handle()
+    async def rolekphandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+        """ KP 身份组认证 """
+        rolekp(event)
+        await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="KP")
+        await matcher.send("[Oracle] 身份组设置为主持人 (KP).")
+
+    @roleobcommand.handle()
+    async def roleobcommand(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+        """ OB 身份组认证 """
+        roleob(event)
+        await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
+        await matcher.send("[Oracle] 身份组设置为旁观者 (OB).")
 
     @chatcommand.handle()
     async def chathandler(matcher: Matcher, event: MessageEvent):

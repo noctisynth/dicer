@@ -288,3 +288,9 @@ def get_status(event):
 def load_status():
     """ 导入目前所存储的机器人在各群聊中状态 """
     change_status(json.load(open(_dicer_girl_status, "r")))
+
+def rolekp(event):
+    ...
+
+def roleob(event):
+    ...

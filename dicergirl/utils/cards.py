@@ -1,10 +1,10 @@
 from pathlib import Path
-#try:
-from .utils import get_group_id, get_user_id
-from .multilogging import multilogger
-#except ImportError:
-#    from dicergirl.utils.utils import get_group_id, get_user_id
-#    from dicergirl.utils.multilogging import multilogger
+from multilogging import multilogger
+
+try:
+    from .utils import get_group_id, get_user_id
+except ImportError:
+    from dicergirl.utils.utils import get_group_id, get_user_id
 
 import json
 

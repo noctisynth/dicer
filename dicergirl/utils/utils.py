@@ -1,24 +1,25 @@
 from pathlib import Path
 from typing import Union, Dict, List, Callable
 from loguru._logger import Logger
+from nonebot.consts import STARTSWITH_KEY
+from nonebot.plugin import on_message
+from nonebot.rule import Rule
+from nonebot.matcher import Matcher
 
 import json
-import sys
 import uuid
 import re
 import inspect
 import json
 
 try:
-    from dicergirl.utils.decorators import translate_punctuation
-    from dicergirl.utils.settings import get_package, setconfig, getconfig, change_status, load_status_settings
-    from dicergirl.utils.multilogging import multilogger
-    from dicergirl import coc, scp, dnd
-except ImportError:
     from .decorators import translate_punctuation
     from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
     from .multilogging import multilogger
-    from .. import coc, scp, dnd
+except ImportError:
+    from dicergirl.utils.decorators import translate_punctuation
+    from dicergirl.utils.settings import get_package, setconfig, getconfig, change_status, load_status_settings
+    from dicergirl.utils.multilogging import multilogger
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
@@ -35,35 +36,19 @@ _loggers_cachepath = data_dir / "loggers.json"
 logger = multilogger(name="Dicer Girl", payload="utils")
 """ `utils.py`日志系统 """
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
-modes = {module.split(".")[-1]: sys.modules[module] for module in sys.modules if hasattr(sys.modules[module], "__type__")}
-""" 已导入的跑团模块 """
 loggers: Dict[str, Dict[int, List[Logger | str]]] = {}
 """ 正在运行的日志 """
 saved_loggers: Dict[str, dict]
 """ 存储的日志 """
 
-if package == "nonebot2":
-    class Message:
-        pass
-    try:
-        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
-    except ModuleNotFoundError:
-        logger.warning("未找到依赖`Nonebot2`, 请检查你的配置.")
-        class MessageEvent:
-            pass
-        class GroupMessageEvent:
-            pass
-elif package == "qqguild":
+try:
+    from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+except ModuleNotFoundError:
+    logger.warning("未找到依赖`Nonebot2`, 请检查你的配置.")
     class MessageEvent:
         pass
     class GroupMessageEvent:
         pass
-    try:
-        from botpy.message import Message
-    except ModuleNotFoundError:
-        logger.warning("未找到依赖`qq-botpy`, 请检查你的配置.")
-        class Message:
-            pass
 
 def init() -> None:
     """ 骰娘初始化 """
@@ -86,6 +71,61 @@ def init() -> None:
                     f.write("{}")
     saved_loggers = load_loggers()
     load_status()
+
+import re
+
+class StartswithRule:
+    """自定义的指令检查方法
+    允许:
+        1. 无视中英文字符串
+        2. 无视前后多余空字符
+    """
+    __slots__ = ("msg", "ignorecase")
+
+    def __init__(self, msg, ignorecase=False):
+        self.msg = msg
+        self.ignorecase = ignorecase
+
+    def __repr__(self) -> str:
+        return f"Startswith(msg={self.msg}, ignorecase={self.ignorecase})"
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, StartswithRule)
+            and frozenset(self.msg) == frozenset(other.msg)
+            and self.ignorecase == other.ignorecase
+        )
+
+    def __hash__(self) -> int:
+        return hash((frozenset(self.msg), self.ignorecase))
+
+    async def __call__(self, event, state) -> bool:
+        try:
+            text = translate_punctuation(event.get_plaintext()).strip()
+        except Exception:
+            return False
+        if match := re.match(
+            f"^(?:{'|'.join(re.escape(prefix) for prefix in self.msg)})",
+            text,
+            re.IGNORECASE if self.ignorecase else 0,
+        ):
+            state[STARTSWITH_KEY] = match.group()
+            return True
+        return False
+
+def startswith(msg, ignorecase=True) -> Rule:
+    """ 实例化指令检查方法 """
+    if isinstance(msg, str):
+        msg = (msg,)
+
+    return Rule(StartswithRule(msg, ignorecase))
+
+def on_startswith(commands, priority=0, block=True) -> Matcher:
+    """ 获得`Nonebot2`指令检查及参数注入方法 """
+    if isinstance(commands, str):
+        commands = (commands, )
+
+    return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
 
 def load_loggers() -> Dict[str, list]:
     """ 加载所有的已存储的日志 """
@@ -142,11 +182,10 @@ def format_msg(message, begin=None, zh_en=False) -> list:
     logger.debug(msg)
     return msg
 
-def format_str(message: Union[Message, str], begin=None) -> str:
+def format_str(message: str, begin=None) -> str:
     """ 骰娘指令转义及解析 """
     regex = r"[<\[](.*?)[\]>]"
-    content = message.content if isinstance(message, Message) else message
-    msg = re.sub("\s+", " ", re.sub(regex, "", str(content).lower())).strip(" ")
+    msg = re.sub("\s+", " ", re.sub(regex, "", str(message).lower())).strip(" ")
     msg = translate_punctuation(msg)
     logger.debug(msg)
 
@@ -181,7 +220,7 @@ def get_handlers(main) -> List[Callable]:
     for _, obj in vars(main).items():
         if inspect.isfunction(obj) and hasattr(obj, '__annotations__'):
             annotations = obj.__annotations__
-            if annotations.get('message') is Message:
+            if annotations.get('message') is GroupMessageEvent:
                 commands_functions.append(obj)
 
     return commands_functions

@@ -43,11 +43,11 @@ package = get_package()
 if package == "nonebot2":
     from .coc.investigator import Investigator
     from .coc.coccards import coc_cards, coc_cache_cards, coc_rolls
-    from .coc.cocutils import sc, st, at, coc_dam, coc_en, coc_ra, ti, li, rb, rp
+    from .coc.cocutils import sc, st, coc_at, coc_dam, coc_en, coc_ra, ti, li, rb, rp
 
     from .scp.agent import Agent
     from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import scp_ra, scp_dam, scp_en, at as sat, deal, begin
+    from .scp.scputils import scp_ra, scp_dam, scp_en, scp_at
     from .scp.attributes import all_alias_dict
 
     from .dnd.adventurer import Adventurer
@@ -57,14 +57,14 @@ if package == "nonebot2":
     from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
     from .utils.utils import (
-        init, get_group_id,
+        init, get_group_id, get_mentions,
         is_super_user, add_super_user, rm_super_user, su_uuid,
         format_msg, format_str,
-        modes, get_mentions,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
         get_status, boton, botoff,
         rolekp, roleob
         )
+    from .utils.plugins import modes
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.handlers import show_handler, set_handler, del_handler, roll
     from .utils.chat import chat
@@ -146,9 +146,6 @@ if package == "nonebot2":
     logcommand = on_startswith(".log", priority=1, block=True)
     loghandlercommand = on_startswith("", priority=1, block=False)
     selflogcommand = on("message_sent", priority=1, block=False)
-    coccommand = on_startswith(".coc", priority=1, block=True)
-    scpcommand = on_startswith(".scp", priority=1, block=True)
-    dndcommand = on_startswith(".dnd", priority=1, block=True)
     showcommand = on_startswith((".show", ".display"), priority=2, block=True)
     setcommand = on_startswith((".set", ".st"), priority=2, block=True)
     helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
@@ -539,214 +536,6 @@ if package == "nonebot2":
         """ 消息记录日志指令 """
         trpg_log(event)
 
-    @coccommand.handle()
-    async def cochandler(matcher: Matcher, event: GroupMessageEvent):
-        """ COC 车卡指令 """
-        if not get_status(event):
-            return
-
-        args = format_msg(event.get_message(), begin=".coc", zh_en=True)
-        qid = event.get_user_id()
-        commands = CommandParser(
-            Commands([
-                Only("cache", False),
-                Optional("set", int),
-                Optional("age", int, 20),
-                Optional("name", str),
-                Optional("sex", str, "女"),
-                Optional("roll", int, 1)
-                ]),
-            args=args,
-            auto=True
-            ).results
-        toroll = commands["roll"]
-
-        if commands["set"]:
-            coc_cards.update(event, coc_rolls[qid][commands["set"]], save=True)
-            inv = Investigator().load(coc_rolls[qid][commands["set"]])
-            await matcher.send(f"使用序列 {commands['set']} 卡:\n{inv.output()}")
-            coc_rolls[qid] = {}
-            return
-
-        age = commands["age"]
-        name = commands["name"]
-
-        if not (15 <= age and age < 90):
-            await matcher.send(Investigator().age_change(age))
-            return
-
-        reply = ""
-        if qid in coc_rolls.keys():
-            rolled = len(coc_rolls[qid].keys())
-        else:
-            coc_rolls[qid] = {}
-            rolled = 0
-
-        for i in range(toroll):
-            inv = Investigator()
-            inv.age_change(age)
-            inv.sex = commands["sex"]
-
-            if name:
-                inv.name = name
-
-            coc_rolls[qid][rolled+i] = inv.__dict__
-            count = inv.rollcount()
-            reply += f"天命编号: {rolled+i}\n"
-            reply += inv.output() + "\n"
-            reply += f"共计: {count[0]}/{count[1]}\n"
-
-        if toroll == 1:
-            coc_cache_cards.update(event, inv.__dict__, save=False)
-
-        reply.rstrip("\n")
-        await matcher.send(reply)
-
-    @scpcommand.handle()
-    async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
-        """ SCP 车卡指令 """
-        if not get_status(event):
-            return
-
-        args = format_msg(event.get_message(), begin=".scp", zh_en=True)
-        at = get_mentions(event)
-
-        if at and not is_super_user(event):
-            return "[Oracle] 权限不足, 无法指定玩家修改人物卡."
-
-        if at:
-            qid = at[0]
-        else:
-            qid = ""
-
-        if len(args) != 0:
-            if args[0] in ["begin", "start"]:
-                for des in begin():
-                    await matcher.send(des)
-                    await asyncio.sleep(2)
-                return
-            elif args[0] in ["level", "levelup", "lu"]:
-                agt = Agent().load(scp_cards.get(event, qid=qid))
-
-                if agt.ach >= 10:
-                    agt.ach -= 10
-                    agt.level += 1
-                    scp_cards.update(event, inv_dict=agt.__dict__, save=True)
-                    await matcher.send(f"[Oracle] {agt.name} 特工权限提升至 {agt.level} 级.")
-                    return
-                else:
-                    await matcher.send(f"[Oracle] 特工 {agt.name} 功勋不足, 无法申请提升权限等级.")
-                    return
-            elif args[0] in ["reset", "r"]:
-                if not is_super_user(event):
-                    await matcher.send("[Oracle] 权限不足, 拒绝执行人物卡重置指令.")
-                    return
-
-                agt = Agent().load(scp_cards.get(event, qid=qid))
-
-                if len(args) == 2:
-                    try:
-                        exec(f"agt.reset_{args[1]}()")
-                        scp_cards.update(event, agt.__dict__, qid=qid, save=True)
-                        await matcher.send(f"[Oracle] 已重置指定人物卡属性: {args[1]}.")
-                    except:
-                        await matcher.send("[Oracle] 指令看起来不存在.")
-                    finally:
-                        return
-
-                agt.reset()
-                scp_cards.update(event, agt.__dict__, qid=qid, save=True)
-                await matcher.send(f"[Oracle] 人物卡 {agt.name} 属性已重置.")
-                return
-            elif args[0] in ["upgrade", "u", "up", "study", "learn"]:
-                agt = Agent().load(scp_cards.get(event, qid=qid))
-                anb = agt.all_not_base()
-
-                if args[1] in all_alias_dict.keys():
-                    key_name = all_alias_dict[args[1]]
-                    oldattr = getattr(agt, anb[key_name])
-                    level = int(oldattr[key_name])
-
-                    if len(args) <= 2:
-                        up = level + 1
-                    else:
-                        try:
-                            up = int(args[2])
-                        except ValueError:
-                            await matcher.send(help_message("scp"))
-                            return
-
-                    if level >= up:
-                        await matcher.send(f"[Oracle] 你的 {args[1]} 技能的等级已经是 {level} 级了.")
-                        return
-
-                    required = int(up * (up + 1) / 2 - level * (level + 1) / 2)
-                    if agt.p[anb[key_name]] < required:
-                        await matcher.send(f"[Oracle] 你的熟练值不足以支撑你将 {args[1]} 提升到 {up} 级.")
-                        return
-
-                    agt.p[anb[key_name]] -= required
-
-                    flt = random.randint(1, 10)
-
-                    if flt == 10:
-                        flt = 0
-
-                    oldattr[key_name] = float(up) + flt/10
-                    setattr(agt, anb[key_name], oldattr)
-                    scp_cards.update(event, agt.__dict__, qid=qid, save=True)
-                    await matcher.send(f"[Oracle] 你的 {args[1]} 升级到 {up} 级.\n该技能的熟练度为 {oldattr[key_name]}.")
-                    return
-                else:
-                    await matcher.send(f"[Oracle] 自定义技能 {args[1]} 无法被升级.")
-                    return
-            elif args[0] in ["deal", "d", "buy", "b"]:
-                args_for_deal = args[1:]
-                await matcher.send(deal(event, args_for_deal))
-                return 
-            else:
-                await matcher.send(f"[Oracle] 指令 {args[0]} 看起来似乎不存在.")
-                return
-
-        agt = Agent()
-        agt.init()
-
-        scp_cache_cards.update(event, agt.__dict__, save=False)
-        await matcher.send(str(agt.output()))
-
-    @dndcommand.handle()
-    async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
-        """ DND 车卡指令 """
-        if not get_status(event):
-            return
-
-        args = format_msg(event.get_message(), begin=".dnd")
-        if len(args) > 1:
-            logger.warning("指令错误, 驳回.")
-            await matcher.send("[Oracle] 错误: 参数超出预计(1需要 但 %d传入), 指令驳回." % len(args))
-            return True
-
-        try:
-            if len(args) == 0:
-                raise ValueError
-            args = int(args[0])
-        except ValueError:
-            await matcher.send(f'警告: 参数 {args} 不合法, 使用默认值 20 替代.')
-            args = 20
-
-        adv = Adventurer()
-        adv.age_check(args)
-        adv.init()
-
-        if adv.int[0] <= 8:
-            await matcher.send("[Orcale] 很遗憾, 检定新的冒险者智力不足, 弱智是不允许成为冒险者的, 请重新进行车卡检定.")
-            return True
-
-        if 15 <= args and args < 90:
-            dnd_cache_cards.update(event, adv.__dict__, save=False)
-            await matcher.send(str(adv.output()))
-        return True
-
     @showcommand.handle()
     async def showhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
         """ 角色卡展示指令 """
@@ -815,7 +604,7 @@ if package == "nonebot2":
 
 
     @helpcommand.handle()
-    async def rdhelphandler(matcher: Matcher, event: MessageEvent):
+    async def helphandler(matcher: Matcher, event: MessageEvent):
         """ 帮助指令 """
         if not get_status(event):
             return
@@ -864,11 +653,10 @@ if package == "nonebot2":
             return
 
         args = format_str(event.get_message(), begin=(".at", ".attack"))
-        if mode == "coc":
-            await matcher.send(at(args, event))
-        elif mode == "scp":
-            await matcher.send(sat(args, event))
-
+        if mode in modes:
+            await matcher.send(eval(f"{mode}_at(args, event)"))
+        else:
+            await matcher.send("[Oracle] 未知的跑团模式.")
 
     @damcommand.handle()
     async def damhandler(matcher: Matcher, event: GroupMessageEvent):

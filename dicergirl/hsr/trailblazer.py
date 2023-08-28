@@ -1,16 +1,16 @@
 try:
     from ..utils.dicer import Dice
-    from .attributes import scp_attrs_dict, ability_data, knowledge_data, skills_data
+    #from .attributes import scp_attrs_dict, ability_data, knowledge_data, skills_data
 except ImportError:
     from dicergirl.utils.dicer import Dice
-    from dicergirl.scp.attributes import scp_attrs_dict, knowledge_data, skills_data, ability_data
+    #from dicergirl.scp.attributes import scp_attrs_dict, knowledge_data, skills_data, ability_data
 
 import random
 
-class Agent(object):
-    """ SCP 特工人物卡 """
+class Trailblazer(object):
+    """ 开拓者人物卡 """
     def __init__(self) -> None:
-        self.name = "无名特工"
+        self.name = "无名客"
         self.age = 20
         self.sex = "女"
         self.level = 1
@@ -19,21 +19,7 @@ class Agent(object):
         self.enp = 0
         self.rep = 0
         self.ach = 0
-        self.dices = {}
         self.en = {}
-        self.money = 200
-        self.agentclass = "E"
-        self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
-        self.skills = {skill: 0 for skill in skills_data.keys()}
-        self.ability = {ability: 0 for ability in ability_data.keys()}
-        self.p = {
-            "knowledge": 17,
-            "skills": 14,
-            "ability": 10
-        }
-        self.ix = 1
-        self.rx = 1
-        self.tools = {}
 
     def init(self):
         prop = {
@@ -84,22 +70,6 @@ class Agent(object):
                 self.rx += 1
             elif d == "D12":
                 self.rx += 1
-
-    def reset_card(self):
-        self.reset()
-        self.money = 200
-        self.agentclass = "E"
-        self.knowledge = {knowledge: 0 for knowledge in knowledge_data.keys()}
-        self.skills = {skill: 0 for skill in skills_data.keys()}
-        self.ability = {ability: 0 for ability in ability_data.keys()}
-        self.p = {
-            "knowledge": 17,
-            "skills": 14,
-            "ability": 10
-        }
-        self.tools = {}
-        self.ach = 0
-        self.level = 1
 
     def reset_hp(self):
         base = 10
@@ -169,28 +139,6 @@ class Agent(object):
         data += "激励点: %d\n" % (self.enp)
         data += "生命: %d/%d" % (self.hp, self.hp_max)
         return data
-    
-    def __dices_format(self, prop):
-        d8 = 0
-        d10 = 0
-        d12 = 0
-        d20 = 0
-
-        for dice in self.dices[prop]:
-            if dice == "D8":
-                d8 += 1
-            elif dice == "D10":
-                d10 += 1
-            elif dice == "D12":
-                d12 += 1
-            elif dice == "D20":
-                d20 += 1
-
-        d8 = f"{d8}D8"
-        d10 = f"+{d10}D10" if d10 != 0 else ""
-        d12 = f"+{d12}D12" if d12 != 0 else ""
-        d20 = f"+{d20}D20" if d20 != 0 else ""
-        return d8 + d10 + d12 + d20
 
     def skills_output(self) -> str:
         if not self.skills and not self.knowledge and not self.ability:
@@ -272,21 +220,6 @@ class Agent(object):
 
     def out_level(self):
         return f"当前特工权限: {self.level}"
-
-    def out_en(self):
-        out = "当前激励状态:"
-        for en in self.en.keys():
-            ability = None
-            for attr in scp_attrs_dict.keys():
-                if scp_attrs_dict[attr][0] == en:
-                    ability = attr
-
-            if not ability:
-                return f"[Orcale] 错误: 已经被激励的技能 {en} 不存在!"
-
-            out += f"\n  {ability}: {self.en[en]} 点激励."
-
-        return out
 
     def load(self, data: dict):
         self.__dict__.update(data)

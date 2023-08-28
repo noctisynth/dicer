@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "dicergirl"
+description = "跑团骰娘机器人欧若可, 支持 QQ频道 及 Nonebot2 部署."
+authors = ["Night Resurgent <fu050409@163.com>"]
+readme = "README.md"
+homepage = "https://gitee.com/unvisitor/dicer"
+repository = "https://gitee.com/unvisitor/dicer"
+documentation = "https://gitee.com/unvisitor/dicer"
+keywords = ["dice", "bot", "nonebot2"]
+license = "Apache-2.0"
+version = "0.0.0"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+nonebot2 = "*"
+nonebot-adapter-onebot = "*"
+qq-botpy = "*"
+watchdog = "*"
+loguru = "*"
+pyyaml = "*"
+openai = "*"
+multilogging = "*"
+psutil = "*"
+nonebot_plugin_apscheduler = "*"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+format-jinja-imports = [
+    { module = "dicergirl", item = "utils" },
+]
+format-jinja = "{{ utils.utils.version }}"
+
+[build-system]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"

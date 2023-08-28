@@ -17,7 +17,7 @@ import random
 
 logger = multilogger(name="Dicer Girl", payload="SCPUtil")
 
-def at(args, event):
+def scp_at(args, event):
     """ SCP 伤害检定 """
     card = scp_cards.get(event)
     agt = Agent().load(card)

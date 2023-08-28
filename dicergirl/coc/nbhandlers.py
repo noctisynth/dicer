@@ -14,9 +14,9 @@ from nonebot.adapters.onebot.v11 import Bot as V11Bot
 from nonebot.internal.matcher.matcher import Matcher
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 
-coccommand = on_startswith(".coc", priority=1, block=True)
-@coccommand.handle()
-async def cochandler(matcher: Matcher, event: GroupMessageEvent):
+coccommand = on_startswith(".coc", priority=1, block=True).handle()
+
+async def coc_handler(matcher: Matcher, event: GroupMessageEvent):
     """ COC 车卡指令 """
     if not get_status(event):
         return
@@ -78,4 +78,4 @@ async def cochandler(matcher: Matcher, event: GroupMessageEvent):
     reply.rstrip("\n")
     await matcher.send(reply)
 
-__all__ = ["cochandler"]
+commands = {"coccommand": "coc_handler"}

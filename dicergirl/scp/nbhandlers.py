@@ -19,9 +19,8 @@ from nonebot.adapters.onebot.v11 import GroupMessageEvent
 import asyncio
 import random
 
-scpcommand = on_startswith(".scp", priority=1, block=True)
+scpcommand = on_startswith(".scp", priority=1, block=True).handle()
 
-@scpcommand.handle()
 async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
     """ SCP 车卡指令 """
     if not get_status(event):
@@ -132,3 +131,5 @@ async def scp_handler(matcher: Matcher, event: GroupMessageEvent):
 
     scp_cache_cards.update(event, agt.__dict__, save=False)
     await matcher.send(str(agt.output()))
+
+commands = {"scpcommand": "scp_handler"}

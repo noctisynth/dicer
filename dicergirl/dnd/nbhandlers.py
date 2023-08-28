@@ -14,9 +14,8 @@ from nonebot.adapters.onebot.v11 import Bot as V11Bot
 from nonebot.internal.matcher.matcher import Matcher
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
 
-dndcommand = on_startswith(".dnd", priority=1, block=True)
+dndcommand = on_startswith(".dnd", priority=1, block=True).handle()
 
-@dndcommand.handle()
 async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
     """ DND 车卡指令 """
     if not get_status(event):
@@ -47,3 +46,5 @@ async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
         dnd_cache_cards.update(event, adv.__dict__, save=False)
         await matcher.send(str(adv.output()))
     return True
+
+commands = {"dndcommand": "dnd_handler"}

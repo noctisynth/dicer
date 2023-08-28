@@ -156,11 +156,11 @@ class Agent(object):
 
     def __repr__(self) -> str:
         data = "姓名: %s\n" % self.name
-        data += "性别: %s 年龄: %d\n" % (self.sex, self.age)
-        data += "强度: %s 命运: %s\n" % (self.__dices_format("str"), self.__dices_format("fte"))
-        data += "感知: %s 魅力: %s\n" % (self.__dices_format("per"), self.__dices_format("chr")) 
-        data += "灵巧: %s 情报: %s\n" % (self.__dices_format("dex"), self.__dices_format("int"))
-        data += "健康: %s 意志: %s\n" % (self.__dices_format("hth"), self.__dices_format("wil"))
+        data += "性别: %s\n年龄: %d\n" % (self.sex, self.age)
+        data += "强度: %s\n命运: %s\n" % (self.__dices_format("str"), self.__dices_format("fte"))
+        data += "感知: %s\n魅力: %s\n" % (self.__dices_format("per"), self.__dices_format("chr")) 
+        data += "灵巧: %s\n情报: %s\n" % (self.__dices_format("dex"), self.__dices_format("int"))
+        data += "健康: %s\n意志: %s\n" % (self.__dices_format("hth"), self.__dices_format("wil"))
         data += "熟练值:\n"
         data += "  知识: %s " % self.p["knowledge"]
         data += "技能: %s " % self.p["skills"]

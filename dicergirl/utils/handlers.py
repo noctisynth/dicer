@@ -1,6 +1,6 @@
 try:
     from .docimasy import expr
-    from ..utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
+    from ..utils.utils import get_group_id
     from ..coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
     from ..scp.scpcards import scp_cache_cards, scp_cards
     from ..scp.attributes import scp_attrs_dict
@@ -9,7 +9,7 @@ try:
     from .dicer import Dice
 except ImportError:
     from dicergirl.utils.docimasy import expr
-    from dicergirl.utils.utils import _coc_cachepath, _scp_cachepath, get_group_id
+    from dicergirl.utils.utils import get_group_id
     from dicergirl.coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
     from dicergirl.scp.scpcards import scp_cache_cards, scp_cards
     from dicergirl.scp.attributes import scp_attrs_dict

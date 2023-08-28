@@ -33,7 +33,7 @@ _dicer_girl_status = data_dir / "status.json"
 _coc_cachepath = data_dir / "coc_cards.json"
 _scp_cachepath = data_dir / "scp_cards.json"
 _dnd_cachepath = data_dir / "dnd_cards.json"
-_hsr_cache_path = data_dir / "hsr.json"
+_hsr_cache_path = data_dir / "hsr_cards.json"
 _super_user = data_dir / "super_user.json"
 _loggers_cachepath = data_dir / "loggers.json"
 logger = multilogger(name="Dicer Girl", payload="utils")
@@ -78,10 +78,6 @@ def init() -> None:
         "Dicer Girl 日志": [log_dir, "dir"],
         "Dicer Girl 状态管理": [_dicer_girl_status, "file"],
         "日志管理": [_loggers_cachepath, "file"],
-        "COC 存储": [_coc_cachepath, "file"],
-        "SCP 存储": [_scp_cachepath, "file"],
-        "DND 存储": [_dnd_cachepath, "file"],
-        "HSR 存储": [_hsr_cache_path, "file"],
         "超级用户存储": [_super_user, "file"]
     }
     for name, dir in dirs.items():

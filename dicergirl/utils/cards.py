@@ -1,33 +1,45 @@
-try:
-    from ..utils.utils import _scp_cachepath
-    from ..utils.utils import get_group_id, get_user_id
-    from ..utils.multilogging import multilogger
-except ImportError:
-    from dicergirl.utils.utils import _scp_cachepath
-    from dicergirl.utils.utils import get_group_id, get_user_id
-    from dicergirl.utils.multilogging import multilogger
+from pathlib import Path
+#try:
+from .utils import get_group_id, get_user_id
+from .multilogging import multilogger
+#except ImportError:
+#    from dicergirl.utils.utils import get_group_id, get_user_id
+#    from dicergirl.utils.multilogging import multilogger
 
 import json
 
 logger = multilogger(name="Dicer Girl", payload="Card")
 
 class Cards():
-    def __init__(self, mode: str=None):
+    data_path: Path = Path.home() / ".dicergirl" / "data"
+
+    def __init__(self, mode: str=None, cache_path: Path=None):
         self.data = {}
         self.mode = mode if mode else "未知模式"
+        self.cache_path = cache_path if cache_path else self.data_path / f"{mode}_cards.json"
+
+    def init(self):
+        logger.info(f"{self.mode.upper()} 存储文件未建立, 建立它.")
+        with open(self.cache_path, "w", encoding="utf-8") as f:
+            json.dump({}, f, ensure_ascii=False)
 
     def save(self):
         logger.info(f"保存 {self.mode.upper()} 人物卡数据.")
-        with open(_scp_cachepath, "w", encoding="utf-8") as f:
+        with open(self.cache_path, "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False)
 
-    def load(self):
-        with open(_scp_cachepath, "r", encoding="utf-8") as f:
+    def load(self) -> dict:
+        if not self.cache_path.exists():
+            self.init()
+
+        with open(self.cache_path, "r", encoding="utf-8") as f:
             data = f.read()
             if not data:
                 self.data = {}
             else:
                 self.data = json.loads(data)
+
+        return self.data
 
     def update(self, message, inv_dict, qid="", save=True):
         group_id = get_group_id(message)

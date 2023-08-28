@@ -1,4 +1,5 @@
 from .investigator import Investigator
+#from .nbhandlers import coccommand
 
 __type__ = "plugin"
 __charactor__ = Investigator

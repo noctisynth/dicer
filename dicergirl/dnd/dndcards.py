@@ -4,8 +4,8 @@ try:
 except ImportError:
     from dicergirl.utils.cards import Cards
 
-dnd_cards = Cards()
-dnd_cache_cards = Cards()
+dnd_cards = Cards(mode="dnd")
+dnd_cache_cards = Cards(mode="dnd")
 dnd_attrs_dict: Dict[str, List[str]] = {
     "名字": ["name", "名字", "名称", "姓名"],
     "性别": ["sex", "性别"],

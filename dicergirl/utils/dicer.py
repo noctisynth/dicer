@@ -10,13 +10,6 @@ EMPTY_LIST = []
 
 logger = multilogger(name="Dicer Girl", payload="Dicer")
 
-def is_digit(number):
-    try:
-        int(number)
-        return True
-    except:
-        return False
-
 class BaseDice:
     def __init__(self, roll_string: str=EMPTY_STRING) -> None:
         self.roll_string = roll_string
@@ -45,6 +38,7 @@ class DigitDice(BaseDice):
 
     def roll(self) -> int:
         self.outcome = self.a
+        self.display = [self.a]
         return self.outcome
 
 class Dice(BaseDice):
@@ -241,7 +235,7 @@ class Dicer:
         self.dices = []
         self.display = []
         for index, calc in enumerate(self.calc_list):
-            if calc in ("+", "-", "*", "/"):
+            if calc in ("+", "-", "*", "/", "(", ")"):
                 continue
 
             outcome = calc.roll()
@@ -327,7 +321,7 @@ if __name__ == "__main__":
             logger.exception(error)
 
     try:
-        roll_string = "1d100+p2"
+        roll_string = "1d100+(10/10)+p2"
         dice = Dicer(roll_string).roll()
         print(dice.description())
     except ValueError as error:

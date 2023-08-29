@@ -17,6 +17,8 @@ except ImportError:
     from dicergirl import coc, scp, dnd
     from dicergirl.utils.dicer import Dice
 
+import random
+
 def __set_plus_format(args: list):
     """ `.set 技能 +3`语法解析 """
     while True:
@@ -257,3 +259,24 @@ def roll(args: str) -> str:
         return r.detail
     except ValueError:
         return "[Oracle] 出现错误, 请检查你的掷骰表达式.\n使用`.help r`获得掷骰指令使用帮助."
+
+def shoot():
+    dice = Dice("1d20").roll()
+    result = dice.total
+
+    if result < 4:
+        rstr = "右腿"
+    elif result < 7:
+        rstr = "左腿"
+    elif result < 11:
+        rstr = "腹部"
+    elif result < 16:
+        rstr = "胸部"
+    elif result < 18:
+        rstr = "右臂"
+    elif result < 20:
+        rstr = "左臂"
+    elif result < 21:
+        rstr = "头部"
+
+    return f"[Oracle] 进行射击检定:\n{dice.description()}\n命中了 {rstr}."

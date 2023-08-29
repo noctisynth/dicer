@@ -53,7 +53,7 @@ if package == "nonebot2":
         )
     from .utils.plugins import modes
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
-    from .utils.handlers import show_handler, set_handler, del_handler, roll
+    from .utils.handlers import show_handler, set_handler, del_handler, roll, shoot
     from .utils.chat import chat
 
     from nonebot.matcher import Matcher
@@ -79,7 +79,7 @@ if package == "nonebot2":
     setcommand = on_startswith((".set", ".st"), priority=2, block=True)
     helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
     modecommand = on_startswith((".mode", ".m"), priority=2, block=True)
-    stcommand = on_startswith(".sht", priority=2, block=True)
+    shootcommand = on_startswith((".sht", ".shoot"), priority=2, block=True)
     attackcommand = on_startswith((".at", ".attack"), priority=2, block=True)
     damcommand = on_startswith((".dam", ".damage"), priority=2, block=True)
     encommand = on_startswith((".en", ".encourage"), priority=2, block=True)
@@ -558,13 +558,13 @@ if package == "nonebot2":
         else:
             await matcher.send(f"[Oracle] 当前的跑团模式为 {mode.upper()}.")
 
-    @stcommand.handle()
-    async def stcommandhandler(matcher: Matcher, event: GroupMessageEvent):
+    @shootcommand.handle()
+    async def shoothandler(matcher: Matcher, event: GroupMessageEvent):
         """ 射击检定指令 """
         if not get_status(event):
             return
 
-        await matcher.send(st())
+        await matcher.send(shoot())
 
     @attackcommand.handle()
     async def attackhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -594,15 +594,19 @@ if package == "nonebot2":
             return
 
         args = format_msg(event.get_message(), begin=(".dam", ".damage"))
-        if mode == "scp":
-            sd = scp_dam(args, event)
-        elif mode == "coc":
-            sd = coc_dam(args, event)
-        else:
-            await matcher.send("未知的跑团模式.")
-            return
+        if mode in modes:
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                return
 
-        await matcher.send(sd)
+            if not "at" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持承伤检定指令.")
+                return
+
+            handler = modes[mode].__commands__["dam"]
+            await matcher.send(handler(event, args))
+        else:
+            await matcher.send("[Oracle] 未知的跑团模式.")
 
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -611,18 +615,19 @@ if package == "nonebot2":
             return
 
         args = format_msg(event.get_message(), begin=".en")
-        at = get_mentions(event)
+        if mode in modes:
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                return
 
-        if at and not is_super_user(event):
-            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
-            return
+            if not "at" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持激励指令.")
+                return
 
-        try:
-            en = eval(f"{mode}_en(event, args)")
-        except:
-            en = f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode.upper()} 不存在该指令."
-
-        await matcher.send(en)
+            handler = modes[mode].__commands__["en"]
+            await matcher.send(handler(event, args))
+        else:
+            await matcher.send("[Oracle] 未知的跑团模式.")
 
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
@@ -632,16 +637,24 @@ if package == "nonebot2":
 
         args = format_msg(event.get_message(), begin=".ra")
         if mode in modes:
-            ras = eval(f"{mode}_ra(args, event)")
-            if isinstance(ras, list):
-                for ra in ras:
-                    await matcher.send(ra)
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
                 return
 
-            await matcher.send(ras)
+            if not "at" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持激励指令.")
+                return
+
+            handler = modes[mode].__commands__["ra"]
+            replies = handler(event, args)
+            if isinstance(replies, list):
+                for reply in replies:
+                    await matcher.send(reply)
+                return
+
+            await matcher.send(replies)
         else:
-            await matcher.send("[Oracle] 当前处于未知的跑团模式.")
-        return
+            await matcher.send("[Oracle] 未知的跑团模式.")
 
     @rhcommand.handle()
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):

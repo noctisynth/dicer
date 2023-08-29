@@ -93,9 +93,9 @@ def deal(event, args):
     else:
         return f"[Oracle] 装备 {real_name} 不存在或特工权限不足."
 
-def scp_dam(args, message):
+def scp_dam(event, args):
     """ SCP 承伤检定 """
-    card = scp_cards.get(message)
+    card = scp_cards.get(event)
 
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.scp`指令进行车卡生成角色卡并`.set`进行保存."
@@ -136,10 +136,10 @@ def scp_dam(args, message):
     else:
         r += "."
 
-    scp_cards.update(message, card)
+    scp_cards.update(event, card)
     return r
 
-def scp_ra(args: list, event):
+def scp_ra(event, args: list) -> str:
     """ SCP 属性或技能检定 """
     if len(args) == 0:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."

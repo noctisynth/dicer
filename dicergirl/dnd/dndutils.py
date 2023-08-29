@@ -32,8 +32,8 @@ def dnd_at(event, args):
 
     return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})={d.total+dbtotal}\n造成了 {d.total+dbtotal}点 伤害."
 
-def dnd_dam(args, message):
-    card = dnd_cards.get(message)
+def dnd_dam(event, args):
+    card = dnd_cards.get(event)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.dnd`指令进行车卡生成角色卡并`.set`进行保存."
     max_hp = card["hp_max"]
@@ -70,10 +70,10 @@ def dnd_dam(args, message):
         r += f", 特工 {card['name']} 濒死."
     else:
         r += "."
-    dnd_cards.update(message, card)
+    dnd_cards.update(event, card)
     return r
 
-def dnd_ra(args, event):
+def dnd_ra(event, args):
     if len(args) == 0:
         return help_message("sra")
     if len(args) > 2:

@@ -68,7 +68,7 @@ def sc(arg, event):
             coc_cards.update(event, card)
         return reply
     except:
-        return "[Oracle] 产生了未知的错误, 你可以使用`.help ra`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
+        return "[Oracle] 产生了未知的错误, 你可以使用`.help sc`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
 
 def st():
     """ COC 射击检定 """
@@ -111,9 +111,9 @@ def coc_at(event, args):
 
     return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})\n造成了 {d.total+dbtotal}点 伤害."
 
-def coc_dam(args, message):
+def coc_dam(event, args):
     """ COC 承伤检定 """
-    card = coc_cards.get(message)
+    card = coc_cards.get(event)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.coc`指令进行车卡生成角色卡并`.set`进行保存."
     max_hp = card["con"] + card["siz"]
@@ -138,10 +138,10 @@ def coc_dam(args, message):
         r += f", 调查员 {card['name']} 濒死."
     else:
         r += "."
-    coc_cards.update(message, card)
+    coc_cards.update(event, card)
     return r
 
-def coc_ra(args, event):
+def coc_ra(event, args):
     """ COC 技能检定 """
     if len(args) == 0:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."

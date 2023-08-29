@@ -49,7 +49,7 @@ def modules():
                     logger.error("未知错误:")
                     logger.exception(error)
 
-            modules_dict[folder.name] = module
+            modules_dict[module.__name__] = module
             logger.success(f"插件 {folder.name.upper()} 导入完成.")
     sys.path.pop(-1)
     loaded = True

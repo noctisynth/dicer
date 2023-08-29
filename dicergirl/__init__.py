@@ -553,7 +553,12 @@ if package == "nonebot2":
                 await matcher.send(help_message("mode"))
                 return True
         else:
-            await matcher.send(f"[Oracle] 当前的跑团模式为 {mode.upper()}.")
+            reply = "当前已正确安装的跑团插件:\n"
+            for plugin in modes.keys():
+                reply += f"{plugin.upper()} 模式: {plugin}.\n"
+
+            reply += f"[Oracle] 当前的跑团模式为 {mode.upper()}."
+            await matcher.send(reply)
 
     @shootcommand.handle()
     async def shoothandler(matcher: Matcher, event: GroupMessageEvent):

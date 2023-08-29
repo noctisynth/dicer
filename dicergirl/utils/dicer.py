@@ -48,11 +48,15 @@ class DigitDice(BaseDice):
         return self.outcome
 
 class Dice(BaseDice):
-    def __init__(self, roll_string: str="") -> None:
+    def __init__(self, roll_string: str="", explode=False) -> None:
         super().__init__(roll_string=roll_string)
+        self.dices = EMPTY_LIST
+        self.great = False
+        self.explode = explode
         self.parse()
 
     def parse(self) -> "Dice":
+        self.dices = []
         split = re.split(r"[dD]", self.roll_string)
 
         if split[0]:
@@ -62,6 +66,7 @@ class Dice(BaseDice):
 
         self.b = int(split[1])
         self.db = f"{self.a}D{self.b}"
+        self.dices += [f"D{self.b}"] * self.a
         return self
 
     def roll(self) -> int:
@@ -70,6 +75,31 @@ class Dice(BaseDice):
 
         for _ in range(self.a):
             result = random.randint(1, self.b)
+
+            if result == 1 and self.explode:
+                result -= 1
+
+            if self.explode and self.b == 8:
+                self.dices.append("D10")
+                result2 = random.randint(1, 10)
+                if result2 == 1:
+                    result -= 1
+                result += result2
+                if result2 == 10:
+                    self.dices.append("D12")
+                    result3 = random.randint(1, 12)
+                    if result3 == 1:
+                        result -= 1
+                    result += result3
+                    if result3 == 12:
+                        self.dices.append("D20")
+                        result4 = random.randint(1, 20)
+                        if result4 == 1:
+                            result -= 1
+                        result += result4
+                        if result4 == 20:
+                            self.great = True
+
             self.results.append(result)
             self.display.append(result)
 
@@ -167,11 +197,14 @@ class Dicer:
         ```
     """
     def __init__(self, roll_string: str=EMPTY_STRING, explode=False) -> None:
-        self.roll_string = roll_string
-        self.calc_list: List[str | BaseDice] = []
+        self.roll_string: str = roll_string
+        self.explode: bool = explode
+        self.calc_list: List[str | Dice | DigitDice | AwardDice | PunishDice] = []
         self.results: List[int] = []
         self.display: List[int | List[int]] = []
-        self.outcome = 0
+        self.outcome: int = ZERO
+        self.great: bool = False
+        self.dices: List[str] = []
         self.parse(roll_string=self.roll_string, explode=explode)
 
     def parse(self, roll_string: str=EMPTY_STRING, explode=False):
@@ -184,7 +217,7 @@ class Dicer:
                 self.calc_list.append(match)
                 self.db += match
             elif re.match(r"\d*[dD]\d+", match):
-                self.calc_list.append(Dice(match))
+                self.calc_list.append(Dice(match, explode=explode))
                 self.db += match.upper()
             elif re.match(r"\d*[bB]\d+", match):
                 self.calc_list.append(AwardDice(match))
@@ -197,9 +230,15 @@ class Dicer:
                 self.db += match.upper()
             else:
                 raise ValueError(f"骰 {match} 不符合规范.")
+
+        if not matches:
+            self.calc_list.append(Dice("1d100"))
+            self.db = "1D100"
+
         return self
 
     def roll(self):
+        self.dices = []
         self.display = []
         for index, calc in enumerate(self.calc_list):
             if calc in ("+", "-", "*", "/"):
@@ -209,6 +248,12 @@ class Dicer:
             self.calc_list[index] = outcome
             self.results.append(outcome)
             self.display += calc.display
+
+            if isinstance(calc, Dice) and self.explode:
+                if calc.great:
+                    self.great = True
+                
+                self.dices += calc.dices
 
         self.outcome = eval("".join(map(str, self.calc_list)))
         return self

@@ -1,8 +1,8 @@
 try:
-    from ..utils.dicer import Dice
+    from ..utils.dicer import Dicer
     #from .attributes import scp_attrs_dict, ability_data, knowledge_data, skills_data
 except ImportError:
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
     #from dicergirl.scp.attributes import scp_attrs_dict, knowledge_data, skills_data, ability_data
 
 import random
@@ -41,7 +41,7 @@ class Trailblazer(object):
 
         for p in prop.keys():
             num = prop[p]
-            dice = Dice(f"{num}d8", explode=True)
+            dice = Dicer(f"{num}d8", explode=True)
             dice.roll()
             prop[p] = dice.total
             attr[p] = dice.dices

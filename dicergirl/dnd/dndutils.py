@@ -1,13 +1,13 @@
 try:
     from ..utils.docimasy import dnd_doc
     from ..utils.messages import help_messages, help_message
-    from ..utils.dicer import Dice
+    from ..utils.dicer import Dicer
     from .dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
     from .adventurer import Adventurer
 except ImportError:
     from dicergirl.utils.docimasy import dnd_doc
     from dicergirl.utils.messages import help_messages, help_message
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
     from dicergirl.dnd.dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
     from dicergirl.dnd.adventurer import Adventurer
 
@@ -16,12 +16,12 @@ def dnd_at(event, args):
     method = "+"
 
     if args:
-        d = Dice().parse(args).roll()
+        d = Dicer().parse(args).roll()
     else:
-        d = Dice().parse("1d6").roll()
+        d = Dicer().parse("1d6").roll()
 
     if "d" in inv.db():
-        db = Dice(inv.db()).roll()
+        db = Dicer(inv.db()).roll()
         dbtotal = db.total
         db = db.db
     else:
@@ -45,14 +45,14 @@ def dnd_dam(event, args):
         else:
             r = "检查特工状态"
     elif len(args) == 0:
-        d = Dice().parse("1d6").roll()
+        d = Dicer().parse("1d6").roll()
         card["hp"] -= d.total
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     elif len(args) == 3:
         if args[1] != "d":
             r = "[Oracle] 未知的指令格式."
         else:
-            d = Dice().parse(f"{args[0]}{args[1]}{args[2]}").roll()
+            d = Dicer().parse(f"{args[0]}{args[1]}{args[2]}").roll()
             card["hp"] -= d.total
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
     if card["hp"] <= 0:
@@ -104,5 +104,5 @@ def dnd_ra(event, args):
     if not is_base and not is_skill:
         return "[Oracle] 错误: 没有这个数据或技能."
 
-    outcome = Dice("1d20").roll().calc() + v
+    outcome = Dicer("1d20").roll().calc() + v
     return dnd_doc(outcome, dc, adventurer=card_data["name"])

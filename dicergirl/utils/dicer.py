@@ -15,7 +15,7 @@ def is_digit(number):
     except:
         return False
 
-class Dice:
+class Dicer:
     """掷骰类
     参数:
         roll_string: 标准掷骰表达式
@@ -120,7 +120,7 @@ class Dice:
             logger.debug(f"计算模式: {self.method}")
             addon = self.method + sub_match.group(3)
             logger.debug(f"附加骰: {addon}")
-            xd = Dice(addon, first=False).roll()
+            xd = Dicer(addon, first=False).roll()
             self.x = xd.calc()
             logger.debug(f"附加骰结果: {self.x}")
             self.db = f"{self.db}{self.method}{sub_match.group(3).upper()}"
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     }
     for roll_string in roll_strings.keys():
         try:
-            dice = Dice().parse(roll_string).roll()
+            dice = Dicer().parse(roll_string).roll()
             if dice.total != roll_strings[roll_string]:
                 print(dice.description())
                 raise ValueError(f"对于 {roll_string} dice.toal={dice.total} 但期待 {roll_strings[roll_string]}")
@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
     try:
         roll_string = "1d100+10-10"
-        dice = Dice().parse(roll_string).roll()
+        dice = Dicer().parse(roll_string).roll()
         print(dice.description())
     except ValueError as error:
         logger.exception(error)

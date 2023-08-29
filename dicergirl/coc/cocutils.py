@@ -2,14 +2,14 @@ from typing import Optional
 try:
     from ..utils.docimasy import expr
     from ..utils.messages import temporary_madness, madness_end, phobias, manias
-    from ..utils.dicer import Dice
+    from ..utils.dicer import Dicer
     from ..utils.multilogging import multilogger
     from .coccards import coc_cards, coc_attrs_dict
     from .investigator import Investigator
 except ImportError:
     from dicergirl.utils.docimasy import expr
     from dicergirl.utils.messages import temporary_madness, madness_end, phobias, manias
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
     from dicergirl.utils.multilogging import multilogger
     from dicergirl.coc.coccards import coc_cards, coc_attrs_dict
     from dicergirl.coc.investigator import Investigator
@@ -27,10 +27,10 @@ def sc(arg, event):
         args = list(filter(None, args))
         using_card = False
         s_and_f = args[0].split("/")
-        success = Dice().parse(s_and_f[0])
+        success = Dicer().parse(s_and_f[0])
         success.roll()
         success = success.calc()
-        failure = Dice().parse(s_and_f[1])
+        failure = Dicer().parse(s_and_f[1])
         failure.roll()
         failure = failure.calc()
         if len(args) > 1:
@@ -40,7 +40,7 @@ def sc(arg, event):
         else:
             card = coc_cards.get(event)
             using_card = True
-        r = Dice().roll().calc()
+        r = Dicer().roll().calc()
         s = f"[Oracle] 调查员: {card['name']}\n"
         s += f"检定精神状态: {card['san']}\n"
         s += f"理智检定值: {r}, "
@@ -76,12 +76,12 @@ def coc_at(event, args):
     method = "+"
 
     if args:
-        d = Dice().parse(args).roll()
+        d = Dicer().parse(args).roll()
     else:
-        d = Dice().parse("1d6").roll()
+        d = Dicer().parse("1d6").roll()
 
     if "d" in inv.db():
-        db = Dice(inv.db()).roll()
+        db = Dicer(inv.db()).roll()
         dbtotal = db.total
         db = db.db
     else:
@@ -103,7 +103,7 @@ def coc_dam(event, args):
         card["hp"] -= arg
         r = f"[Orcale] {card['name']} 失去了 {arg}点 生命"
     except:
-        d = Dice().parse("1d6").roll()
+        d = Dicer().parse("1d6").roll()
         card["hp"] -= d.total
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     if card["hp"] <= 0:
@@ -134,7 +134,7 @@ def coc_ra(event, args):
         if len(args) == 1:
             return "[Oracle] 你尚未保存人物卡, 请先执行`.coc`车卡并执行`.set`保存.\n如果你希望快速检定, 请执行`.ra [str: 技能名] [int: 技能值]`."
 
-        return str(expr(Dice(), args[1]))
+        return str(expr(Dicer(), args[1]))
 
     inv = Investigator().load(card_data)
 
@@ -161,20 +161,20 @@ def coc_ra(event, args):
         if not args[1].isdigit():
             return "[Oracle] 技能值应当为整型数, 使用`.help ra`查看技能检定指令使用帮助."
 
-        return str(expr(Dice(), int(args[1])))
+        return str(expr(Dicer(), int(args[1])))
     elif exp and len(args) > 1:
         if not args[1].isdigit():
             return "[Oracle] 技能值应当为整型数, 使用`.help ra`查看技能检定指令使用帮助."
 
         reply = [f"[Oracle] 你已经设置了技能 {args[0]} 为 {exp}, 但你指定了检定值, 使用指定检定值作为替代."]
-        reply.append(str(expr(Dice(), int(args[1]))))
+        reply.append(str(expr(Dicer(), int(args[1]))))
         return reply
 
     time = 1
-    r = expr(Dice(), exp)
+    r = expr(Dicer(), exp)
 
     for _ in range(time-1):
-        r += expr(Dice(), exp)
+        r += expr(Dicer(), exp)
 
     return r.detail
 

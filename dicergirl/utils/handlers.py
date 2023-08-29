@@ -6,7 +6,7 @@ try:
     from ..scp.attributes import scp_attrs_dict
     from ..dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from .. import coc, scp, dnd
-    from .dicer import Dice
+    from .dicer import Dicer
 except ImportError:
     from dicergirl.utils.docimasy import expr
     from dicergirl.utils.utils import get_group_id
@@ -15,7 +15,7 @@ except ImportError:
     from dicergirl.scp.attributes import scp_attrs_dict
     from dicergirl.dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
     from dicergirl import coc, scp, dnd
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
 
 import random
 
@@ -250,7 +250,7 @@ def roll(args: str) -> str:
         args = args.strip()
 
     try:
-        d = Dice(args)
+        d = Dicer(args)
         r = expr(d, None)
 
         for _ in range(time-1):
@@ -283,31 +283,31 @@ def roll(args: str) -> str:
 #     ten.remove(result//10)
 #     return f"{reason}奖励骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
-def rp(args):
-    """ COC 惩罚骰 """
-    if args:
-        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
-    else:
-        match = None
-    ten = []
-    if match:
-        t = int(match[1]) if match[1] else 1
-        reason = f"由于 {match[2]}:\n" if match[2] else ""
-    else:
-        reason = ""
-        t = 1
-    for _ in range(t):
-        _ = Dice("1d10").roll().calc()
-        _ = _ if _ != 10 else 0
-        ten.append(_)
-    result = Dice("1d100").roll().calc()
-    ten.append(result//10)
-    ften = max(ten)
-    ten.remove(result//10)
-    return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
+# def rp(args):
+#     """ COC 惩罚骰 """
+#     if args:
+#         match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
+#     else:
+#         match = None
+#     ten = []
+#     if match:
+#         t = int(match[1]) if match[1] else 1
+#         reason = f"由于 {match[2]}:\n" if match[2] else ""
+#     else:
+#         reason = ""
+#         t = 1
+#     for _ in range(t):
+#         _ = Dicer("1d10").roll().calc()
+#         _ = _ if _ != 10 else 0
+#         ten.append(_)
+#     result = Dicer("1d100").roll().calc()
+#     ten.append(result//10)
+#     ften = max(ten)
+#     ten.remove(result//10)
+#     return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
 def shoot():
-    dice = Dice("1d20").roll()
+    dice = Dicer("1d20").roll()
     result = dice.total
 
     if result < 4:

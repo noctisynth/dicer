@@ -1,13 +1,13 @@
 try:
     from ..utils.docimasy import expr, scp_doc
-    from ..utils.dicer import Dice
+    from ..utils.dicer import Dicer
     from .scpcards import scp_cards
     from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from .agent import Agent
     from ..utils.multilogging import multilogger
 except ImportError:
     from dicergirl.utils.docimasy import expr, scp_doc
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
     from dicergirl.scp.scpcards import scp_cards
     from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
     from dicergirl.scp.agent import Agent
@@ -36,7 +36,7 @@ def scp_at(event, args):
 
         results = []
         for dice in all_dices:
-            dice = Dice("1"+dice.lower()).roll()
+            dice = Dicer("1"+dice.lower()).roll()
             results.append(dice.total)
 
         result = max(results)
@@ -53,7 +53,7 @@ def scp_at(event, args):
         if not args.upper() in upper.keys():
             return f"[Oracle] 看起来该特工并未购置 {args.upper()}."
 
-        return f"[Oracle] 特工使用 {upper[args.upper()][1]} 发起攻击, 检定造成了 {Dice(upper[args.upper()][0]['base']).roll().calc()} 点 伤害."
+        return f"[Oracle] 特工使用 {upper[args.upper()][1]} 发起攻击, 检定造成了 {Dicer(upper[args.upper()][0]['base']).roll().calc()} 点 伤害."
 
 def deal(event, args):
     """ SCP 武器交易系统 """
@@ -110,14 +110,14 @@ def scp_dam(event, args):
         else:
             r = "检查特工状态"
     elif len(args) == 0:
-        d = Dice().parse("1d6").roll()
+        d = Dicer().parse("1d6").roll()
         card["hp"] -= d.total
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     elif len(args) == 3:
         if args[1] != "d":
             r = "[Oracle] 未知的指令格式."
         else:
-            d = Dice().parse(f"{args[0]}{args[1]}{args[2]}").roll()
+            d = Dicer().parse(f"{args[0]}{args[1]}{args[2]}").roll()
             card["hp"] -= d.total
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
 
@@ -216,7 +216,7 @@ def scp_ra(event, args: list) -> str:
     if not is_base and not is_skill and not skill_only:
         if args[0] in inv.skills.keys():
             exp = inv.skills[args[0]]
-            return str(expr(Dice(), int(exp)))
+            return str(expr(Dicer(), int(exp)))
         else:
             return "[Oracle] 错误: 没有这个数据或技能."
 
@@ -233,7 +233,7 @@ def scp_ra(event, args: list) -> str:
     results = []
     great = False
     for dice in all_dices:
-        dice = Dice("1"+dice.lower()).roll()
+        dice = Dicer("1"+dice.lower()).roll()
         results.append(dice.total)
         if dice.great:
             great = True

@@ -1,8 +1,8 @@
 import random
 try:
-    from .dicer import Dice
+    from .dicer import Dicer
 except ImportError:
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
 
 class Docimasy:
     """
@@ -61,7 +61,7 @@ class Docimasy:
     def __str__(self):
         return self.detail
 
-def expr(dice: Dice, anum) -> Docimasy:
+def expr(dice: Dicer, anum) -> Docimasy:
     """ COC 技能检定结果 """
     result = dice.roll().calc()
     docimasy = Docimasy(f"掷骰: {dice.db}")

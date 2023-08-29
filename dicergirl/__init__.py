@@ -41,10 +41,6 @@ mode = "scp"
 package = get_package()
 
 if package == "nonebot2":
-    from .coc.cocutils import coc_at, coc_dam, coc_en, coc_ra
-    from .scp.scputils import scp_ra, scp_dam, scp_en, scp_at
-    from .dnd.dndutils import dra
-
     from .utils.messages import help_message, version
     from .utils.utils import (
         init, on_startswith,
@@ -101,7 +97,7 @@ if package == "nonebot2":
     scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 
     @driver.on_startup
-    async def _():
+    async def _() -> None:
         """ `Nonebot2`核心加载完成后的初始化方法 """
         global DEBUG
         logger.info("欧若可骰娘初始化中...")
@@ -159,7 +155,6 @@ if package == "nonebot2":
             return
 
         await matcher.send(None)
-
 
     @debugcommand.handle()
     async def debughandler(matcher: Matcher, event: MessageEvent):
@@ -535,7 +530,7 @@ if package == "nonebot2":
         if not get_status(event):
             return
 
-        args = format_msg(str(event.get_message()), begin=(".help", ".h"))
+        args = format_msg(event.get_message(), begin=(".help", ".h"))
         if args:
             arg = args[0]
         else:
@@ -579,7 +574,16 @@ if package == "nonebot2":
 
         args = format_str(event.get_message(), begin=(".at", ".attack"))
         if mode in modes:
-            await matcher.send(eval(f"{mode}_at(args, event)"))
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                return
+
+            if not "at" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持伤害检定指令.")
+                return
+
+            handler = modes[mode].__commands__["at"]
+            await matcher.send(handler(event, args))
         else:
             await matcher.send("[Oracle] 未知的跑团模式.")
 

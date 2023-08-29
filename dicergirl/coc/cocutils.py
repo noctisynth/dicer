@@ -89,7 +89,7 @@ def st():
         rstr = "头部"
     return "D20=%d: 命中了%s" % (result, rstr)
 
-def coc_at(args, event):
+def coc_at(event, args):
     """ COC 伤害检定 """
     inv = Investigator().load(coc_cards.get(event))
     method = "+"

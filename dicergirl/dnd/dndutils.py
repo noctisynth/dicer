@@ -11,27 +11,7 @@ except ImportError:
     from dicergirl.dnd.dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
     from dicergirl.dnd.adventurer import Adventurer
 
-import random
-
-def st():
-    result = random.randint(1, 20)
-    if result < 4:
-        rstr = "右腿"
-    elif result < 7:
-        rstr = "左腿"
-    elif result < 11:
-        rstr = "腹部"
-    elif result < 16:
-        rstr = "胸部"
-    elif result < 18:
-        rstr = "右臂"
-    elif result < 20:
-        rstr = "左臂"
-    elif result < 21:
-        rstr = "头部"
-    return "[Oracle] 命中了%s" % (rstr)
-
-def at(args, event):
+def dnd_at(event, args):
     inv = Adventurer().load(dnd_cards.get(event))
     method = "+"
 
@@ -93,7 +73,7 @@ def dnd_dam(args, message):
     dnd_cards.update(message, card)
     return r
 
-def dra(args, event):
+def dnd_ra(args, event):
     if len(args) == 0:
         return help_message("sra")
     if len(args) > 2:

@@ -1,10 +1,12 @@
-try:
-    from dicergirl.utils.multilogging import multilogger
-except ImportError:
-    from .multilogging import multilogger
+from multilogging import multilogger
+from typing import List
 
 import re
 import random
+
+ZERO = 0
+EMPTY_STRING = ""
+EMPTY_LIST = []
 
 logger = multilogger(name="Dicer Girl", payload="Dicer")
 
@@ -15,6 +17,143 @@ def is_digit(number):
     except:
         return False
 
+class BaseDice:
+    def __init__(self, roll_string: str=EMPTY_STRING) -> None:
+        self.roll_string = roll_string
+        self.db = EMPTY_STRING
+        self.outcome = ZERO
+        self.display = EMPTY_LIST
+
+    def __repr__(self):
+        return self.db.upper()
+
+    def roll(self) -> int:
+        raise NotImplementedError
+
+class DigitDice(BaseDice):
+    def __init__(self, roll_string: str=EMPTY_STRING) -> None:
+        super().__init__(roll_string=roll_string)
+        if not roll_string.isdigit():
+            raise ValueError
+
+        self.parse()
+
+    def parse(self) -> "DigitDice":
+        self.a = int(self.roll_string)
+        self.b = 1
+        return self
+
+    def roll(self) -> int:
+        self.outcome = self.a
+        return self.outcome
+
+class Dice(BaseDice):
+    def __init__(self, roll_string: str="") -> None:
+        super().__init__(roll_string=roll_string)
+        self.parse()
+
+    def parse(self) -> "Dice":
+        split = re.split(r"[dD]", self.roll_string)
+
+        if split[0]:
+            self.a = int(split[0])
+        else:
+            self.a = 1
+
+        self.b = int(split[1])
+        self.db = f"{self.a}D{self.b}"
+        return self
+
+    def roll(self) -> int:
+        self.results = []
+        self.display = []
+
+        for _ in range(self.a):
+            result = random.randint(1, self.b)
+            self.results.append(result)
+            self.display.append(result)
+
+        self.outcome = sum(self.results)
+        return self.outcome
+
+class AwardDice(BaseDice):
+    def __init__(self, roll_string: str="") -> None:
+        super().__init__(roll_string=roll_string)
+        self.parse()
+
+    def parse(self) -> "AwardDice":
+        split = re.split(r"[bB]", self.roll_string)
+
+        if split[0]:
+            self.a = int(split[0])
+        else:
+            self.a = 1
+
+        self.b = int(split[1])
+        self.db = f"{self.a}B{self.b}"
+        return self
+
+    def roll(self) -> int:
+        self.results = []
+        self.display = []
+
+        for _ in range(self.a):
+            ten = []
+            for _ in range(self.b):
+                outcome = Dice("1d10").roll()
+                outcome = outcome if outcome != 10 else 0
+                ten.append(outcome)
+
+            result = Dice("1d100").roll()
+            ten.append(result//10)
+            minten = min(ten)
+            ten.remove(result//10)
+            outcome = minten*10 + (result % 10)
+            self.results.append(outcome)
+            self.display.append([result, ten])
+
+        self.outcome = sum(self.results)
+        return self.outcome
+
+class PunishDice(BaseDice):
+    def __init__(self, roll_string: str="") -> None:
+        super().__init__(roll_string=roll_string)
+        self.parse()
+
+    def parse(self) -> "PunishDice":
+        split = re.split(r"[pP]", self.roll_string)
+
+        if split[0]:
+            self.a = int(split[0])
+        else:
+            self.a = 1
+
+        self.b = int(split[1])
+        self.db = f"{self.a}P{self.b}"
+        return self
+
+    def roll(self) -> int:
+        self.results = []
+        self.display = []
+
+        for _ in range(self.a):
+            ten = []
+            for _ in range(self.b):
+                outcome = Dice("1d10").roll()
+                outcome = outcome if outcome != 10 else 0
+                ten.append(outcome)
+
+            result = Dice("1d100").roll()
+            ten.append(result//10)
+            maxten = max(ten)
+            ten.remove(result//10)
+            outcome = maxten*10 + (result % 10)
+            self.results.append(outcome)
+            self.display.append([result, ten])
+
+        self.outcome = sum(self.results)
+        return self.outcome
+
 class Dicer:
     """掷骰类
     参数:
@@ -24,222 +163,106 @@ class Dicer:
         ```python
         dice = Dice("1d10")
         dice.roll()
-        print(dice.total) # 输出`1d10`投掷结果
+        print(dice.outcome) # 输出`1d10`投掷结果
         ```
     """
-    def __init__(self, roll_string="", explode=False, first=True):
+    def __init__(self, roll_string: str=EMPTY_STRING, explode=False) -> None:
         self.roll_string = roll_string
-        self.dices = []
-        self.a = 1
-        self.b = 100
-        self.method = "+"
-        self.premethod = ""
-        self.x = 0
-        self.results = []
-        self.add = []
-        self.to_rolls = []
-        self.total = 0
-        self.great = False
-        self.parse(roll_string=self.roll_string, explode=explode, first=first)
+        self.calc_list: List[str | BaseDice] = []
+        self.results: List[int] = []
+        self.display: List[int | List[int]] = []
+        self.outcome = 0
+        self.parse(roll_string=self.roll_string, explode=explode)
 
-    def parse(self, roll_string="", explode=False, first=True):
-        self.is_farther = first
-        self.explode = explode
-        if roll_string:
-            self.roll_string = roll_string
+    def parse(self, roll_string: str=EMPTY_STRING, explode=False):
+        self.calc_list = []
+        self.db = EMPTY_STRING
+        matches: List[str] = re.findall(r'\d*[a-zA-Z]\w*|\d+|[-+*/]', roll_string)
 
-        if not self.roll_string:
-            self.a = 1
-            self.b = 100
-            self.x = 0
-            self.db = f"1D100"
-            self.dices += [f"D{self.b}"] * self.a
-            return self
-
-        if self.is_farther:
-            logger.debug(f"初始骰字符串: {roll_string}")
-            pattern = r'^(\d+d\d+|\d+|d\d+)([+\-])?(.*?)?$'
-        else:
-            pattern = r'^([+-]?\d+d\d+|[+-]?\d+|d\d+)([+\-])?(.*?)?$'
-
-        sub_match = re.match(pattern, self.roll_string)
-
-        if not sub_match:
-            raise ValueError(f"[Oracle] 错误的投掷指令: {self.roll_string}.")
-        if self.is_farther and sub_match.group(1).startswith(("+", "-")):
-            raise ValueError(f"[Oracle] 错误的投掷指令: {self.roll_string}.")
-        elif not self.is_farther:
-            self.premethod = sub_match.group(1)[0]
-        else:
-            self.premethod = ""
-
-        logger.debug(f"指令 {self.roll_string} 符合正则表达式.")
-        logger.debug(f"捕获到基础骰: {sub_match.group(1)}")
-
-        if is_digit(sub_match.group(1)):
-            logger.debug(f"基础骰 {sub_match.group(1)} 为数字骰.")
-            if sub_match.group(1).startswith(("+", "-")):
-                self.a = int(sub_match.group(1)[1:])
+        for match in matches:
+            if match in ("+", "-", "*", "/", "(", ")"):
+                self.calc_list.append(match)
+                self.db += match
+            elif re.match(r"\d*[dD]\d+", match):
+                self.calc_list.append(Dice(match))
+                self.db += match.upper()
+            elif re.match(r"\d*[bB]\d+", match):
+                self.calc_list.append(AwardDice(match))
+                self.db += match.upper()
+            elif re.match(r"\d*[pP]\d+", match):
+                self.calc_list.append(PunishDice(match))
+                self.db += match.upper()
+            elif re.match(r"\d+", match):
+                self.calc_list.append(DigitDice(match))
+                self.db += match.upper()
             else:
-                self.a = int(sub_match.group(1))
-
-            self.b = 1
-            self.x = 0
-            self.db = self.premethod + str(self.a)
-            self.is_num = True
-        else:
-            this_roll_string = sub_match.group(1)[1:] if sub_match.group(1).startswith(("+", "-")) else sub_match.group(1)
-            logger.debug(f"基础骰 {this_roll_string} 为标准骰.")
-            regex = r'^(\d+)?d?(\d+)?$'
-            match = re.match(regex, this_roll_string)
-
-            if not match:
-                raise ValueError(f"[Oracle] 错误的投掷指令: {self.roll_string}.")
-
-            self.is_num = False
-
-        if not self.is_num:
-            if match.group(2):
-                if not is_digit(match.group(2)):
-                    raise ValueError(f"[Oracle] 错误的投掷指令: {self.roll_string}.")
-            if match.group(1):
-                if not is_digit(match.group(1)):
-                    raise ValueError(f"[Oracle] 错误的投掷指令: {self.roll_string}.")
-
-            self.a = int(match.group(1)) if match.group(1) else 1
-            self.b = int(match.group(2))
-            self.db = f"{self.a}D{self.b}"
-            self.dices += [f"D{self.b}"] * self.a
-
-        self.method = sub_match.group(2) if sub_match.group(2) else "+"
-
-        if sub_match.group(3):
-            if not re.match(pattern, sub_match.group(3)):
-                raise ValueError(f"[Oracle] 附加骰不符合标准: {sub_match.group(3)}.")
-
-            logger.debug(f"计算模式: {self.method}")
-            addon = self.method + sub_match.group(3)
-            logger.debug(f"附加骰: {addon}")
-            xd = Dicer(addon, first=False).roll()
-            self.x = xd.calc()
-            logger.debug(f"附加骰结果: {self.x}")
-            self.db = f"{self.db}{self.method}{sub_match.group(3).upper()}"
-            self.add = xd.results
-        else:
-            self.x = 0
-            self.add = None
-
+                raise ValueError(f"骰 {match} 不符合规范.")
         return self
 
-    def __get_sum(self, list_to_sum: list) -> int:
-        total = 0
-        for index in range(len(list_to_sum)):
-            sub = list_to_sum[index]
-
-            if isinstance(sub, list):
-                total += self.__get_sum(sub)
+    def roll(self):
+        self.display = []
+        for index, calc in enumerate(self.calc_list):
+            if calc in ("+", "-", "*", "/"):
                 continue
 
-            total += sub
-        return total
+            outcome = calc.roll()
+            self.calc_list[index] = outcome
+            self.results.append(outcome)
+            self.display += calc.display
 
-    def roll(self):
-        self.results = []
-
-        if self.add:
-            add = self.__get_sum(self.add)
-            add = -add if add < 0 else add
-            logger.debug(f"掷骰时附加结果: {self.method}{add}")
-        else:
-            add = 0
-
-        rolla = self.a if self.a > 0 else -self.a
-        for _ in range(rolla):
-            if self.b == 1:
-                break
-
-            result = random.randint(1, self.b)
-
-            if result == 1:
-                if self.explode:
-                    result -= 1
-
-            if self.explode and self.b == 8:
-                self.dices.append("D10")
-                result2 = random.randint(1, 10)
-                if result2 == 1:
-                    result -= 1
-                result += result2
-                if result2 == 10:
-                    self.dices.append("D12")
-                    result3 = random.randint(1, 12)
-                    if result3 == 1:
-                        result -= 1
-                    result += result3
-                    if result3 == 12:
-                        self.dices.append("D20")
-                        result4 = random.randint(1, 20)
-                        if result4 == 1:
-                            result -= 1
-                        result += result4
-                        if result4 == 20:
-                            self.great = True
-
-            self.results.append(result)
-        
-        if self.b == 1:
-            self.results = [int(self.premethod + str(self.a))]
-
-        self.total = sum(self.results)
-        
-        if self.premethod == "-":
-            self.total = -self.total
-
-        if self.method == "+":
-            self.total += add
-        else:
-            self.total -= add
-
-        if self.add:
-            self.results.append(self.add)
-
+        self.outcome = eval("".join(map(str, self.calc_list)))
         return self
 
     def description(self):
-        results = self.get_results()
-        length = 0
-        for result in results:
-            if isinstance(result, int):
-                length += 1
-                continue
+        def count_integers(lst) -> int:
+            count = 0
+            for item in lst:
+                if isinstance(item, int):
+                    count += 1
+                elif isinstance(item, list):
+                    count += count_integers(item)
+            return count
 
-            length += len(result)
+        results = self.display
+        len_display = count_integers(self.display)
+        len_results = count_integers(self.results)
 
-        if length > 10:
+        if len_display <= 10:
+            results = self.display
+        elif len_results <= 10:
+            results = self.results
+        else:
             results = [...]
 
-        return f"{self.db}={results}={self.total}"
-
-    def detail_expr(self):
-        return str(self.get_results())
+        return f"{self.db}={results}={self.outcome}"
 
     def get_results(self):
         return self.results
 
+    def detail_expr(self):
+        return str(self.results)
+
     def calc(self):
-        return self.get_total()
+        return self.outcome
 
-    def get_total(self):
-        return self.total
-
-    def __str__(self):
+    def __repr__(self):
         return self.db
 
 if __name__ == "__main__":
+    # text = "-10/d2/1d10+2d2-22/2+3p2+2b10-p4/b2/d2"
+    # dice = Dicer(text)
+    # print(dice.calc_list)
+    # dice.roll()
+    # print(dice.calc_list)
+    # print(dice.results)
+    # print(dice.outcome)
     roll_strings = {
         "1": 1,
         "10": 10,
         "100": 100,
+        "-1": -1,
+        "-10": -10,
+        "-100": -100,
         "1d1": 1,
         "10d1": 10,
         "100d1": 100,
@@ -252,15 +275,15 @@ if __name__ == "__main__":
     for roll_string in roll_strings.keys():
         try:
             dice = Dicer().parse(roll_string).roll()
-            if dice.total != roll_strings[roll_string]:
+            if dice.outcome != roll_strings[roll_string]:
                 print(dice.description())
-                raise ValueError(f"对于 {roll_string} dice.toal={dice.total} 但期待 {roll_strings[roll_string]}")
+                raise ValueError(f"对于 {roll_string} dice.toal={dice.outcome} 但期待 {roll_strings[roll_string]}")
         except ValueError as error:
             logger.exception(error)
 
     try:
-        roll_string = "1d100+10-10"
-        dice = Dicer().parse(roll_string).roll()
+        roll_string = "1d100+p2"
+        dice = Dicer(roll_string).roll()
         print(dice.description())
     except ValueError as error:
         logger.exception(error)

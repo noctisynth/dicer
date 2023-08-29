@@ -22,7 +22,7 @@ def dnd_at(event, args):
 
     if "d" in inv.db():
         db = Dicer(inv.db()).roll()
-        dbtotal = db.total
+        dbtotal = db.outcome
         db = db.db
     else:
         db = int(inv.db())
@@ -30,7 +30,7 @@ def dnd_at(event, args):
         if db < 0:
             method = ""
 
-    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})={d.total+dbtotal}\n造成了 {d.total+dbtotal}点 伤害."
+    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.outcome}+{dbtotal})={d.outcome+dbtotal}\n造成了 {d.outcome+dbtotal}点 伤害."
 
 def dnd_dam(event, args):
     card = dnd_cards.get(event)
@@ -46,14 +46,14 @@ def dnd_dam(event, args):
             r = "检查特工状态"
     elif len(args) == 0:
         d = Dicer().parse("1d6").roll()
-        card["hp"] -= d.total
+        card["hp"] -= d.outcome
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     elif len(args) == 3:
         if args[1] != "d":
             r = "[Oracle] 未知的指令格式."
         else:
             d = Dicer().parse(f"{args[0]}{args[1]}{args[2]}").roll()
-            card["hp"] -= d.total
+            card["hp"] -= d.outcome
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
     if card["hp"] <= 0:
         card["hp"] = 0

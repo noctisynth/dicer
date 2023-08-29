@@ -37,7 +37,7 @@ def scp_at(event, args):
         results = []
         for dice in all_dices:
             dice = Dicer("1"+dice.lower()).roll()
-            results.append(dice.total)
+            results.append(dice.outcome)
 
         result = max(results)
 
@@ -111,14 +111,14 @@ def scp_dam(event, args):
             r = "检查特工状态"
     elif len(args) == 0:
         d = Dicer().parse("1d6").roll()
-        card["hp"] -= d.total
+        card["hp"] -= d.outcome
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     elif len(args) == 3:
         if args[1] != "d":
             r = "[Oracle] 未知的指令格式."
         else:
             d = Dicer().parse(f"{args[0]}{args[1]}{args[2]}").roll()
-            card["hp"] -= d.total
+            card["hp"] -= d.outcome
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
 
     if card["hp"] <= 0:
@@ -234,7 +234,7 @@ def scp_ra(event, args: list) -> str:
     great = False
     for dice in all_dices:
         dice = Dicer("1"+dice.lower()).roll()
-        results.append(dice.total)
+        results.append(dice.outcome)
         if dice.great:
             great = True
 

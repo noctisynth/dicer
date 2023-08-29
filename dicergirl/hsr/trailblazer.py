@@ -43,7 +43,7 @@ class Trailblazer(object):
             num = prop[p]
             dice = Dicer(f"{num}d8", explode=True)
             dice.roll()
-            prop[p] = dice.total
+            prop[p] = dice.outcome
             attr[p] = dice.dices
 
         self.dices = attr

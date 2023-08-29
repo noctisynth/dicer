@@ -458,7 +458,7 @@ if package == "nonebot2":
     @showcommand.handle()
     async def showhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
         """ 角色卡展示指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         if not isinstance(args, list):
@@ -485,7 +485,7 @@ if package == "nonebot2":
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
         """ 角色卡设置指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=(".set", ".st"))
@@ -524,7 +524,7 @@ if package == "nonebot2":
     @helpcommand.handle()
     async def helphandler(matcher: Matcher, event: MessageEvent):
         """ 帮助指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=(".help", ".h"))
@@ -538,7 +538,7 @@ if package == "nonebot2":
     @modecommand.handle()
     async def modehandler(matcher: Matcher, event: MessageEvent):
         """ 跑团模式切换指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         global mode
@@ -549,8 +549,7 @@ if package == "nonebot2":
                 await matcher.send(f"[Oracle] 已切换到 {mode.upper()} 跑团模式.")
                 return True
             else:
-                await matcher.send("[Oracle] 未知的跑团模式, 忽略.")
-                await matcher.send(help_message("mode"))
+                await matcher.send("[Oracle] 未知的跑团模式, 忽略指令.")
                 return True
         else:
             reply = "当前已正确安装的跑团插件:\n"
@@ -563,7 +562,7 @@ if package == "nonebot2":
     @shootcommand.handle()
     async def shoothandler(matcher: Matcher, event: GroupMessageEvent):
         """ 射击检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         await matcher.send(shoot())
@@ -571,7 +570,7 @@ if package == "nonebot2":
     @attackcommand.handle()
     async def attackhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 伤害检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_str(event.get_message(), begin=(".at", ".attack"))
@@ -592,7 +591,7 @@ if package == "nonebot2":
     @damcommand.handle()
     async def damhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 承伤检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=(".dam", ".damage"))
@@ -613,7 +612,7 @@ if package == "nonebot2":
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 属性或技能激励指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=".en")
@@ -634,7 +633,7 @@ if package == "nonebot2":
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
         """ 属性或技能检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=".ra")
@@ -661,7 +660,7 @@ if package == "nonebot2":
     @rhcommand.handle()
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         """ 暗骰指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_str(event.get_message(), begin=".rh")
@@ -671,7 +670,7 @@ if package == "nonebot2":
     @rhacommand.handle()
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         """ 暗骰技能检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=".rha")
@@ -681,7 +680,7 @@ if package == "nonebot2":
     @rollcommand.handle()
     async def rollhandler(matcher: Matcher, event: MessageEvent):
         """ 标准掷骰指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_str(event.get_message(), begin=(".r", ".roll"))
@@ -693,12 +692,12 @@ if package == "nonebot2":
             await matcher.send(roll(args))
         except Exception as error:
             logger.exception(error)
-            await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
+            await matcher.send("掷骰失败, 可能是掷骰表达式存在语法错误.\nBUG提交: https://gitee.com/unvisitor/issues")
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
         """ 角色卡或角色卡技能删除指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         if not isinstance(args, list):
@@ -766,7 +765,6 @@ if package == "nonebot2":
             await matcher.send("[Oracle] 空消息是不被允许的.")
             return
         await matcher.send(chat(args))
-
 
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher):

@@ -22,6 +22,7 @@ def modules():
             except Exception as error:
                 logger.exception(error)
                 logger.error(f"插件 {folder.name} 导入失败.")
+                continue
 
             if not hasattr(module, "__type__"):
                 continue

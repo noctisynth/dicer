@@ -1,5 +1,8 @@
 from .investigator import Investigator
 from .nbhandlers import commands
+from .coccards import coc_cards
+
+coc_cards.load()
 
 __type__ = "plugin"
 __charactor__ = Investigator

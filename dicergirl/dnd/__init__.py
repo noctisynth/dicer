@@ -1,5 +1,8 @@
 from .adventurer import Adventurer
 from .nbhandlers import commands
+from .dndcards import dnd_cards
+
+dnd_cards.load()
 
 __type__ = "plugin"
 __charactor__ = Adventurer

@@ -1,5 +1,8 @@
 from .agent import Agent
 from .nbhandlers import commands
+from .scpcards import scp_cards
+
+scp_cards.load()
 
 __type__ = "plugin"
 __charactor__ = Agent

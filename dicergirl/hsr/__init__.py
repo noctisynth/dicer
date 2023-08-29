@@ -1,5 +1,8 @@
 from .trailblazer import Trailblazer
 from .nbhandlers import commands
+from .hsrcards import hsr_cards
+
+hsr_cards.load()
 
 __type__ = "plugin"
 __charactor__ = Trailblazer

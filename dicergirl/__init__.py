@@ -41,23 +41,14 @@ mode = "scp"
 package = get_package()
 
 if package == "nonebot2":
-    from .coc.investigator import Investigator
-    from .coc.coccards import coc_cards, coc_cache_cards, coc_rolls
-    from .coc.cocutils import sc, st, coc_at, coc_dam, coc_en, coc_ra, ti, li, rb, rp
-
-    from .scp.agent import Agent
-    from .scp.scpcards import scp_cards, scp_cache_cards
+    from .coc.cocutils import coc_at, coc_dam, coc_en, coc_ra
     from .scp.scputils import scp_ra, scp_dam, scp_en, scp_at
-    from .scp.attributes import all_alias_dict
-
-    from .dnd.adventurer import Adventurer
-    from .dnd.dndcards import dnd_cards, dnd_cache_cards
     from .dnd.dndutils import dra
 
-    from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
     from .utils.utils import (
-        init, get_group_id, get_mentions,
+        init, on_startswith,
+        get_group_id, get_mentions,
         is_super_user, add_super_user, rm_super_user, su_uuid,
         format_msg, format_str,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
@@ -69,74 +60,16 @@ if package == "nonebot2":
     from .utils.handlers import show_handler, set_handler, del_handler, roll
     from .utils.chat import chat
 
-    from nonebot.rule import Rule
     from nonebot.matcher import Matcher
-    from nonebot.plugin import on_startswith, on_message, on
+    from nonebot.plugin import on
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
-    from nonebot.consts import STARTSWITH_KEY
     from nonebot.internal.matcher.matcher import Matcher
 
     if driver._adapters.get("OneBot V12"):
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, Event, MessageSegment
     else:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
-
-    class StartswithRule:
-        """自定义的指令检查方法
-        允许:
-            1. 无视中英文字符串
-            2. 无视前后多余空字符
-        """
-        __slots__ = ("msg", "ignorecase")
-
-        def __init__(self, msg, ignorecase=False):
-            self.msg = msg
-            self.ignorecase = ignorecase
-
-        def __repr__(self) -> str:
-            return f"Startswith(msg={self.msg}, ignorecase={self.ignorecase})"
-
-        def __eq__(self, other: object) -> bool:
-            return (
-                isinstance(other, StartswithRule)
-                and frozenset(self.msg) == frozenset(other.msg)
-                and self.ignorecase == other.ignorecase
-            )
-
-        def __hash__(self) -> int:
-            return hash((frozenset(self.msg), self.ignorecase))
-
-        async def __call__(self, event, state) -> bool:
-            try:
-                text = translate_punctuation(event.get_plaintext()).strip()
-            except Exception:
-                return False
-            if match := re.match(
-                f"^(?:{'|'.join(re.escape(prefix) for prefix in self.msg)})",
-                text,
-                re.IGNORECASE if self.ignorecase else 0,
-            ):
-                state[STARTSWITH_KEY] = match.group()
-                return True
-            return False
-
-    def startswith(msg, ignorecase=True) -> Rule:
-        """ 实例化指令检查方法 """
-        if isinstance(msg, str):
-            msg = (msg,)
-
-        return Rule(StartswithRule(msg, ignorecase))
-
-    def on_startswith(commands, priority=0, block=True) -> Matcher | Commands:
-        """ 获得`Nonebot2`指令检查及参数注入方法 """
-        if isinstance(commands, str):
-            commands = (commands, )
-
-        if get_package() == "nonebot2":
-            return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
-        elif get_package() == "qqguild":
-            return Commands(name=commands)
 
     # 指令装饰器实例化
     testcommand = on_startswith(".test", priority=2, block=True)
@@ -158,9 +91,6 @@ if package == "nonebot2":
     rhcommand = on_startswith(".rh", priority=2, block=True)
     rhacommand = on_startswith(".rha", priority=1, block=True)
     rollcommand = on_startswith((".r", ".roll"), priority=3, block=True)
-    ticommand = on_startswith(".ti", priority=2, block=True)
-    licommand = on_startswith(".li", priority=2, block=True)
-    sccommand = on_startswith(".sc", priority=2, block=True)
     delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
     rolekpcommand = on_startswith(".kp", priority=2, block=True)
     roleobcommand = on_startswith(".ob", priority=2, block=True)
@@ -184,9 +114,6 @@ if package == "nonebot2":
             )
             logger.info("DEBUG 模式已启动.")
         init()
-        coc_cards.load()
-        scp_cards.load()
-        dnd_cards.load()
         logger.success("欧若可骰娘初始化完毕.")
 
     @testcommand.handle()
@@ -602,7 +529,6 @@ if package == "nonebot2":
         await matcher.send(sh)
         return
 
-
     @helpcommand.handle()
     async def helphandler(matcher: Matcher, event: MessageEvent):
         """ 帮助指令 """
@@ -616,7 +542,6 @@ if package == "nonebot2":
             arg = ""
         print(arg)
         await matcher.send(help_message(arg))
-
 
     @modecommand.handle()
     async def modehandler(matcher: Matcher, event: MessageEvent):
@@ -757,45 +682,6 @@ if package == "nonebot2":
         except Exception as error:
             logger.exception(error)
             await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
-
-    @ticommand.handle()
-    async def ticommandhandler(matcher: Matcher, event: MessageEvent):
-        """ COC 临时疯狂检定指令 """
-        if not get_status(event):
-            return
-
-        try:
-            await matcher.send(ti())
-        except:
-            await matcher.send("[Oracle] 未知错误, 执行`.debug on`获得更多信息.")
-
-
-    @licommand.handle()
-    async def licommandhandler(matcher: Matcher, event: MessageEvent):
-        """ COC 总结疯狂检定指令 """
-        if not get_status(event):
-            return
-
-        try:
-            await matcher.send(li())
-        except:
-            await matcher.send("[Oracle] 未知错误, 执行`.debug on`获得更多信息.")
-
-
-    @sccommand.handle()
-    async def schandler(matcher: Matcher, event: GroupMessageEvent):
-        """ COC 疯狂检定指令 """
-        if not get_status(event):
-            return
-
-        args = format_str(event.get_message(), begin=".sc")
-        scrs = sc(args, event)
-
-        if isinstance(scrs, list):
-            for scr in scrs:
-                await matcher.send(scr)
-        else:
-            await matcher.send(scrs)
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):

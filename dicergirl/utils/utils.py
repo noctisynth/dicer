@@ -33,6 +33,7 @@ log_dir = dicer_girl_dir / "log"
 _dicer_girl_status = data_dir / "status.json"
 _super_user = data_dir / "super_user.json"
 _loggers_cachepath = data_dir / "loggers.json"
+_modes_cachepath = data_dir / "modes.json"
 logger = multilogger(name="Dicer Girl", payload="utils")
 """ `utils.py`日志系统 """
 su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
@@ -52,13 +53,14 @@ except ModuleNotFoundError:
 
 def init() -> None:
     """ 骰娘初始化 """
-    global saved_loggers
+    global saved_loggers, mode_status
     dirs: Dict[str, List[Path, list]] = {
         "Dicer Girl": [dicer_girl_dir, "dir"],
         "Dicer Girl 数据": [data_dir, "dir"],
         "Dicer Girl 日志": [log_dir, "dir"],
         "Dicer Girl 状态管理": [_dicer_girl_status, "file"],
         "日志管理": [_loggers_cachepath, "file"],
+        "跑团模式存储": [_modes_cachepath, "file"],
         "超级用户存储": [_super_user, "file"]
     }
     for name, dir in dirs.items():
@@ -125,6 +127,26 @@ def on_startswith(commands, priority=0, block=True) -> Matcher:
 
     return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
 
+def load_modes() -> Dict[str, list]:
+    """ 加载当前不同群聊的跑团模式 """
+    return json.loads(open(_modes_cachepath, "r").read())
+
+def set_mode(event, mode) -> bool:
+    """ 设置当前群聊的跑团模式 """
+    lm = load_modes()
+    lm[get_group_id(event)] = mode
+    json.dump(lm, open(_modes_cachepath, "w"))
+
+def get_mode(event) -> str:
+    """ 获得当前群聊的跑团模式 """
+    lm = load_modes()
+    if not get_group_id(event) in lm.keys():
+        lm[get_group_id(event)] = "scp"
+        json.dump(lm, open(_modes_cachepath, "w"))
+        return "scp"
+
+    return lm[get_group_id(event)]
+
 def load_loggers() -> Dict[str, list]:
     """ 加载所有的已存储的日志 """
     return json.loads(open(_loggers_cachepath, "r").read())
@@ -164,7 +186,7 @@ def get_config() -> dict:
     """ 获取`QQGuild`模式中频道机器人的`appid`以及`token`. """
     return getconfig(path=dicer_girl_dir, filename="config.yaml")
 
-def format_msg(message, begin=None, zh_en=False) -> list:
+def format_msg(message, begin=None, zh_en=False) -> List[str]:
     """ 骰娘指令拆析为`list`的方法 """
     msg = format_str(message, begin=begin).split(" ")
     outer = []

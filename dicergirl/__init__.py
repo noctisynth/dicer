@@ -34,7 +34,6 @@ import html
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
-mode = "scp"
 package = get_package()
 
 if package == "nonebot2":
@@ -44,6 +43,7 @@ if package == "nonebot2":
         get_group_id, get_mentions,
         is_super_user, add_super_user, rm_super_user, su_uuid,
         format_msg, format_str,
+        get_mode, set_mode,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
         get_status, boton, botoff,
         rolekp, roleob
@@ -468,6 +468,7 @@ if package == "nonebot2":
 
         at = get_mentions(event)
 
+        mode = get_mode(event)
         if mode in modes:
             try:
                 sh = show_handler(event, args, at, mode=mode)
@@ -541,12 +542,11 @@ if package == "nonebot2":
         if not get_status(event) and not event.to_me:
             return
 
-        global mode
         args = format_msg(event.get_message(), begin=(".mode", ".m"))
         if args:
             if args[0].lower() in modes:
-                mode = args[0].lower()
-                await matcher.send(f"[Oracle] 已切换到 {mode.upper()} 跑团模式.")
+                set_mode(event, args[0].lower())
+                await matcher.send(f"[Oracle] 已切换到 {args[0].upper()} 跑团模式.")
                 return True
             else:
                 await matcher.send("[Oracle] 未知的跑团模式, 忽略指令.")
@@ -556,7 +556,7 @@ if package == "nonebot2":
             for plugin in modes.keys():
                 reply += f"{plugin.upper()} 模式: {plugin}.\n"
 
-            reply += f"[Oracle] 当前的跑团模式为 {mode.upper()}."
+            reply += f"[Oracle] 当前的跑团模式为 {get_mode(event).upper()}."
             await matcher.send(reply)
 
     @shootcommand.handle()
@@ -574,6 +574,7 @@ if package == "nonebot2":
             return
 
         args = format_str(event.get_message(), begin=(".at", ".attack"))
+        mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
                 await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
@@ -595,6 +596,7 @@ if package == "nonebot2":
             return
 
         args = format_msg(event.get_message(), begin=(".dam", ".damage"))
+        mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
                 await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
@@ -616,6 +618,7 @@ if package == "nonebot2":
             return
 
         args = format_msg(event.get_message(), begin=".en")
+        mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
                 await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
@@ -637,6 +640,7 @@ if package == "nonebot2":
             return
 
         args = format_msg(event.get_message(), begin=".ra")
+        mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
                 await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
@@ -692,7 +696,7 @@ if package == "nonebot2":
             await matcher.send(roll(args))
         except Exception as error:
             logger.exception(error)
-            await matcher.send("掷骰失败, 可能是掷骰表达式存在语法错误.\nBUG提交: https://gitee.com/unvisitor/issues")
+            await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
@@ -711,6 +715,7 @@ if package == "nonebot2":
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
 
+        mode = get_mode(event)
         if mode in modes:
             for msg in del_handler(event, args, at, mode=mode):
                 await matcher.send(msg)

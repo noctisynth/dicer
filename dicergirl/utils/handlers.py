@@ -1,26 +1,16 @@
 try:
     from .docimasy import expr
     from ..utils.utils import get_group_id
-    from ..coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
-    from ..scp.scpcards import scp_cache_cards, scp_cards
-    from ..scp.attributes import scp_attrs_dict
-    from ..dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
-    from .. import coc, scp, dnd
     from .dicer import Dicer
+    from ..utils.plugins import modes
 except ImportError:
     from dicergirl.utils.docimasy import expr
     from dicergirl.utils.utils import get_group_id
-    from dicergirl.coc.coccards import coc_cache_cards, coc_cards, coc_attrs_dict
-    from dicergirl.scp.scpcards import scp_cache_cards, scp_cards
-    from dicergirl.scp.attributes import scp_attrs_dict
-    from dicergirl.dnd.dndcards import dnd_cache_cards, dnd_cards, dnd_attrs_dict
-    from dicergirl import coc, scp, dnd
     from dicergirl.utils.dicer import Dicer
-
-import random
+    from dicergirl.utils.plugins import modes
 
 def __set_plus_format(args: list):
-    """ `.set 技能 +3`语法解析 """
+    """ `.set 技能 +x`语法解析 """
     while True:
         try:
             index = args.index("+")
@@ -28,7 +18,7 @@ def __set_plus_format(args: list):
             break
         args[index] = args[index] + args[index+1]
         args.pop(index+1)
-    
+
     while True:
         try:
             index = args.index("-")
@@ -78,11 +68,11 @@ def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid
 
 def set_handler(message, args, at, mode=None):
     """ 兼容所有模式的`.set`指令后端方法 """
-    cards = eval(f"{mode}_cards")
-    cache_cards = eval(f"{mode}_cache_cards")
-    charactor = eval(mode).__charactor__
-    attrs_dict = eval(f"{mode}_attrs_dict")
-    module = eval(mode)
+    module = modes[mode]
+    cards = module.__cards__
+    cache_cards = module.__cache__
+    charactor = module.__charactor__
+    attrs_dict = module.__baseattrs__
     args = __set_plus_format(args)
 
     if len(at) == 1:
@@ -145,9 +135,10 @@ def set_handler(message, args, at, mode=None):
 
 def show_handler(message, args, at, mode=None):
     """ 兼容所有模式的`.show`指令后端方法 """
-    cards = eval(f"{mode}_cards")
-    cache_cards = eval(f"{mode}_cache_cards")
-    charactor = eval(mode).__charactor__
+    module = modes[mode]
+    cards = module.__cards__
+    cache_cards = module.__cache__
+    charactor = module.__charactor__
 
     if len(at) == 1:
         qid = at[0]
@@ -194,8 +185,9 @@ def show_handler(message, args, at, mode=None):
 
 def del_handler(message, args, at, mode=None):
     """ 兼容所有模式的`.del`指令后端方法 """
-    cache_cards = eval(f"{mode}_cache_cards")
-    cards = eval(f"{mode}_cards")
+    module = modes[mode]
+    cache_cards = module.__cache__
+    cards = module.__cards__
 
     if len(at) == 1:
         qid = at[0]

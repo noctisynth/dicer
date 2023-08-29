@@ -1,6 +1,6 @@
 from .investigator import Investigator
 from .coccards import coc_cards, coc_cache_cards, coc_rolls
-from .cocutils import sc, st, coc_at, coc_dam, coc_en, coc_ra, ti, li, rb, rp
+from .cocutils import sc, ti, li
 
 try:
     from ..utils.utils import format_msg, get_status, on_startswith, format_str

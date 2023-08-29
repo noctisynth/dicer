@@ -260,6 +260,52 @@ def roll(args: str) -> str:
     except ValueError:
         return "[Oracle] 出现错误, 请检查你的掷骰表达式.\n使用`.help r`获得掷骰指令使用帮助."
 
+# def rb(args):
+#     """ COC 奖励骰 """
+#     if args:
+#         match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
+#     else:
+#         match = None
+#     ten = []
+#     if match:
+#         t = int(match[1]) if match[1] else 1
+#         reason = f"由于 {match[2]}:\n" if match[2] else ""
+#     else:
+#         reason = ""
+#         t = 1
+#     for _ in range(t):
+#         _ = Dice("1d10").roll().calc()
+#         _ = _ if _ != 10 else 0
+#         ten.append(_)
+#     result = Dice("1d100").roll().calc()
+#     ten.append(result//10)
+#     ften = min(ten)
+#     ten.remove(result//10)
+#     return f"{reason}奖励骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
+
+def rp(args):
+    """ COC 惩罚骰 """
+    if args:
+        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
+    else:
+        match = None
+    ten = []
+    if match:
+        t = int(match[1]) if match[1] else 1
+        reason = f"由于 {match[2]}:\n" if match[2] else ""
+    else:
+        reason = ""
+        t = 1
+    for _ in range(t):
+        _ = Dice("1d10").roll().calc()
+        _ = _ if _ != 10 else 0
+        ten.append(_)
+    result = Dice("1d100").roll().calc()
+    ten.append(result//10)
+    ften = max(ten)
+    ten.remove(result//10)
+    return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
+
 def shoot():
     dice = Dice("1d20").roll()
     result = dice.total

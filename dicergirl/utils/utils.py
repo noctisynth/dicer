@@ -72,8 +72,6 @@ def init() -> None:
     saved_loggers = load_loggers()
     load_status()
 
-import re
-
 class StartswithRule:
     """自定义的指令检查方法
     允许:

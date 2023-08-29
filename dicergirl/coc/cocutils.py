@@ -70,25 +70,6 @@ def sc(arg, event):
     except:
         return "[Oracle] 产生了未知的错误, 你可以使用`.help sc`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
 
-def st():
-    """ COC 射击检定 """
-    result = random.randint(1, 20)
-    if result < 4:
-        rstr = "右腿"
-    elif result < 7:
-        rstr = "左腿"
-    elif result < 11:
-        rstr = "腹部"
-    elif result < 16:
-        rstr = "胸部"
-    elif result < 18:
-        rstr = "右臂"
-    elif result < 20:
-        rstr = "左臂"
-    elif result < 21:
-        rstr = "头部"
-    return "D20=%d: 命中了%s" % (result, rstr)
-
 def coc_at(event, args):
     """ COC 伤害检定 """
     inv = Investigator().load(coc_cards.get(event))
@@ -229,52 +210,6 @@ def li():
         r += "\n狂躁症状为: \n"
         r += manias[j-1]
     return r
-
-def rb(args):
-    """ COC 奖励骰 """
-    if args:
-        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
-    else:
-        match = None
-    ten = []
-    if match:
-        t = int(match[1]) if match[1] else 1
-        reason = f"由于 {match[2]}:\n" if match[2] else ""
-    else:
-        reason = ""
-        t = 1
-    for _ in range(t):
-        _ = Dice("1d10").roll().calc()
-        _ = _ if _ != 10 else 0
-        ten.append(_)
-    result = Dice("1d100").roll().calc()
-    ten.append(result//10)
-    ften = min(ten)
-    ten.remove(result//10)
-    return f"{reason}奖励骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
-
-def rp(args):
-    """ COC 惩罚骰 """
-    if args:
-        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
-    else:
-        match = None
-    ten = []
-    if match:
-        t = int(match[1]) if match[1] else 1
-        reason = f"由于 {match[2]}:\n" if match[2] else ""
-    else:
-        reason = ""
-        t = 1
-    for _ in range(t):
-        _ = Dice("1d10").roll().calc()
-        _ = _ if _ != 10 else 0
-        ten.append(_)
-    result = Dice("1d100").roll().calc()
-    ten.append(result//10)
-    ften = max(ten)
-    ten.remove(result//10)
-    return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
 def coc_en(event, args):
     """ COC 技能成长检定 """

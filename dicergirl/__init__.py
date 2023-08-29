@@ -28,9 +28,6 @@ from .utils.utils import version as __version__
 
 import logging
 import sys
-import random
-import re
-import asyncio
 import platform
 import psutil
 import html
@@ -685,13 +682,6 @@ if package == "nonebot2":
         args = format_str(event.get_message(), begin=(".r", ".roll"))
         if not args:
             await matcher.send(roll("1d100"))
-            return
-
-        if args[0] == "b":
-            await matcher.send(rb(args[1:]))
-            return
-        elif args[0] == "p":
-            await matcher.send(rp(args[1:]))
             return
 
         try:

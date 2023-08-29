@@ -34,6 +34,7 @@ class DigitDice(BaseDice):
     def parse(self) -> "DigitDice":
         self.a = int(self.roll_string)
         self.b = 1
+        self.db = f"{self.a}"
         return self
 
     def roll(self) -> int:
@@ -199,7 +200,6 @@ class Dicer:
         self.outcome: int = ZERO
         self.great: bool = False
         self.dices: List[str] = []
-        self.parse(roll_string=self.roll_string, explode=explode)
 
     def parse(self, roll_string: str=EMPTY_STRING, explode=False):
         self.calc_list = []
@@ -232,6 +232,7 @@ class Dicer:
         return self
 
     def roll(self):
+        self.parse(roll_string=self.roll_string, explode=self.explode)
         self.dices = []
         self.display = []
         for index, calc in enumerate(self.calc_list):

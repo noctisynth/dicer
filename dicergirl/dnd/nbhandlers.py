@@ -18,7 +18,7 @@ dndcommand = on_startswith(".dnd", priority=1, block=True).handle()
 
 async def dnd_handler(matcher: Matcher, event: GroupMessageEvent):
     """ DND 车卡指令 """
-    if not get_status(event):
+    if not get_status(event) and not event.to_me:
         return
 
     args = format_msg(event.get_message(), begin=".dnd")

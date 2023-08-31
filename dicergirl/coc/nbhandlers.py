@@ -22,7 +22,7 @@ sccommand = on_startswith(".sc", priority=2, block=True).handle()
 
 async def coc_handler(matcher: Matcher, event: GroupMessageEvent):
     """ COC 车卡指令 """
-    if not get_status(event):
+    if not get_status(event) and not event.to_me:
         return
 
     args = format_msg(event.get_message(), begin=".coc", zh_en=True)

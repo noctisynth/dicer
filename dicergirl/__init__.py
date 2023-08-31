@@ -51,6 +51,7 @@ if package == "nonebot2":
     from .utils.plugins import modes
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.handlers import show_handler, set_handler, del_handler, roll, shoot
+    from .utils.cards import Cards
     from .utils.chat import chat
 
     from nonebot.matcher import Matcher
@@ -484,7 +485,7 @@ if package == "nonebot2":
         return
 
     @setcommand.handle()
-    async def sethandler(matcher: Matcher, event: GroupMessageEvent):
+    async def sethandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ 角色卡设置指令 """
         if not get_status(event) and not event.to_me:
             return
@@ -516,6 +517,9 @@ if package == "nonebot2":
         mode = get_mode(event)
         if mode in modes:
             try:
+                if not args:
+                    await bot.set_group_card(user_id=event.user_id, group_id=event.group_id, card=modes[mode].__cache__.get(event)['name'])
+
                 sh = set_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
@@ -542,7 +546,7 @@ if package == "nonebot2":
         await matcher.send(help_message(arg))
 
     @modecommand.handle()
-    async def modehandler(matcher: Matcher, event: MessageEvent):
+    async def modehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
         """ 跑团模式切换指令 """
         if not get_status(event) and not event.to_me:
             return
@@ -551,6 +555,20 @@ if package == "nonebot2":
         if args:
             if args[0].lower() in modes:
                 set_mode(event, args[0].lower())
+
+                for user in await bot.get_group_member_list(group_id=event.group_id):
+                    card: Cards = modes[get_mode(event)].__cards__
+                    user_id: int = user['user_id']
+                    got = card.get(event, qid=str(user_id))
+                    print(got)
+
+                    if isinstance(got, dict):
+                        if "name" not in got.keys():
+                            got = ""
+
+                    name = got['name'] if got else ""
+                    await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
+
                 await matcher.send(f"[Oracle] 已切换到 {args[0].upper()} 跑团模式.")
                 return True
             else:

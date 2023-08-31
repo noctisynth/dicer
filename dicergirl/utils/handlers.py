@@ -223,7 +223,7 @@ def del_handler(message, args, at, mode=None):
 
     return r
 
-def roll(args: str) -> str:
+def roll(args: str, name: str=None) -> str:
     """ 标准掷骰指令后端方法 """
     time = 1
     if "#" in args:
@@ -243,10 +243,10 @@ def roll(args: str) -> str:
 
     try:
         d = Dicer(args)
-        r = expr(d, None)
+        r = expr(d, None, name=name)
 
         for _ in range(time-1):
-            r += expr(d, None)
+            r += expr(d, None, name=name)
 
         return r.detail
     except ValueError:

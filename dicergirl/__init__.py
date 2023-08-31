@@ -40,7 +40,7 @@ if package == "nonebot2":
     from .utils.messages import help_message, version
     from .utils.utils import (
         init, on_startswith,
-        get_group_id, get_mentions,
+        get_group_id, get_mentions, get_user_card,
         is_super_user, add_super_user, rm_super_user, su_uuid,
         format_msg, format_str,
         get_mode, set_mode,
@@ -694,12 +694,13 @@ if package == "nonebot2":
             return
 
         args = format_str(event.get_message(), begin=(".r", ".roll"))
+        name = get_user_card(event)
         if not args:
-            await matcher.send(roll("1d100"))
+            await matcher.send(roll("1d100", name=name))
             return
 
         try:
-            await matcher.send(roll(args))
+            await matcher.send(roll(args, name=name))
         except Exception as error:
             logger.exception(error)
             await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")

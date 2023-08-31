@@ -267,6 +267,13 @@ def get_user_id(event) -> str:
         logger.warning(f"超出预计的 package: {package}, 将 User ID 设置为 0.")
         return "0"
 
+def get_user_card(event) -> str:
+    """ 获取`event`指向的用户群名片 """
+    try:
+        return json.loads(event.json())['sender']['card']
+    except:
+        return "未知用户"
+
 def add_super_user(message) -> bool:
     """ 新增超级管理员 """
     with open(_super_user, "w+") as _su:

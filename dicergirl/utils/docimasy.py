@@ -61,10 +61,11 @@ class Docimasy:
     def __str__(self):
         return self.detail
 
-def expr(dice: Dicer, anum) -> Docimasy:
+def expr(dice: Dicer, anum: int, name: str=None) -> Docimasy:
     """ COC 技能检定结果 """
     result = dice.roll().calc()
-    docimasy = Docimasy(f"掷骰: {dice.db}")
+    display = f"为PC {name} 掷骰: {dice.db}" if name else f"掷骰: {dice.db}"
+    docimasy = Docimasy(display)
     docimasy += dice.description()
 
     if anum:

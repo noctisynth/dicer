@@ -305,7 +305,7 @@ if package == "nonebot2":
                     await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
                     return
 
-                await matcher.send(f"欧若可骰娘已更新为版本 {newest_version}.")
+                await matcher.send(f"欧若可骰娘已更新为版本 {'.'.join(map(str, newest_version))}.")
 
             await matcher.send("我已经是最新版本的欧若可了!")
             return

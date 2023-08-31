@@ -239,6 +239,7 @@ if package == "nonebot2":
                 Only(("exit", "bye", "leave")),
                 Only(("on", "run", "start")),
                 Only(("off", "down", "shutdown")),
+                Only(("upgrade", "up")),
                 Only(("status"))
             ]),
             args=args,
@@ -287,6 +288,11 @@ if package == "nonebot2":
             reply += "系统内存占用: %.2fMB/%.2fMB\n" % (rss, total)
             reply += f"漏洞检测模式: {'on' if DEBUG else 'off'}"
             await matcher.send(reply)
+            return
+
+        if commands["upgrade"]:
+            import subprocess
+            sys.executable
             return
 
         await matcher.send("[Oracle] 未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
@@ -518,7 +524,16 @@ if package == "nonebot2":
         if mode in modes:
             try:
                 if not args:
-                    await bot.set_group_card(user_id=event.user_id, group_id=event.group_id, card=modes[mode].__cache__.get(event)['name'])
+                    cache = modes[mode].__cache__
+                    user_id: int = event.user_id
+                    got = cache.get(event, qid=str(user_id))
+
+                    if isinstance(got, dict):
+                        if "name" not in got.keys():
+                            got = ""
+
+                    name = got['name'] if got else ""
+                    await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
                 sh = set_handler(event, args, at, mode=mode)
             except Exception as error:
@@ -560,7 +575,6 @@ if package == "nonebot2":
                     card: Cards = modes[get_mode(event)].__cards__
                     user_id: int = user['user_id']
                     got = card.get(event, qid=str(user_id))
-                    print(got)
 
                     if isinstance(got, dict):
                         if "name" not in got.keys():

@@ -23,7 +23,7 @@ except ImportError:
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.2.1"
+version = "3.2.3"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """
@@ -53,7 +53,7 @@ except ModuleNotFoundError:
 
 def init() -> None:
     """ 骰娘初始化 """
-    global saved_loggers, mode_status
+    global saved_loggers
     dirs: Dict[str, List[Path, list]] = {
         "Dicer Girl": [dicer_girl_dir, "dir"],
         "Dicer Girl 数据": [data_dir, "dir"],

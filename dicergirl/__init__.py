@@ -272,7 +272,7 @@ if package == "nonebot2":
         if commands["status"]:
             try:
                 system = platform.freedesktop_os_release()["PRETTY_NAME"]
-            except KeyError or FileNotFoundError:
+            except:
                 system = platform.platform()
 
             memi = psutil.Process().memory_info()

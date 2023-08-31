@@ -15,6 +15,7 @@ def modules():
 
     modules_dict = {}
     sys.path.append(Path(__file__).resolve().parent.parent.__str__())
+
     for folder in Path(__file__).resolve().parent.parent.iterdir():
         if Path(folder).is_dir() and (Path(folder) / "__init__.py").exists():
             try:
@@ -39,7 +40,11 @@ def modules():
                 logger.error(f"插件 {folder.name} 配置异常, 导入失败.")
                 continue
 
-            handlers = module.__nbhandler__
+            if hasattr(module, "__nbcommands__"):
+                handlers = module.__nbhandler__
+            else:
+                handlers = {}
+
             for command, handler in commands.items():
                 try:
                     getattr(handlers, command)(getattr(handlers, handler))
@@ -52,6 +57,7 @@ def modules():
 
             modules_dict[module.__name__] = module
             logger.success(f"插件 {folder.name.upper()} 导入完成.")
+
     sys.path.pop(-1)
     loaded = True
     return modules_dict

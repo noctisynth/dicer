@@ -26,7 +26,7 @@ except ImportError:
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.2.10"
+version = "3.2.11"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """
@@ -370,7 +370,7 @@ async def get_latest_version(package_name):
             return "0.0.0.0"
 
         package_info = response.json()
-        return package_info["info"]["version"]
+        return tuple(package_info["info"]["version"].split("."))
 
 async def run_shell_command(command):
     """ 异步执行 shell 指令的原始方法 """

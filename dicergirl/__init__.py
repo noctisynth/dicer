@@ -296,7 +296,7 @@ if package == "nonebot2":
             await matcher.send("检查版本更新中...")
             newest_version = await get_latest_version("dicergirl")
 
-            if version < newest_version:
+            if tuple(version.split(".")) < newest_version:
                 await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
                 upgrade = await run_shell_command(f"{sys.executable} -m pip install dicergirl -i https://pypi.org/simple --upgrade")
 

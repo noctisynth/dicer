@@ -5,12 +5,15 @@ from nonebot.consts import STARTSWITH_KEY
 from nonebot.plugin import on_message
 from nonebot.rule import Rule
 from nonebot.matcher import Matcher
+from pypi_simple import PyPISimple
 
 import json
 import uuid
 import re
 import inspect
 import json
+import asyncio
+import httpx
 
 try:
     from .decorators import translate_punctuation
@@ -356,3 +359,35 @@ def rolekp(event):
 
 def roleob(event):
     ...
+
+async def get_latest_version(package_name):
+    """ 获取当前 Pypi 上`dicergirl`的最新版本号 """
+    async with httpx.AsyncClient() as client:
+        url = f"https://pypi.org/pypi/{package_name}/json"
+        response = await client.get(url)
+
+        if response.status_code == 404:
+            return "0.0.0.0"
+
+        package_info = response.json()
+        return package_info["info"]["version"]
+
+async def _run_shell_command(command):
+    """ 异步执行 shell 指令的原始方法 """
+    process = await asyncio.create_subprocess_shell(
+        command,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+
+    stdout, stderr = await process.communicate()
+
+    return {
+        "stdout": stdout.decode().strip(),
+        "stderr": stderr.decode().strip(),
+        "returncode": process.returncode
+    }
+
+def run_shell_command(command):
+    """ 异步执行 shell 指令 """
+    return asyncio.run(_run_shell_command(command))

@@ -27,14 +27,14 @@ setuptools.setup(
     install_requires = [
         'nonebot2',
         'nonebot-adapter-onebot',
-        'qq-botpy',
-        'watchdog',
         'loguru',
         'pyyaml',
         'openai',
         'multilogging',
         'psutil',
-        'nonebot_plugin_apscheduler'
+        'nonebot_plugin_apscheduler',
+        'pypi-simple',
+        'httpx'
     ],
     python_requires=">=3",
 )

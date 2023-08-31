@@ -46,7 +46,8 @@ if package == "nonebot2":
         get_mode, set_mode,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
         get_status, boton, botoff,
-        rolekp, roleob
+        rolekp, roleob,
+        run_shell_command, get_latest_version
         )
     from .utils.plugins import modes
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
@@ -291,8 +292,21 @@ if package == "nonebot2":
             return
 
         if commands["upgrade"]:
-            import subprocess
-            sys.executable
+            await matcher.send("检查版本更新中...")
+            newest_version = await get_latest_version("dicergirl")
+
+            if version < newest_version:
+                await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
+                upgrade = run_shell_command(f"{sys.executable} -m pip install dicergirl -i https://pypi.org/simple --upgrade")
+
+                if upgrade["returncode"] != 0:
+                    logger.error(upgrade['stderr'])
+                    await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
+                    return
+
+                await matcher.send(f"欧若可骰娘已更新为版本 {newest_version}.")
+
+            await matcher.send("我已经是最新版本的欧若可了!")
             return
 
         await matcher.send("[Oracle] 未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")

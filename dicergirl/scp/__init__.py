@@ -21,3 +21,4 @@ __commands__ = {
     "en": scp_en
 }
 __baseattrs__ = scp_attrs_dict
+__description__ = "SCP 模式是基于SCP基金会(SCP Foundation) 设定的 TRPG 跑团模式."

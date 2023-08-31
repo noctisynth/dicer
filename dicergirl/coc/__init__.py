@@ -20,3 +20,4 @@ __commands__ = {
     "en": coc_en
 }
 __baseattrs__ = coc_attrs_dict
+__description__ = "COC 模式是以H.P.洛夫克拉夫特《克苏鲁的呼唤(Call of Cthulhu)》为背景的 TRPG 跑团模式."

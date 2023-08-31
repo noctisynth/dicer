@@ -10,3 +10,4 @@ __name__ = "hsr"
 __cname__ = "开拓者"
 __nbhandler__ = nbhandlers
 __nbcommands__ = commands
+__description__ = "HSR 模式是以游戏 崩坏：星穹铁道(Honkai: Star Rail) 为背景的 TRPG 跑团模式."

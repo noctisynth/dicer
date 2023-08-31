@@ -16,3 +16,4 @@ __commands__ = {
     "dam": dnd_dam,
     "ra": dnd_ra,
 }
+__description__ = "DND 模式是以游戏 龙与地下城(Dungeons & Dragons) 为背景的 TRPG 跑团模式."

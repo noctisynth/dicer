@@ -474,7 +474,7 @@ if package == "nonebot2":
                 sh = show_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
-                sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
+                sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
         else:
             await matcher.send("未知的跑团模式.")
             return True
@@ -513,11 +513,16 @@ if package == "nonebot2":
             args.remove("del")
             return await delhandler(matcher, event, args=args)
 
-        try:
-            sh = set_handler(event, args, at, mode=mode)
-        except Exception as error:
-            logger.exception(error)
-            sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+        mode = get_mode(event)
+        if mode in modes:
+            try:
+                sh = set_handler(event, args, at, mode=mode)
+            except Exception as error:
+                logger.exception(error)
+                sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+        else:
+            await matcher.send("未知的跑团模式.")
+            return True
 
         await matcher.send(sh)
         return
@@ -646,8 +651,8 @@ if package == "nonebot2":
                 await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
                 return
 
-            if not "at" in modes[mode].__commands__.keys():
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持激励指令.")
+            if not "ra" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持技能检定指令.")
                 return
 
             handler = modes[mode].__commands__["ra"]
@@ -678,6 +683,7 @@ if package == "nonebot2":
             return
 
         args = format_msg(event.get_message(), begin=".rha")
+        mode = get_mode()
         await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
         await bot.send_private_msg(user_id=event.get_user_id(), message=eval(f"{mode}_(args, event)"))
 

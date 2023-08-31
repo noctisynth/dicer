@@ -1,21 +1,11 @@
-from typing import Optional
-try:
-    from ..utils.docimasy import expr
-    from ..utils.messages import temporary_madness, madness_end, phobias, manias
-    from ..utils.dicer import Dice
-    from ..utils.multilogging import multilogger
-    from .coccards import coc_cards, coc_attrs_dict
-    from .investigator import Investigator
-except ImportError:
-    from dicergirl.utils.docimasy import expr
-    from dicergirl.utils.messages import temporary_madness, madness_end, phobias, manias
-    from dicergirl.utils.dicer import Dice
-    from dicergirl.utils.multilogging import multilogger
-    from dicergirl.coc.coccards import coc_cards, coc_attrs_dict
-    from dicergirl.coc.investigator import Investigator
+from dicergirl.utils.docimasy import expr
+from dicergirl.utils.messages import temporary_madness, madness_end, phobias, manias
+from dicergirl.utils.dicer import Dicer
+from multilogging import multilogger
+from .coccards import coc_cards, coc_attrs_dict
+from .investigator import Investigator
 
 import random
-import re
 
 logger = multilogger(name="Dicer Girl", payload="COCUtil")
 
@@ -27,10 +17,10 @@ def sc(arg, event):
         args = list(filter(None, args))
         using_card = False
         s_and_f = args[0].split("/")
-        success = Dice().parse(s_and_f[0])
+        success = Dicer().parse(s_and_f[0])
         success.roll()
         success = success.calc()
-        failure = Dice().parse(s_and_f[1])
+        failure = Dicer().parse(s_and_f[1])
         failure.roll()
         failure = failure.calc()
         if len(args) > 1:
@@ -40,7 +30,7 @@ def sc(arg, event):
         else:
             card = coc_cards.get(event)
             using_card = True
-        r = Dice().roll().calc()
+        r = Dicer().roll().calc()
         s = f"[Oracle] 调查员: {card['name']}\n"
         s += f"检定精神状态: {card['san']}\n"
         s += f"理智检定值: {r}, "
@@ -68,40 +58,21 @@ def sc(arg, event):
             coc_cards.update(event, card)
         return reply
     except:
-        return "[Oracle] 产生了未知的错误, 你可以使用`.help ra`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
+        return "[Oracle] 产生了未知的错误, 你可以使用`.help sc`指令查看指令使用方法.\n如果你确信这是一个错误, 建议联系开发者获得更多帮助.\n如果你是具有管理员权限, 你可以使用`.debug on`获得更多信息."
 
-def st():
-    """ COC 射击检定 """
-    result = random.randint(1, 20)
-    if result < 4:
-        rstr = "右腿"
-    elif result < 7:
-        rstr = "左腿"
-    elif result < 11:
-        rstr = "腹部"
-    elif result < 16:
-        rstr = "胸部"
-    elif result < 18:
-        rstr = "右臂"
-    elif result < 20:
-        rstr = "左臂"
-    elif result < 21:
-        rstr = "头部"
-    return "D20=%d: 命中了%s" % (result, rstr)
-
-def coc_at(args, event):
+def coc_at(event, args):
     """ COC 伤害检定 """
     inv = Investigator().load(coc_cards.get(event))
     method = "+"
 
     if args:
-        d = Dice().parse(args).roll()
+        d = Dicer().parse(args).roll()
     else:
-        d = Dice().parse("1d6").roll()
+        d = Dicer().parse("1d6").roll()
 
     if "d" in inv.db():
-        db = Dice(inv.db()).roll()
-        dbtotal = db.total
+        db = Dicer(inv.db()).roll()
+        dbtotal = db.outcome
         db = db.db
     else:
         db = int(inv.db())
@@ -109,11 +80,11 @@ def coc_at(args, event):
         if db < 0:
             method = ""
 
-    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})\n造成了 {d.total+dbtotal}点 伤害."
+    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.outcome}+{dbtotal})\n造成了 {d.outcome+dbtotal}点 伤害."
 
-def coc_dam(args, message):
+def coc_dam(event, args):
     """ COC 承伤检定 """
-    card = coc_cards.get(message)
+    card = coc_cards.get(event)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.coc`指令进行车卡生成角色卡并`.set`进行保存."
     max_hp = card["con"] + card["siz"]
@@ -122,8 +93,8 @@ def coc_dam(args, message):
         card["hp"] -= arg
         r = f"[Orcale] {card['name']} 失去了 {arg}点 生命"
     except:
-        d = Dice().parse("1d6").roll()
-        card["hp"] -= d.total
+        d = Dicer().parse("1d6").roll()
+        card["hp"] -= d.outcome
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     if card["hp"] <= 0:
         card["hp"] = 0
@@ -138,10 +109,10 @@ def coc_dam(args, message):
         r += f", 调查员 {card['name']} 濒死."
     else:
         r += "."
-    coc_cards.update(message, card)
+    coc_cards.update(event, card)
     return r
 
-def coc_ra(args, event):
+def coc_ra(event, args):
     """ COC 技能检定 """
     if len(args) == 0:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
@@ -153,7 +124,7 @@ def coc_ra(args, event):
         if len(args) == 1:
             return "[Oracle] 你尚未保存人物卡, 请先执行`.coc`车卡并执行`.set`保存.\n如果你希望快速检定, 请执行`.ra [str: 技能名] [int: 技能值]`."
 
-        return str(expr(Dice(), args[1]))
+        return str(expr(Dicer(), args[1]))
 
     inv = Investigator().load(card_data)
 
@@ -180,20 +151,20 @@ def coc_ra(args, event):
         if not args[1].isdigit():
             return "[Oracle] 技能值应当为整型数, 使用`.help ra`查看技能检定指令使用帮助."
 
-        return str(expr(Dice(), int(args[1])))
+        return str(expr(Dicer(), int(args[1])))
     elif exp and len(args) > 1:
         if not args[1].isdigit():
             return "[Oracle] 技能值应当为整型数, 使用`.help ra`查看技能检定指令使用帮助."
 
         reply = [f"[Oracle] 你已经设置了技能 {args[0]} 为 {exp}, 但你指定了检定值, 使用指定检定值作为替代."]
-        reply.append(str(expr(Dice(), int(args[1]))))
+        reply.append(str(expr(Dicer(), int(args[1]))))
         return reply
 
     time = 1
-    r = expr(Dice(), exp)
+    r = expr(Dicer(), exp)
 
     for _ in range(time-1):
-        r += expr(Dice(), exp)
+        r += expr(Dicer(), exp)
 
     return r.detail
 
@@ -229,52 +200,6 @@ def li():
         r += "\n狂躁症状为: \n"
         r += manias[j-1]
     return r
-
-def rb(args):
-    """ COC 奖励骰 """
-    if args:
-        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
-    else:
-        match = None
-    ten = []
-    if match:
-        t = int(match[1]) if match[1] else 1
-        reason = f"由于 {match[2]}:\n" if match[2] else ""
-    else:
-        reason = ""
-        t = 1
-    for _ in range(t):
-        _ = Dice("1d10").roll().calc()
-        _ = _ if _ != 10 else 0
-        ten.append(_)
-    result = Dice("1d100").roll().calc()
-    ten.append(result//10)
-    ften = min(ten)
-    ten.remove(result//10)
-    return f"{reason}奖励骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
-
-def rp(args):
-    """ COC 惩罚骰 """
-    if args:
-        match = re.match(r'([0-9]{1,2})([a-zA-Z\u4e00-\u9fa5]*)', args)
-    else:
-        match = None
-    ten = []
-    if match:
-        t = int(match[1]) if match[1] else 1
-        reason = f"由于 {match[2]}:\n" if match[2] else ""
-    else:
-        reason = ""
-        t = 1
-    for _ in range(t):
-        _ = Dice("1d10").roll().calc()
-        _ = _ if _ != 10 else 0
-        ten.append(_)
-    result = Dice("1d100").roll().calc()
-    ten.append(result//10)
-    ften = max(ten)
-    ten.remove(result//10)
-    return f"{reason}惩罚骰:\nB{t}=(1D100={result}, {ten})={ften}{str(result)[-1]}"
 
 def coc_en(event, args):
     """ COC 技能成长检定 """

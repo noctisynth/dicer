@@ -25,6 +25,9 @@ class Cards():
 
     def save(self):
         logger.info(f"保存 {self.mode.upper()} 人物卡数据.")
+        if not self.cache_path.parent.exists():
+            self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+
         with open(self.cache_path, "w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False)
 

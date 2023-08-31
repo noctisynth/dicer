@@ -1,8 +1,8 @@
 import random
 try:
-    from .dicer import Dice
+    from .dicer import Dicer
 except ImportError:
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
 
 class Docimasy:
     """
@@ -61,10 +61,11 @@ class Docimasy:
     def __str__(self):
         return self.detail
 
-def expr(dice: Dice, anum) -> Docimasy:
-    """ COC 技能检定结果 """
+def expr(dice: Dicer, anum: int, name: str=None) -> Docimasy:
+    """ 类 COC 模式技能检定结果 """
     result = dice.roll().calc()
-    docimasy = Docimasy(f"掷骰: {dice.db}")
+    display = f"[{name}]掷骰: {dice.db}" if name else f"掷骰: {dice.db}"
+    docimasy = Docimasy(display)
     docimasy += dice.description()
 
     if anum:
@@ -96,7 +97,7 @@ def expr(dice: Dice, anum) -> Docimasy:
     return docimasy
 
 def scp_doc(result, difficulty, encourage=None, agent=None, great=False) -> Docimasy:
-    """ SCP 技能检定结果 """
+    """ 类 SCP 模式技能检定结果 """
     if not agent:
         agent = "该特工"
 

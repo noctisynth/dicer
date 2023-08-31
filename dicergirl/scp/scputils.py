@@ -1,23 +1,15 @@
-try:
-    from ..utils.docimasy import expr, scp_doc
-    from ..utils.dicer import Dice
-    from .scpcards import scp_cards
-    from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
-    from .agent import Agent
-    from ..utils.multilogging import multilogger
-except ImportError:
-    from dicergirl.utils.docimasy import expr, scp_doc
-    from dicergirl.utils.dicer import Dice
-    from dicergirl.scp.scpcards import scp_cards
-    from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
-    from dicergirl.scp.agent import Agent
-    from dicergirl.utils.multilogging import multilogger
+from dicergirl.utils.docimasy import expr, scp_doc
+from dicergirl.utils.dicer import Dicer
+from multilogging import multilogger
+from .scpcards import scp_cards
+from .attributes import scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
+from .agent import Agent
 
 import random
 
 logger = multilogger(name="Dicer Girl", payload="SCPUtil")
 
-def scp_at(args, event):
+def scp_at(event, args):
     """ SCP 伤害检定 """
     card = scp_cards.get(event)
     agt = Agent().load(card)
@@ -36,8 +28,8 @@ def scp_at(args, event):
 
         results = []
         for dice in all_dices:
-            dice = Dice("1"+dice.lower()).roll()
-            results.append(dice.total)
+            dice = Dicer("1"+dice.lower()).roll()
+            results.append(dice.outcome)
 
         result = max(results)
 
@@ -53,7 +45,7 @@ def scp_at(args, event):
         if not args.upper() in upper.keys():
             return f"[Oracle] 看起来该特工并未购置 {args.upper()}."
 
-        return f"[Oracle] 特工使用 {upper[args.upper()][1]} 发起攻击, 检定造成了 {Dice(upper[args.upper()][0]['base']).roll().calc()} 点 伤害."
+        return f"[Oracle] 特工使用 {upper[args.upper()][1]} 发起攻击, 检定造成了 {Dicer(upper[args.upper()][0]['base']).roll().calc()} 点 伤害."
 
 def deal(event, args):
     """ SCP 武器交易系统 """
@@ -93,9 +85,9 @@ def deal(event, args):
     else:
         return f"[Oracle] 装备 {real_name} 不存在或特工权限不足."
 
-def scp_dam(args, message):
+def scp_dam(event, args):
     """ SCP 承伤检定 """
-    card = scp_cards.get(message)
+    card = scp_cards.get(event)
 
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.scp`指令进行车卡生成角色卡并`.set`进行保存."
@@ -110,15 +102,15 @@ def scp_dam(args, message):
         else:
             r = "检查特工状态"
     elif len(args) == 0:
-        d = Dice().parse("1d6").roll()
-        card["hp"] -= d.total
+        d = Dicer().parse("1d6").roll()
+        card["hp"] -= d.outcome
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     elif len(args) == 3:
         if args[1] != "d":
             r = "[Oracle] 未知的指令格式."
         else:
-            d = Dice().parse(f"{args[0]}{args[1]}{args[2]}").roll()
-            card["hp"] -= d.total
+            d = Dicer().parse(f"{args[0]}{args[1]}{args[2]}").roll()
+            card["hp"] -= d.outcome
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
 
     if card["hp"] <= 0:
@@ -136,10 +128,10 @@ def scp_dam(args, message):
     else:
         r += "."
 
-    scp_cards.update(message, card)
+    scp_cards.update(event, card)
     return r
 
-def scp_ra(args: list, event):
+def scp_ra(event, args: list) -> str:
     """ SCP 属性或技能检定 """
     if len(args) == 0:
         return "[Oracle] 错误: 检定技能需要给入技能名称.\n使用`.help ra`指令查看指令使用方法."
@@ -216,7 +208,7 @@ def scp_ra(args: list, event):
     if not is_base and not is_skill and not skill_only:
         if args[0] in inv.skills.keys():
             exp = inv.skills[args[0]]
-            return str(expr(Dice(), int(exp)))
+            return str(expr(Dicer(), int(exp)))
         else:
             return "[Oracle] 错误: 没有这个数据或技能."
 
@@ -233,8 +225,8 @@ def scp_ra(args: list, event):
     results = []
     great = False
     for dice in all_dices:
-        dice = Dice("1"+dice.lower()).roll()
-        results.append(dice.total)
+        dice = Dicer("1"+dice.lower()).roll()
+        results.append(dice.outcome)
         if dice.great:
             great = True
 

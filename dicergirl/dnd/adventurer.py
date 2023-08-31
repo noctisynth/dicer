@@ -1,7 +1,7 @@
 try:
-    from ..utils.dicer import Dice
+    from ..utils.dicer import Dicer
 except ImportError:
-    from dicergirl.utils.dicer import Dice
+    from dicergirl.utils.dicer import Dicer
 
 class Adventurer(object):
     def __init__(self) -> None:
@@ -34,7 +34,7 @@ class Adventurer(object):
         for p in prop.keys():
             outcome = []
             for _ in range(6):
-                outcome.append(Dice("1d6").roll().calc())
+                outcome.append(Dicer("1d6").roll().calc())
             d1 = max(outcome)
             outcome.remove(d1)
             d2 = max(outcome)
@@ -51,7 +51,7 @@ class Adventurer(object):
         return (result, correct)
 
     def reset_hp(self):
-        base = Dice("1d10").roll().calc() + self.con[1]
+        base = Dicer("1d10").roll().calc() + self.con[1]
         self.hp_max = base
         self.hp = base
     

@@ -28,115 +28,41 @@ from .utils.utils import version as __version__
 
 import logging
 import sys
-import random
-import re
-import asyncio
 import platform
 import psutil
 import html
 
 DEBUG = False
 current_dir = Path(__file__).resolve().parent
-mode = "scp"
 package = get_package()
 
 if package == "nonebot2":
-    from .coc.investigator import Investigator
-    from .coc.coccards import coc_cards, coc_cache_cards, coc_rolls
-    from .coc.cocutils import sc, st, coc_at, coc_dam, coc_en, coc_ra, ti, li, rb, rp
-
-    from .scp.agent import Agent
-    from .scp.scpcards import scp_cards, scp_cache_cards
-    from .scp.scputils import scp_ra, scp_dam, scp_en, scp_at
-    from .scp.attributes import all_alias_dict
-
-    from .dnd.adventurer import Adventurer
-    from .dnd.dndcards import dnd_cards, dnd_cache_cards
-    from .dnd.dndutils import dra
-
-    from .utils.decorators import Commands, translate_punctuation
     from .utils.messages import help_message, version
     from .utils.utils import (
-        init, get_group_id, get_mentions,
+        init, on_startswith,
+        get_group_id, get_mentions, get_user_card,
         is_super_user, add_super_user, rm_super_user, su_uuid,
         format_msg, format_str,
+        get_mode, set_mode,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
         get_status, boton, botoff,
         rolekp, roleob
         )
     from .utils.plugins import modes
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
-    from .utils.handlers import show_handler, set_handler, del_handler, roll
+    from .utils.handlers import show_handler, set_handler, del_handler, roll, shoot
     from .utils.chat import chat
 
-    from nonebot.rule import Rule
     from nonebot.matcher import Matcher
-    from nonebot.plugin import on_startswith, on_message, on
+    from nonebot.plugin import on
     from nonebot.adapters import Bot as Bot
     from nonebot.adapters.onebot.v11 import Bot as V11Bot
-    from nonebot.consts import STARTSWITH_KEY
     from nonebot.internal.matcher.matcher import Matcher
 
     if driver._adapters.get("OneBot V12"):
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, Event, MessageSegment
     else:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
-
-    class StartswithRule:
-        """自定义的指令检查方法
-        允许:
-            1. 无视中英文字符串
-            2. 无视前后多余空字符
-        """
-        __slots__ = ("msg", "ignorecase")
-
-        def __init__(self, msg, ignorecase=False):
-            self.msg = msg
-            self.ignorecase = ignorecase
-
-        def __repr__(self) -> str:
-            return f"Startswith(msg={self.msg}, ignorecase={self.ignorecase})"
-
-        def __eq__(self, other: object) -> bool:
-            return (
-                isinstance(other, StartswithRule)
-                and frozenset(self.msg) == frozenset(other.msg)
-                and self.ignorecase == other.ignorecase
-            )
-
-        def __hash__(self) -> int:
-            return hash((frozenset(self.msg), self.ignorecase))
-
-        async def __call__(self, event, state) -> bool:
-            try:
-                text = translate_punctuation(event.get_plaintext()).strip()
-            except Exception:
-                return False
-            if match := re.match(
-                f"^(?:{'|'.join(re.escape(prefix) for prefix in self.msg)})",
-                text,
-                re.IGNORECASE if self.ignorecase else 0,
-            ):
-                state[STARTSWITH_KEY] = match.group()
-                return True
-            return False
-
-    def startswith(msg, ignorecase=True) -> Rule:
-        """ 实例化指令检查方法 """
-        if isinstance(msg, str):
-            msg = (msg,)
-
-        return Rule(StartswithRule(msg, ignorecase))
-
-    def on_startswith(commands, priority=0, block=True) -> Matcher | Commands:
-        """ 获得`Nonebot2`指令检查及参数注入方法 """
-        if isinstance(commands, str):
-            commands = (commands, )
-
-        if get_package() == "nonebot2":
-            return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
-        elif get_package() == "qqguild":
-            return Commands(name=commands)
 
     # 指令装饰器实例化
     testcommand = on_startswith(".test", priority=2, block=True)
@@ -150,7 +76,7 @@ if package == "nonebot2":
     setcommand = on_startswith((".set", ".st"), priority=2, block=True)
     helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
     modecommand = on_startswith((".mode", ".m"), priority=2, block=True)
-    stcommand = on_startswith(".sht", priority=2, block=True)
+    shootcommand = on_startswith((".sht", ".shoot"), priority=2, block=True)
     attackcommand = on_startswith((".at", ".attack"), priority=2, block=True)
     damcommand = on_startswith((".dam", ".damage"), priority=2, block=True)
     encommand = on_startswith((".en", ".encourage"), priority=2, block=True)
@@ -158,9 +84,6 @@ if package == "nonebot2":
     rhcommand = on_startswith(".rh", priority=2, block=True)
     rhacommand = on_startswith(".rha", priority=1, block=True)
     rollcommand = on_startswith((".r", ".roll"), priority=3, block=True)
-    ticommand = on_startswith(".ti", priority=2, block=True)
-    licommand = on_startswith(".li", priority=2, block=True)
-    sccommand = on_startswith(".sc", priority=2, block=True)
     delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
     rolekpcommand = on_startswith(".kp", priority=2, block=True)
     roleobcommand = on_startswith(".ob", priority=2, block=True)
@@ -171,7 +94,7 @@ if package == "nonebot2":
     scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 
     @driver.on_startup
-    async def _():
+    async def _() -> None:
         """ `Nonebot2`核心加载完成后的初始化方法 """
         global DEBUG
         logger.info("欧若可骰娘初始化中...")
@@ -184,9 +107,6 @@ if package == "nonebot2":
             )
             logger.info("DEBUG 模式已启动.")
         init()
-        coc_cards.load()
-        scp_cards.load()
-        dnd_cards.load()
         logger.success("欧若可骰娘初始化完毕.")
 
     @testcommand.handle()
@@ -232,7 +152,6 @@ if package == "nonebot2":
             return
 
         await matcher.send(None)
-
 
     @debugcommand.handle()
     async def debughandler(matcher: Matcher, event: MessageEvent):
@@ -353,7 +272,7 @@ if package == "nonebot2":
         if commands["status"]:
             try:
                 system = platform.freedesktop_os_release()["PRETTY_NAME"]
-            except KeyError or FileNotFoundError:
+            except:
                 system = platform.platform()
 
             memi = psutil.Process().memory_info()
@@ -539,7 +458,7 @@ if package == "nonebot2":
     @showcommand.handle()
     async def showhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
         """ 角色卡展示指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         if not isinstance(args, list):
@@ -549,12 +468,13 @@ if package == "nonebot2":
 
         at = get_mentions(event)
 
+        mode = get_mode(event)
         if mode in modes:
             try:
                 sh = show_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
-                sh = [f"[Oracle] 错误: 执行指令失败, 疑似该模式不存在该指令."]
+                sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
         else:
             await matcher.send("未知的跑团模式.")
             return True
@@ -566,7 +486,7 @@ if package == "nonebot2":
     @setcommand.handle()
     async def sethandler(matcher: Matcher, event: GroupMessageEvent):
         """ 角色卡设置指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=(".set", ".st"))
@@ -593,23 +513,27 @@ if package == "nonebot2":
             args.remove("del")
             return await delhandler(matcher, event, args=args)
 
-        try:
-            sh = set_handler(event, args, at, mode=mode)
-        except Exception as error:
-            logger.exception(error)
-            sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+        mode = get_mode(event)
+        if mode in modes:
+            try:
+                sh = set_handler(event, args, at, mode=mode)
+            except Exception as error:
+                logger.exception(error)
+                sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+        else:
+            await matcher.send("未知的跑团模式.")
+            return True
 
         await matcher.send(sh)
         return
 
-
     @helpcommand.handle()
     async def helphandler(matcher: Matcher, event: MessageEvent):
         """ 帮助指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(str(event.get_message()), begin=(".help", ".h"))
+        args = format_msg(event.get_message(), begin=(".help", ".h"))
         if args:
             arg = args[0]
         else:
@@ -617,107 +541,135 @@ if package == "nonebot2":
         print(arg)
         await matcher.send(help_message(arg))
 
-
     @modecommand.handle()
     async def modehandler(matcher: Matcher, event: MessageEvent):
         """ 跑团模式切换指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
-        global mode
         args = format_msg(event.get_message(), begin=(".mode", ".m"))
         if args:
             if args[0].lower() in modes:
-                mode = args[0].lower()
-                await matcher.send(f"[Oracle] 已切换到 {mode.upper()} 跑团模式.")
+                set_mode(event, args[0].lower())
+                await matcher.send(f"[Oracle] 已切换到 {args[0].upper()} 跑团模式.")
                 return True
             else:
-                await matcher.send("[Oracle] 未知的跑团模式, 忽略.")
-                await matcher.send(help_message("mode"))
+                await matcher.send("[Oracle] 未知的跑团模式, 忽略指令.")
                 return True
         else:
-            await matcher.send(f"[Oracle] 当前的跑团模式为 {mode.upper()}.")
+            reply = "当前已正确安装的跑团插件:\n"
+            for plugin in modes.keys():
+                reply += f"{plugin.upper()} 模式: {plugin}.\n"
 
-    @stcommand.handle()
-    async def stcommandhandler(matcher: Matcher, event: GroupMessageEvent):
+            reply += f"[Oracle] 当前的跑团模式为 {get_mode(event).upper()}."
+            await matcher.send(reply)
+
+    @shootcommand.handle()
+    async def shoothandler(matcher: Matcher, event: GroupMessageEvent):
         """ 射击检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
-        await matcher.send(st())
+        await matcher.send(shoot())
 
     @attackcommand.handle()
     async def attackhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 伤害检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_str(event.get_message(), begin=(".at", ".attack"))
+        mode = get_mode(event)
         if mode in modes:
-            await matcher.send(eval(f"{mode}_at(args, event)"))
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                return
+
+            if not "at" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持伤害检定指令.")
+                return
+
+            handler = modes[mode].__commands__["at"]
+            await matcher.send(handler(event, args))
         else:
             await matcher.send("[Oracle] 未知的跑团模式.")
 
     @damcommand.handle()
     async def damhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 承伤检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=(".dam", ".damage"))
-        if mode == "scp":
-            sd = scp_dam(args, event)
-        elif mode == "coc":
-            sd = coc_dam(args, event)
-        else:
-            await matcher.send("未知的跑团模式.")
-            return
+        mode = get_mode(event)
+        if mode in modes:
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                return
 
-        await matcher.send(sd)
+            if not "at" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持承伤检定指令.")
+                return
+
+            handler = modes[mode].__commands__["dam"]
+            await matcher.send(handler(event, args))
+        else:
+            await matcher.send("[Oracle] 未知的跑团模式.")
 
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 属性或技能激励指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=".en")
-        at = get_mentions(event)
+        mode = get_mode(event)
+        if mode in modes:
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                return
 
-        if at and not is_super_user(event):
-            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
-            return
+            if not "at" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持激励指令.")
+                return
 
-        try:
-            en = eval(f"{mode}_en(event, args)")
-        except:
-            en = f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode.upper()} 不存在该指令."
-
-        await matcher.send(en)
+            handler = modes[mode].__commands__["en"]
+            await matcher.send(handler(event, args))
+        else:
+            await matcher.send("[Oracle] 未知的跑团模式.")
 
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
         """ 属性或技能检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=".ra")
+        mode = get_mode(event)
         if mode in modes:
-            ras = eval(f"{mode}_ra(args, event)")
-            if isinstance(ras, list):
-                for ra in ras:
-                    await matcher.send(ra)
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
                 return
 
-            await matcher.send(ras)
+            if not "ra" in modes[mode].__commands__.keys():
+                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持技能检定指令.")
+                return
+
+            handler = modes[mode].__commands__["ra"]
+            replies = handler(event, args)
+            if isinstance(replies, list):
+                for reply in replies:
+                    await matcher.send(reply)
+                return
+
+            await matcher.send(replies)
         else:
-            await matcher.send("[Oracle] 当前处于未知的跑团模式.")
-        return
+            await matcher.send("[Oracle] 未知的跑团模式.")
 
     @rhcommand.handle()
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         """ 暗骰指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_str(event.get_message(), begin=".rh")
@@ -727,80 +679,36 @@ if package == "nonebot2":
     @rhacommand.handle()
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         """ 暗骰技能检定指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_msg(event.get_message(), begin=".rha")
+        mode = get_mode()
         await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
         await bot.send_private_msg(user_id=event.get_user_id(), message=eval(f"{mode}_(args, event)"))
 
     @rollcommand.handle()
     async def rollhandler(matcher: Matcher, event: MessageEvent):
         """ 标准掷骰指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         args = format_str(event.get_message(), begin=(".r", ".roll"))
+        name = get_user_card(event)
         if not args:
-            await matcher.send(roll("1d100"))
-            return
-
-        if args[0] == "b":
-            await matcher.send(rb(args[1:]))
-            return
-        elif args[0] == "p":
-            await matcher.send(rp(args[1:]))
+            await matcher.send(roll("1d100", name=name))
             return
 
         try:
-            await matcher.send(roll(args))
+            await matcher.send(roll(args, name=name))
         except Exception as error:
             logger.exception(error)
             await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
 
-    @ticommand.handle()
-    async def ticommandhandler(matcher: Matcher, event: MessageEvent):
-        """ COC 临时疯狂检定指令 """
-        if not get_status(event):
-            return
-
-        try:
-            await matcher.send(ti())
-        except:
-            await matcher.send("[Oracle] 未知错误, 执行`.debug on`获得更多信息.")
-
-
-    @licommand.handle()
-    async def licommandhandler(matcher: Matcher, event: MessageEvent):
-        """ COC 总结疯狂检定指令 """
-        if not get_status(event):
-            return
-
-        try:
-            await matcher.send(li())
-        except:
-            await matcher.send("[Oracle] 未知错误, 执行`.debug on`获得更多信息.")
-
-
-    @sccommand.handle()
-    async def schandler(matcher: Matcher, event: GroupMessageEvent):
-        """ COC 疯狂检定指令 """
-        if not get_status(event):
-            return
-
-        args = format_str(event.get_message(), begin=".sc")
-        scrs = sc(args, event)
-
-        if isinstance(scrs, list):
-            for scr in scrs:
-                await matcher.send(scr)
-        else:
-            await matcher.send(scrs)
-
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
         """ 角色卡或角色卡技能删除指令 """
-        if not get_status(event):
+        if not get_status(event) and not event.to_me:
             return
 
         if not isinstance(args, list):
@@ -814,6 +722,7 @@ if package == "nonebot2":
             await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
             return
 
+        mode = get_mode(event)
         if mode in modes:
             for msg in del_handler(event, args, at, mode=mode):
                 await matcher.send(msg)
@@ -868,7 +777,6 @@ if package == "nonebot2":
             await matcher.send("[Oracle] 空消息是不被允许的.")
             return
         await matcher.send(chat(args))
-
 
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher):

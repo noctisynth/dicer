@@ -1,48 +1,21 @@
-try:
-    from ..utils.docimasy import dnd_doc
-    from ..utils.messages import help_messages, help_message
-    from ..utils.dicer import Dice
-    from .dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
-    from .adventurer import Adventurer
-except ImportError:
-    from dicergirl.utils.docimasy import dnd_doc
-    from dicergirl.utils.messages import help_messages, help_message
-    from dicergirl.utils.dicer import Dice
-    from dicergirl.dnd.dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
-    from dicergirl.dnd.adventurer import Adventurer
+from dicergirl.utils.docimasy import dnd_doc
+from dicergirl.utils.messages import help_messages, help_message
+from dicergirl.utils.dicer import Dicer
+from .dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
+from .adventurer import Adventurer
 
-import random
-
-def st():
-    result = random.randint(1, 20)
-    if result < 4:
-        rstr = "右腿"
-    elif result < 7:
-        rstr = "左腿"
-    elif result < 11:
-        rstr = "腹部"
-    elif result < 16:
-        rstr = "胸部"
-    elif result < 18:
-        rstr = "右臂"
-    elif result < 20:
-        rstr = "左臂"
-    elif result < 21:
-        rstr = "头部"
-    return "[Oracle] 命中了%s" % (rstr)
-
-def at(args, event):
+def dnd_at(event, args):
     inv = Adventurer().load(dnd_cards.get(event))
     method = "+"
 
     if args:
-        d = Dice().parse(args).roll()
+        d = Dicer().parse(args).roll()
     else:
-        d = Dice().parse("1d6").roll()
+        d = Dicer().parse("1d6").roll()
 
     if "d" in inv.db():
-        db = Dice(inv.db()).roll()
-        dbtotal = db.total
+        db = Dicer(inv.db()).roll()
+        dbtotal = db.outcome
         db = db.db
     else:
         db = int(inv.db())
@@ -50,10 +23,10 @@ def at(args, event):
         if db < 0:
             method = ""
 
-    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.total}+{dbtotal})={d.total+dbtotal}\n造成了 {d.total+dbtotal}点 伤害."
+    return f"[Oracle] 投掷 {d.db}{method}{db}=({d.outcome}+{dbtotal})={d.outcome+dbtotal}\n造成了 {d.outcome+dbtotal}点 伤害."
 
-def dnd_dam(args, message):
-    card = dnd_cards.get(message)
+def dnd_dam(event, args):
+    card = dnd_cards.get(event)
     if not card:
         return "[Oracle] 未找到缓存数据, 请先使用`.dnd`指令进行车卡生成角色卡并`.set`进行保存."
     max_hp = card["hp_max"]
@@ -65,15 +38,15 @@ def dnd_dam(args, message):
         else:
             r = "检查特工状态"
     elif len(args) == 0:
-        d = Dice().parse("1d6").roll()
-        card["hp"] -= d.total
+        d = Dicer().parse("1d6").roll()
+        card["hp"] -= d.outcome
         r = "[Oracle] 投掷 1D6={d}\n受到了 {d}点 伤害".format(d=d.calc())
     elif len(args) == 3:
         if args[1] != "d":
             r = "[Oracle] 未知的指令格式."
         else:
-            d = Dice().parse(f"{args[0]}{args[1]}{args[2]}").roll()
-            card["hp"] -= d.total
+            d = Dicer().parse(f"{args[0]}{args[1]}{args[2]}").roll()
+            card["hp"] -= d.outcome
             r = f"[Oracle] 投掷 {args[0]}D{args[2]}={d.calc()}\n受到了 {d.calc()}点 伤害"
     if card["hp"] <= 0:
         card["hp"] = 0
@@ -90,10 +63,10 @@ def dnd_dam(args, message):
         r += f", 特工 {card['name']} 濒死."
     else:
         r += "."
-    dnd_cards.update(message, card)
+    dnd_cards.update(event, card)
     return r
 
-def dra(args, event):
+def dnd_ra(event, args):
     if len(args) == 0:
         return help_message("sra")
     if len(args) > 2:
@@ -124,5 +97,5 @@ def dra(args, event):
     if not is_base and not is_skill:
         return "[Oracle] 错误: 没有这个数据或技能."
 
-    outcome = Dice("1d20").roll().calc() + v
+    outcome = Dicer("1d20").roll().calc() + v
     return dnd_doc(outcome, dc, adventurer=card_data["name"])

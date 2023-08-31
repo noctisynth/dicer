@@ -1,21 +1,11 @@
-from typing import Optional
-try:
-    from ..utils.docimasy import expr
-    from ..utils.messages import temporary_madness, madness_end, phobias, manias
-    from ..utils.dicer import Dicer
-    from ..utils.multilogging import multilogger
-    from .coccards import coc_cards, coc_attrs_dict
-    from .investigator import Investigator
-except ImportError:
-    from dicergirl.utils.docimasy import expr
-    from dicergirl.utils.messages import temporary_madness, madness_end, phobias, manias
-    from dicergirl.utils.dicer import Dicer
-    from dicergirl.utils.multilogging import multilogger
-    from dicergirl.coc.coccards import coc_cards, coc_attrs_dict
-    from dicergirl.coc.investigator import Investigator
+from dicergirl.utils.docimasy import expr
+from dicergirl.utils.messages import temporary_madness, madness_end, phobias, manias
+from dicergirl.utils.dicer import Dicer
+from multilogging import multilogger
+from .coccards import coc_cards, coc_attrs_dict
+from .investigator import Investigator
 
 import random
-import re
 
 logger = multilogger(name="Dicer Girl", payload="COCUtil")
 

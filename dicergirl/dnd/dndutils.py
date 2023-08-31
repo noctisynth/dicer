@@ -1,15 +1,8 @@
-try:
-    from ..utils.docimasy import dnd_doc
-    from ..utils.messages import help_messages, help_message
-    from ..utils.dicer import Dicer
-    from .dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
-    from .adventurer import Adventurer
-except ImportError:
-    from dicergirl.utils.docimasy import dnd_doc
-    from dicergirl.utils.messages import help_messages, help_message
-    from dicergirl.utils.dicer import Dicer
-    from dicergirl.dnd.dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
-    from dicergirl.dnd.adventurer import Adventurer
+from dicergirl.utils.docimasy import dnd_doc
+from dicergirl.utils.messages import help_messages, help_message
+from dicergirl.utils.dicer import Dicer
+from .dndcards import dnd_cards, dnd_attrs_dict as attrs_dict
+from .adventurer import Adventurer
 
 def dnd_at(event, args):
     inv = Adventurer().load(dnd_cards.get(event))

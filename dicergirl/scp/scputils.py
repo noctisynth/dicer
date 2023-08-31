@@ -1,17 +1,9 @@
-try:
-    from ..utils.docimasy import expr, scp_doc
-    from ..utils.dicer import Dicer
-    from .scpcards import scp_cards
-    from .attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
-    from .agent import Agent
-    from ..utils.multilogging import multilogger
-except ImportError:
-    from dicergirl.utils.docimasy import expr, scp_doc
-    from dicergirl.utils.dicer import Dicer
-    from dicergirl.scp.scpcards import scp_cards
-    from dicergirl.scp.attributes import all_names, scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
-    from dicergirl.scp.agent import Agent
-    from dicergirl.utils.multilogging import multilogger
+from dicergirl.utils.docimasy import expr, scp_doc
+from dicergirl.utils.dicer import Dicer
+from multilogging import multilogger
+from .scpcards import scp_cards
+from .attributes import scp_attrs_dict as attrs_dict, weapons, all_alias, all_alias_dict
+from .agent import Agent
 
 import random
 

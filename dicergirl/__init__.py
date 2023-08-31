@@ -297,7 +297,7 @@ if package == "nonebot2":
 
             if version < newest_version:
                 await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
-                upgrade = run_shell_command(f"{sys.executable} -m pip install dicergirl -i https://pypi.org/simple --upgrade")
+                upgrade = await run_shell_command(f"{sys.executable} -m pip install dicergirl -i https://pypi.org/simple --upgrade")
 
                 if upgrade["returncode"] != 0:
                     logger.error(upgrade['stderr'])

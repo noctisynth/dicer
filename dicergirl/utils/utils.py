@@ -372,7 +372,7 @@ async def get_latest_version(package_name):
         package_info = response.json()
         return package_info["info"]["version"]
 
-async def _run_shell_command(command):
+async def run_shell_command(command):
     """ 异步执行 shell 指令的原始方法 """
     process = await asyncio.create_subprocess_shell(
         command,
@@ -387,7 +387,3 @@ async def _run_shell_command(command):
         "stderr": stderr.decode().strip(),
         "returncode": process.returncode
     }
-
-def run_shell_command(command):
-    """ 异步执行 shell 指令 """
-    return asyncio.run(_run_shell_command(command))

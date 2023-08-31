@@ -26,7 +26,7 @@ except ImportError:
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.2.9"
+version = "3.2.10"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """

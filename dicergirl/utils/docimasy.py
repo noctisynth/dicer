@@ -62,9 +62,9 @@ class Docimasy:
         return self.detail
 
 def expr(dice: Dicer, anum: int, name: str=None) -> Docimasy:
-    """ COC 技能检定结果 """
+    """ 类 COC 模式技能检定结果 """
     result = dice.roll().calc()
-    display = f"为PC {name} 掷骰: {dice.db}" if name else f"掷骰: {dice.db}"
+    display = f"[{name}]掷骰: {dice.db}" if name else f"掷骰: {dice.db}"
     docimasy = Docimasy(display)
     docimasy += dice.description()
 
@@ -97,7 +97,7 @@ def expr(dice: Dicer, anum: int, name: str=None) -> Docimasy:
     return docimasy
 
 def scp_doc(result, difficulty, encourage=None, agent=None, great=False) -> Docimasy:
-    """ SCP 技能检定结果 """
+    """ 类 SCP 模式技能检定结果 """
     if not agent:
         agent = "该特工"
 

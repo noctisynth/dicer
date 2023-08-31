@@ -270,7 +270,11 @@ def get_user_id(event) -> str:
 def get_user_card(event) -> str:
     """ 获取`event`指向的用户群名片 """
     try:
-        return json.loads(event.json())['sender']['card']
+        raw_json = json.loads(event.json())['sender']
+        if raw_json['card']:
+            return raw_json['card']
+        else:
+            return raw_json['nickname']
     except:
         return "未知用户"
 

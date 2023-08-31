@@ -89,6 +89,7 @@ if package == "nonebot2":
     delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
     rolekpcommand = on_startswith(".kp", priority=2, block=True)
     roleobcommand = on_startswith(".ob", priority=2, block=True)
+    sncommand = on_startswith(".sn", priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
 
@@ -803,7 +804,7 @@ if package == "nonebot2":
         await matcher.send("[Oracle] 身份组设置为主持人 (KP).")
 
     @roleobcommand.handle()
-    async def roleobcommand(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def roleobhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ OB 身份组认证 """
         import json
         roleob(event)
@@ -814,6 +815,19 @@ if package == "nonebot2":
         else:
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
             await matcher.send("[Oracle] 身份组设置为旁观者 (OB).")
+
+    @sncommand.handle()
+    async def snhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+        card: Cards = modes[get_mode(event)].__cards__
+        user_id: int = event.get_user_id()
+        got = card.get(event, qid=str(user_id))
+
+        if isinstance(got, dict):
+            if "name" not in got.keys():
+                got = ""
+
+        name = got['name'] if got else ""
+        await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
     @chatcommand.handle()
     async def chathandler(matcher: Matcher, event: MessageEvent):

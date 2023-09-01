@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DicerGirl - 新一代 TRPG 骰娘框架</title>
+    <link href="https://unvisitor.gitee.io/media/unvisitor/images/favicon.ico" rel="icon">
+    <!-- 引入Bootstrap CSS文件 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入最新版Select2的CSS文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2/dist/css/select2.min.css">
+    <!-- 引入Prism.js库 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+
+    <!-- 自定义样式 -->
+    <style>
+        /* 背景颜色 */
+        body {
+            background-color: #f0f0f0;
+        }
+
+        /* 导航栏颜色 - 调整为浅蓝色 */
+        .navbar {
+            background-color: #97b6c2;
+        }
+
+        /* 导航栏链接颜色 - 调整为浅色 */
+        .navbar-nav .nav-link {
+            color: #fff;
+        }
+
+        /* 项目名称文字样式 */
+        h1 {
+            color: #333;
+            font-size: 36px;
+        }
+
+        /* 标题文字样式 - 调整为浅蓝色 */
+        h2 {
+            color: #97b6c2;
+            font-size: 24px;
+        }
+
+        /* 段落文字样式 - 调整为稍浅的灰色 */
+        p {
+            color: #777;
+            font-size: 16px;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* 调整下拉框箭头颜色 */
+        .select2-container .select2-selection--single .select2-selection__arrow b {
+            border-color: #97b6c2 transparent transparent transparent;
+        }
+
+        .navbar-nav .nav-item {
+            margin-left: 10px; /* 调整右边距，可以根据需要进行调整 */
+        }
+
+        .select2-results__option {
+            padding: 2px;
+            padding-left: 8px;
+        }
+
+        .footer {
+            background-color: #97b6c2;
+        }
+
+        .py-2 {
+            padding-top: 0.5rem!important;
+            padding-bottom: 1.5rem!important;
+        }
+/* 调整代码块的外观 */
+        pre {
+            border-radius: 10px; /* 调整圆角的半径值，根据需要进行调整 */
+            padding: 10px; /* 添加一些内边距，使代码块内容离边框有一些间隔 */
+            border: 3px solid #97b6c2; /* 左边框颜色 */
+            padding: 15px!important;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <!-- 项目图标 -->
+            <a class="navbar-brand" href="/">
+                <img src="https://unvisitor.gitee.io/media/unvisitor/images/unvisitor.png" width="30" height="30" alt="DicerGirl Icon">
+            </a>
+            <!-- 导航链接和下拉框 -->
+            <ul class="navbar-nav align-items-center"> <!-- 使用 "align-items-center" 类来垂直居中 -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#">使用</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">开发</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">帮助</a>
+                </li>
+                <li class="nav-item">
+                    <select class="form-control form-control-lg">
+                        <option value="v2.0">v3.2.0</option>
+                        <option value="v3.0">v3.2.13</option>
+                        <option value="v3.0">v3.3.0</option>
+                    </select>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 项目主页内容，使用vh单位来占据整个视口高度 -->
+    <div class="container-fluid mt-5" style="height: 90vh;">
+        <!-- 居中内容 -->
+        <div class="d-flex flex-column align-items-center h-100" style="padding-top: 15vh;">
+            <!-- 项目图标（大小限定为200x200） -->
+            <img src="https://unvisitor.gitee.io/media/unvisitor/images/unvisitor.png" width="200" height="200" alt="DicerGirl Icon">
+            <!-- 项目名称 -->
+            <hr>
+            <h1 class="text-center mt-3">DicerGirl</h1>
+            <p class="text-center">新一代跨平台开源 TRPG 骰娘框架</p>
+            <hr>
+            <p>&#9660;</p>
+            <hr>
+        </div>
+    </div>
+
+    <!-- 项目简介和其他内容，分两列 -->
+    <div class="container mt-4 col-md-5">
+        <div class="row">
+            <div>
+                <h2 class="text-center">快速部署</h2>
+                <p>未知访客提供快速部署方案, 访问 <a href="https://gitee.com/unvisitor/dginstaller/releases/">Dicergirl Installer 发布页</a> 获取最新版 DGI.</p>
+                <p>DGI 会自动安装并部署 <code>DicerGirl</code>.</p>
+                <p>但值的注意的是, DGI 目前仅适用于 Windows 系统.</p>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <div class="row">
+            <!-- 左侧列 - 项目简介 -->
+            <div class="col-md-6">
+                <h2>跑团模块系统</h2>
+                <p><code>DicerGirl</code> 作为 <code>Nonebot2</code> 插件存在, 如果你熟悉 <code>Nonebot2</code>, 你可以使用如下方法直接安装:</p>
+                <pre><code class="language-bash">pip install nb-cli
+nb create -t bootstrap
+nb plugin install dicergirl
+</code></pre>
+                <p>你可以选择安装其它 <code>DicerGirl</code> 跑团模块:</p>
+                <pre><code class="language-bash">pip install dicergirl-plugin-scp
+pip install dicergirl-plugin-coc
+pip install dicergirl-plugin-dnd
+pip install dicergirl-plugin-hsr
+</code></pre>
+                <p>你同样可以安装第三方插件, 但未知访客不对其稳定性和安全性负责.</p>
+            </div>
+            <!-- 右侧列 - 其他内容 -->
+            <div class="col-md-6">
+                <h2>跨平台支持</h2>
+                <p><code>DicerGirl</code> 依赖于 <code>Nonebot2</code>, 这使得它可以跨平台工作. 除此之外, <code>Onebot v11</code> 以及 <code>Nonebot2</code> 支持的任何通讯平台都被支持.</p>
+                <pre><code class="language-bash">nb adapter install nonebot-adapter-onebot
+nb adapter install nonebot-adapter-qqguild
+</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部部分 -->
+    <footer class="footer text-white mt-5">
+        <div class="container">
+            <!-- 上部分 - 项目简介与链接图标 -->
+            <div class="row pt-4">
+                <div class="col-md-6">
+                    <img src="https://unvisitor.gitee.io/media/unvisitor/images/unvisitor.png" width="50" height="50" alt="DicerGirl Icon">
+                    <h4 style="padding-top: 10px;">关于项目</h4>
+                    <p>Dicergirl 是新一代跨平台开源 TRPG 骰娘框架, 具有完整的社区平台支持.</p>
+                    <a href="https://github.com/unvisitor/dicer" target="_blank">
+                        <i class="fab fa-github fa-2x"></i>
+                    </a>
+                    <a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=hvaf8JGmEXA3N9r4SGgpghDti31aW1bR&authKey=%2Bux%2BedOIguriMYBMGe40coeOT7mx%2B99%2FVMbK0MvE2w1AsVQLLK%2B0hBO6vVB%2Bmlws&noverify=0&group_code=770386358" target="_blank">
+                        <i class="fab fa-qq fa-2x"></i>
+                    </a>
+                </div>
+            </div>
+            <hr>
+            <div class="row pt-4">
+                <!-- 中部分 - 三类不同的外链 -->
+                <div class="row">
+                    <div class="col-md-4">
+                        <h4>使用 DicerGirl</h4>
+                        <ul class="list-unstyled">
+                            <li class="list-group-item">
+                                <a href="docs/usage/" target="_blank">
+                                    <i class="fas fa-link me-2"> 使用</i>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="docs/develop/" target="_blank">
+                                    <i class="fas fa-link me-2"> 开发</i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>Github 仓库</h4>
+                        <ul class="list-unstyled">
+                            <li class="list-group-item">
+                                <a href="https://gitee.com/unvisitor/dicer" target="_blank">
+                                    <i class="fas fa-link me-2"> DicerGirl - Gitee</i>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="https://github.com/nonebot/nonebot2" target="_blank">
+                                    <i class="fas fa-link me-2"> Nonebot2</i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h4>关于我们</h4>
+                        <ul class="list-unstyled">
+                            <li class="list-group-item">
+                                <a href="https://www.unvisitor.site/" target="_blank">
+                                    <i class="fas fa-link me-2"> 未知访客黑客联盟</i>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="https://www.unvisitor.site/blog/" target="_blank">
+                                    <i class="fas fa-link me-2"> 未知访客论坛</i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>  
+        </div>
+        <!-- 下部分 - 版权声明 -->
+        <hr>
+        <div class="text-center py-2">
+            &copy; CopyRight 2011-2023, Unknown Visitor, org. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- 引入Bootstrap JS文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- 引入jQuery库（Select2依赖jQuery） -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 引入最新版Select2的JavaScript文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2/dist/js/select2.min.js"></script>
+    <!-- 导入FontAwesome的CSS文件 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- 引入所需的语言扩展文件，例如JavaScript和Python -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
+    <!-- 初始化Select2 -->
+    <script>
+        $(document).ready(function() {
+            $('.form-control').select2({
+                minimumResultsForSearch: -1, // 隐藏搜索框
+                dropdownAutoWidth: true, // 自动调整下拉框的宽度和高度以适应内容
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            Prism.highlightAll();
+        });
+    </script>
+</body>
+</html>

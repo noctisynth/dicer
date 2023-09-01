@@ -34,7 +34,8 @@ setuptools.setup(
         'psutil',
         'nonebot_plugin_apscheduler',
         'pypi-simple',
-        'httpx'
+        'httpx',
+        'dicergirl-plugin-scp',
     ],
     python_requires=">=3",
 )

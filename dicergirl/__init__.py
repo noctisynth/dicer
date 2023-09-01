@@ -242,7 +242,11 @@ if package == "nonebot2":
                 Only(("on", "run", "start")),
                 Only(("off", "down", "shutdown")),
                 Only(("upgrade", "up")),
-                Only(("status"))
+                Only(("downgrade")),
+                Only(("status")),
+                Optional(("install", "add"), str),
+                Optional(("remove", "del", "rm"), str),
+                Only(("list", "all"))
             ]),
             args=args,
             auto=True
@@ -310,6 +314,30 @@ if package == "nonebot2":
             await matcher.send("我已经是最新版本的欧若可了!")
             return
 
+        if commands["downgrade"]:
+            await matcher.send("警告! 执行降级之后可能导致无法再次自动升级!")
+            await matcher.send("当前暂不支持降级!")
+            return
+
+        if commands["list"]:
+            await matcher.send("暂不支持列出所以已发布的依赖包.")
+            return
+
+        if commands["install"]:
+            if commands["install"] in modes.keys():
+                await matcher.send(f"模块 {commands['install']} 已经安装了!")
+                return
+
+            await matcher.send("暂不支持新增模式.")
+            return
+
+        if commands["remove"]:
+            if not commands["remove"] in modes.keys():
+                await matcher.send(f"模块 {commands['remove']} 未安装, 故忽略删除指令.")
+                return
+
+            await matcher.send("暂不支持删除依赖包.")
+            return
         await matcher.send("[Oracle] 未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @logcommand.handle()

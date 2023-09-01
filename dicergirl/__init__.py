@@ -46,11 +46,13 @@ if package == "nonebot2":
         get_mode, set_mode,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
         get_status, boton, botoff,
-        rolekp, roleob
+        rolekp, roleob,
+        run_shell_command, get_latest_version
         )
     from .utils.plugins import modes
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.handlers import show_handler, set_handler, del_handler, roll, shoot
+    from .utils.cards import Cards
     from .utils.chat import chat
 
     from nonebot.matcher import Matcher
@@ -87,6 +89,7 @@ if package == "nonebot2":
     delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
     rolekpcommand = on_startswith(".kp", priority=2, block=True)
     roleobcommand = on_startswith(".ob", priority=2, block=True)
+    sncommand = on_startswith(".sn", priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
 
@@ -238,7 +241,12 @@ if package == "nonebot2":
                 Only(("exit", "bye", "leave")),
                 Only(("on", "run", "start")),
                 Only(("off", "down", "shutdown")),
-                Only(("status"))
+                Only(("upgrade", "up")),
+                Only(("downgrade")),
+                Only(("status")),
+                Optional(("install", "add"), str),
+                Optional(("remove", "del", "rm"), str),
+                Only(("list", "all"))
             ]),
             args=args,
             auto=True
@@ -288,6 +296,48 @@ if package == "nonebot2":
             await matcher.send(reply)
             return
 
+        if commands["upgrade"]:
+            await matcher.send("检查版本更新中...")
+            newest_version = await get_latest_version("dicergirl")
+
+            if tuple(map(int, version.split("."))) < newest_version:
+                await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
+                upgrade = await run_shell_command(f"{sys.executable} -m pip install dicergirl -i https://pypi.org/simple --upgrade")
+
+                if upgrade["returncode"] != 0:
+                    logger.error(upgrade['stderr'])
+                    await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
+                    return
+
+                await matcher.send(f"欧若可骰娘已更新为版本 {'.'.join(map(str, newest_version))}.")
+
+            await matcher.send("我已经是最新版本的欧若可了!")
+            return
+
+        if commands["downgrade"]:
+            await matcher.send("警告! 执行降级之后可能导致无法再次自动升级!")
+            await matcher.send("当前暂不支持降级!")
+            return
+
+        if commands["list"]:
+            await matcher.send("暂不支持列出所以已发布的依赖包.")
+            return
+
+        if commands["install"]:
+            if commands["install"] in modes.keys():
+                await matcher.send(f"模块 {commands['install']} 已经安装了!")
+                return
+
+            await matcher.send("暂不支持新增模式.")
+            return
+
+        if commands["remove"]:
+            if not commands["remove"] in modes.keys():
+                await matcher.send(f"模块 {commands['remove']} 未安装, 故忽略删除指令.")
+                return
+
+            await matcher.send("暂不支持删除依赖包.")
+            return
         await matcher.send("[Oracle] 未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @logcommand.handle()
@@ -484,7 +534,7 @@ if package == "nonebot2":
         return
 
     @setcommand.handle()
-    async def sethandler(matcher: Matcher, event: GroupMessageEvent):
+    async def sethandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ 角色卡设置指令 """
         if not get_status(event) and not event.to_me:
             return
@@ -516,6 +566,18 @@ if package == "nonebot2":
         mode = get_mode(event)
         if mode in modes:
             try:
+                if not args:
+                    cache = modes[mode].__cache__
+                    user_id: int = event.user_id
+                    got = cache.get(event, qid=str(user_id))
+
+                    if isinstance(got, dict):
+                        if "name" not in got.keys():
+                            got = ""
+
+                    name = got['name'] if got else ""
+                    await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
+
                 sh = set_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
@@ -542,7 +604,7 @@ if package == "nonebot2":
         await matcher.send(help_message(arg))
 
     @modecommand.handle()
-    async def modehandler(matcher: Matcher, event: MessageEvent):
+    async def modehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
         """ 跑团模式切换指令 """
         if not get_status(event) and not event.to_me:
             return
@@ -551,6 +613,19 @@ if package == "nonebot2":
         if args:
             if args[0].lower() in modes:
                 set_mode(event, args[0].lower())
+
+                for user in await bot.get_group_member_list(group_id=event.group_id):
+                    card: Cards = modes[get_mode(event)].__cards__
+                    user_id: int = user['user_id']
+                    got = card.get(event, qid=str(user_id))
+
+                    if isinstance(got, dict):
+                        if "name" not in got.keys():
+                            got = ""
+
+                    name = got['name'] if got else ""
+                    await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
+
                 await matcher.send(f"[Oracle] 已切换到 {args[0].upper()} 跑团模式.")
                 return True
             else:
@@ -757,7 +832,7 @@ if package == "nonebot2":
         await matcher.send("[Oracle] 身份组设置为主持人 (KP).")
 
     @roleobcommand.handle()
-    async def roleobcommand(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def roleobhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ OB 身份组认证 """
         import json
         roleob(event)
@@ -768,6 +843,19 @@ if package == "nonebot2":
         else:
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
             await matcher.send("[Oracle] 身份组设置为旁观者 (OB).")
+
+    @sncommand.handle()
+    async def snhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+        card: Cards = modes[get_mode(event)].__cards__
+        user_id: int = event.get_user_id()
+        got = card.get(event, qid=str(user_id))
+
+        if isinstance(got, dict):
+            if "name" not in got.keys():
+                got = ""
+
+        name = got['name'] if got else ""
+        await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
     @chatcommand.handle()
     async def chathandler(matcher: Matcher, event: MessageEvent):

@@ -1,6 +1,9 @@
-<div style="text-align: center">
-<img src="https://unvisitor.gitee.io/media/unvisitor/images/unvisitor.png" alt="图片的描述" style="width:200px; height:200px;"></img>
+<div align="center">
+    <img src="https://unvisitor.gitee.io/media/unvisitor/images/unvisitor.png" alt="未知访客" width="200" height="200"></img>
+</div>
 
+<div align="center">
+ 
 # DicerGirl
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/dicergirl)
 [![PyPI](https://img.shields.io/pypi/v/dicergirl)](https://pypi.org/project/dicergirl/)

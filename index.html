@@ -74,13 +74,22 @@
             padding-top: 0.5rem!important;
             padding-bottom: 1.5rem!important;
         }
-/* 调整代码块的外观 */
+
+        /* 调整代码块的外观 */
         pre {
             border-radius: 10px; /* 调整圆角的半径值，根据需要进行调整 */
             padding: 10px; /* 添加一些内边距，使代码块内容离边框有一些间隔 */
             border: 3px solid #97b6c2; /* 左边框颜色 */
             padding: 15px!important;
             margin: 10px 0;
+        }
+
+        button {
+            border-radius: 10px;
+            padding: 8px;
+            border: 3px solid #97b6c2;
+            background-color: #97b6c2;
+            color: #f0f0f0;
         }
     </style>
 </head>
@@ -95,20 +104,23 @@
             <!-- 导航链接和下拉框 -->
             <ul class="navbar-nav align-items-center"> <!-- 使用 "align-items-center" 类来垂直居中 -->
                 <li class="nav-item">
-                    <a class="nav-link" href="#">使用</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">开发</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">帮助</a>
-                </li>
-                <li class="nav-item">
                     <select class="form-control form-control-lg">
                         <option value="v2.0">v3.2.0</option>
                         <option value="v3.0">v3.2.13</option>
                         <option value="v3.0">v3.3.0</option>
                     </select>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="docs/usage/">使用</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="docs/develop/">开发</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="docs/faq/">帮助</a>
+                </li>
+                <li class="nav-item" style="color: #fff;">
+                    <a class="nav-link" href="https://github.com/unvisitor/dicer"><i class="fab fa-github fa-2x"></i></a>
                 </li>
             </ul>
         </div>
@@ -124,6 +136,7 @@
             <hr>
             <h1 class="text-center mt-3">DicerGirl</h1>
             <p class="text-center">新一代跨平台开源 TRPG 骰娘框架</p>
+            <a href="docs/usage/"><button>开始使用 ></button></a>
             <hr>
             <p>&#9660;</p>
             <hr>

@@ -10,7 +10,7 @@ setuptools.setup(
     version = version,
     author = "Night Resurgent <fu050409@163.com>",
     author_email = "fu050409@163.com",
-    description = "跑团骰娘机器人欧若可, 支持 QQ频道 及 Nonebot2 部署.",
+    description = "新一代跨平台开源 TRPG 骰娘框架",
     long_description = long_description,
     long_description_content_type = "text/markdown",
     url = "https://gitee.com/unvisitor/dicer",

@@ -4,12 +4,18 @@ from nonebot.plugin import PluginMetadata
 from typing import Dict
 from .utils.settings import set_package, get_package
 from .utils.multilogging import multilogger
+from .utils.utils import version as __version__
 
+import logging
+import sys
+import platform
+import psutil
+import html
 import nonebot
 
 __plugin_meta__ = PluginMetadata(
     name="欧若可骰娘",
-    description="完善的可拓展跑团机器人, 支持 COC/DND/SCP 等跑团模式.",
+    description="新一代跨平台开源 TRPG 骰娘框架",
     usage="安装即可使用.",
     type="application",
     homepage="https://gitee.com/unvisitor/dicer",
@@ -18,22 +24,14 @@ __plugin_meta__ = PluginMetadata(
 __author__ = "苏向夜 <fu050409@163.com>"
 
 logger = multilogger(name="Dicer Girl", payload="Nonebot2")
+DEBUG = False
+current_dir = Path(__file__).resolve().parent
+
 try:
     driver = nonebot.get_driver()
     set_package("nonebot2")
 except ValueError:
     set_package("qqguild")
-
-from .utils.utils import version as __version__
-
-import logging
-import sys
-import platform
-import psutil
-import html
-
-DEBUG = False
-current_dir = Path(__file__).resolve().parent
 package = get_package()
 
 if package == "nonebot2":
@@ -45,7 +43,7 @@ if package == "nonebot2":
         format_msg, format_str,
         get_mode, set_mode,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
-        get_status, boton, botoff,
+        get_status, boton, botoff, set_name, get_name,
         rolekp, roleob,
         run_shell_command, get_latest_version
         )
@@ -127,7 +125,7 @@ if package == "nonebot2":
         )
 
         if not is_super_user(event):
-            await matcher.send("[Oracle] 权限不足, 拒绝执行测试指令.")
+            await matcher.send("权限不足, 拒绝执行测试指令.")
             return
 
         reply = ""
@@ -162,7 +160,7 @@ if package == "nonebot2":
         global DEBUG
         args = format_msg(event.get_message(), begin=".debug")
         if not is_super_user(event):
-            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+            await matcher.send("权限不足, 拒绝执行指令.")
             return
 
         if args:
@@ -176,7 +174,7 @@ if package == "nonebot2":
                     level = "INFO"
                 )
                 logger.info("[cocdicer] 输出等级设置为 INFO.")
-                await matcher.send("[Oracle] DEBUG 模式已关闭.")
+                await matcher.send("DEBUG 模式已关闭.")
                 return
         else:
             DEBUG = True
@@ -187,7 +185,7 @@ if package == "nonebot2":
                 level = "INFO"
             )
             logger.info("[cocdicer] 输出等级设置为 DEBUG.")
-            await matcher.send("[Oracle] DEBUG 模式已启动.")
+            await matcher.send("DEBUG 模式已启动.")
             return
 
         if args[0] == "on":
@@ -199,9 +197,9 @@ if package == "nonebot2":
                 level = "INFO"
             )
             logger.info("[cocdicer] 输出等级设置为 DEBUG.")
-            await matcher.send("[Oracle] DEBUG 模式已启动.")
+            await matcher.send("DEBUG 模式已启动.")
         else:
-            await matcher.send("[Oracle] 错误, 我无法解析你的指令.")
+            await matcher.send("错误, 我无法解析你的指令.")
 
     @superusercommand.handle()
     async def superuser_handler(matcher: Matcher, event: MessageEvent):
@@ -212,24 +210,24 @@ if package == "nonebot2":
         if len(arg) >= 1:
             if arg[0].lower() == "exit":
                 if not rm_super_user(event):
-                    await matcher.send("[Oracle] 你还不是超级管理员, 无法撤销超级管理员身份.")
+                    await matcher.send("你还不是超级管理员, 无法撤销超级管理员身份.")
                     return
-                await matcher.send("[Oracle] 你已撤销超级管理员身份.")
+                await matcher.send("你已撤销超级管理员身份.")
                 return
 
         if is_super_user(event):
-            await matcher.send("[Oracle] 你已经是超级管理员.")
+            await matcher.send("你已经是超级管理员.")
             return
 
         if not args:
             logger.critical(f"超级令牌: {su_uuid}")
-            await matcher.send("[Oracle] 启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
+            await matcher.send("启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
         else:
             if not args == su_uuid:
-                await matcher.send("[Oracle] 鉴权失败!")
+                await matcher.send("鉴权失败!")
             else:
                 add_super_user(event)
-                await matcher.send("[Oracle] 你取得了管理员权限.")
+                await matcher.send("你取得了管理员权限.")
 
     @botcommand.handle()
     async def bothandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -243,6 +241,7 @@ if package == "nonebot2":
                 Only(("off", "down", "shutdown", "关闭")),
                 Only(("upgrade", "up", "升级")),
                 Only(("downgrade", "降级")),
+                Optional(("name", "命名"), str),
                 Only(("status", "状态")),
                 Optional(("install", "add", "安装"), str),
                 Optional(("remove", "del", "rm", "删除"), str),
@@ -261,22 +260,22 @@ if package == "nonebot2":
 
         if commands["exit"]:
             if not is_super_user(event):
-                await matcher.send("[Oracle] 你没有管理员权限, 请先执行`.su`开启权限鉴定.")
+                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
                 return
 
-            logger.info(f"欧若可退出群聊: {event.group_id}")
-            await matcher.send("[Oracle] 欧若可离开群聊.")
+            logger.info(f"{get_name()}退出群聊: {event.group_id}")
+            await matcher.send(f"{get_name()}离开群聊.")
             await bot.set_group_leave(group_id=event.group_id)
             return
 
         if commands["on"]:
             boton(event)
-            await matcher.send("[Oracle] 欧若可已开放指令限制.")
+            await matcher.send(f"{get_name()}已开放指令限制.")
             return
 
         if commands["off"]:
             botoff(event)
-            await matcher.send("[Oracle] 欧若可已开启指令限制.")
+            await matcher.send(f"{get_name()}已开启指令限制.")
             return
 
         if commands["status"]:
@@ -311,14 +310,24 @@ if package == "nonebot2":
                     await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
                     return
 
-                await matcher.send(f"欧若可骰娘已更新为版本 {'.'.join(map(str, newest_version))}.")
+                await matcher.send(f"{get_name()}骰娘已更新为版本 {'.'.join(map(str, newest_version))}.")
 
-            await matcher.send("我已经是最新版本的欧若可了!")
+            await matcher.send(f"我已经是最新版本的{get_name()}了!")
             return
 
         if commands["downgrade"]:
             await matcher.send("警告! 执行降级之后可能导致无法再次自动升级!")
             await matcher.send("当前暂不支持降级!")
+            return
+
+        if commands["name"]:
+            sn = set_name(commands["name"])
+
+            if isinstance(sn, bool):
+                await matcher.send(f"倒是好生有趣的名字, 以后我就是 {commands['name']} 了.")
+            elif isinstance(sn, str):
+                await matcher.send(sn)
+
             return
 
         if commands["mode"]:
@@ -331,7 +340,7 @@ if package == "nonebot2":
                 reply += f"\t切换: .mode {plugin}\n"
 
             reply.strip("\n")
-            reply += f"[Oracle] 当前的跑团模式为 {get_mode(event).upper()}."
+            reply += f"当前的跑团模式为 {get_mode(event).upper()}."
             await matcher.send(reply)
             return
 
@@ -350,7 +359,7 @@ if package == "nonebot2":
 
             await matcher.send("暂不支持删除依赖包.")
             return
-        await matcher.send("[Oracle] 未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
+        await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @logcommand.handle()
     async def loghandler(bot: V11Bot, matcher: Matcher, event: Event):
@@ -425,7 +434,7 @@ if package == "nonebot2":
             if not add_logger(event, logname):
                 raise IOError("无法新增日志.")
 
-            await matcher.send(f"[Oracle] 新增日志序列: {index}\n日志文件: {logname}")
+            await matcher.send(f"新增日志序列: {index}\n日志文件: {logname}")
             return
 
         if commands["stop"] or commands["stop"] == 0:
@@ -457,7 +466,7 @@ if package == "nonebot2":
                 loggers[get_group_id(event)] = {}
 
             loggers[get_group_id(event)][commands["start"]] = [new_logger, logname]
-            await matcher.send(f"[Oracle] 日志序列 {commands['start']} 重新启动.")
+            await matcher.send(f"日志序列 {commands['start']} 重新启动.")
             return
 
         if commands["remove"] or commands["remove"] == 0:
@@ -507,7 +516,7 @@ if package == "nonebot2":
 
                 message = role_or_name + ": " + html.unescape(str(event.get_message()))
             elif isinstance(event, Event):
-                message = "[欧若可]: " + html.unescape(event.message)
+                message = f"[{get_name()}]: " + html.unescape(event.message)
 
             loggers[get_group_id(event)][log][0].info(message)
 
@@ -536,7 +545,7 @@ if package == "nonebot2":
                 sh = show_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
-                sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+                sh = [f"错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
         else:
             await matcher.send("未知的跑团模式.")
             return True
@@ -564,7 +573,7 @@ if package == "nonebot2":
         ).results
 
         if at and not is_super_user(event):
-            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+            await matcher.send("权限不足, 拒绝执行指令.")
             return
 
         if commands["show"]:
@@ -593,7 +602,7 @@ if package == "nonebot2":
                 sh = set_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
-                sh = [f"[Oracle] 错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+                sh = [f"错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
         else:
             await matcher.send("未知的跑团模式.")
             return True
@@ -643,17 +652,17 @@ if package == "nonebot2":
                     name = got['name'] if got else ""
                     await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
-                await matcher.send(f"[Oracle] 已切换到 {args.upper()} 跑团模式.")
+                await matcher.send(f"已切换到 {args.upper()} 跑团模式.")
                 return True
             else:
-                await matcher.send("[Oracle] 未知的跑团模式, 忽略指令.")
+                await matcher.send("未知的跑团模式, 忽略指令.")
                 return True
         else:
             reply = "当前已正确安装的跑团插件:\n"
             for plugin in modes.keys():
                 reply += f"{plugin.upper()} 模式: {plugin}.\n"
 
-            reply += f"[Oracle] 当前的跑团模式为 {get_mode(event).upper()}."
+            reply += f"当前的跑团模式为 {get_mode(event).upper()}."
             await matcher.send(reply)
 
     @shootcommand.handle()
@@ -674,17 +683,17 @@ if package == "nonebot2":
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
                 return
 
             if not "at" in modes[mode].__commands__.keys():
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持伤害检定指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 不支持伤害检定指令.")
                 return
 
             handler = modes[mode].__commands__["at"]
             await matcher.send(handler(event, args))
         else:
-            await matcher.send("[Oracle] 未知的跑团模式.")
+            await matcher.send("未知的跑团模式.")
 
     @damcommand.handle()
     async def damhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -696,17 +705,17 @@ if package == "nonebot2":
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
                 return
 
             if not "at" in modes[mode].__commands__.keys():
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持承伤检定指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 不支持承伤检定指令.")
                 return
 
             handler = modes[mode].__commands__["dam"]
             await matcher.send(handler(event, args))
         else:
-            await matcher.send("[Oracle] 未知的跑团模式.")
+            await matcher.send("未知的跑团模式.")
 
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -718,17 +727,17 @@ if package == "nonebot2":
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
                 return
 
             if not "at" in modes[mode].__commands__.keys():
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持激励指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 不支持激励指令.")
                 return
 
             handler = modes[mode].__commands__["en"]
             await matcher.send(handler(event, args))
         else:
-            await matcher.send("[Oracle] 未知的跑团模式.")
+            await matcher.send("未知的跑团模式.")
 
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
@@ -740,11 +749,11 @@ if package == "nonebot2":
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 未设置标准指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
                 return
 
             if not "ra" in modes[mode].__commands__.keys():
-                await matcher.send(f"[Oracle] 跑团模式 {mode.upper()} 不支持技能检定指令.")
+                await matcher.send(f"跑团模式 {mode.upper()} 不支持技能检定指令.")
                 return
 
             handler = modes[mode].__commands__["ra"]
@@ -756,7 +765,7 @@ if package == "nonebot2":
 
             await matcher.send(replies)
         else:
-            await matcher.send("[Oracle] 未知的跑团模式.")
+            await matcher.send("未知的跑团模式.")
 
     @rhcommand.handle()
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -765,7 +774,7 @@ if package == "nonebot2":
             return
 
         args = format_str(event.get_message(), begin=".rh")
-        await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
+        await matcher.send("暗骰: 命运的骰子在滚动.")
         await bot.send_private_msg(user_id=event.get_user_id(), message=roll(args))
 
     @rhacommand.handle()
@@ -776,7 +785,7 @@ if package == "nonebot2":
 
         args = format_msg(event.get_message(), begin=".rha")
         mode = get_mode()
-        await matcher.send("[Oracle] 暗骰: 命运的骰子在滚动.")
+        await matcher.send("暗骰: 命运的骰子在滚动.")
         await bot.send_private_msg(user_id=event.get_user_id(), message=eval(f"{mode}_(args, event)"))
 
     @rollcommand.handle()
@@ -795,7 +804,7 @@ if package == "nonebot2":
             await matcher.send(roll(args, name=name))
         except Exception as error:
             logger.exception(error)
-            await matcher.send("[Oracle] 未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
+            await matcher.send("未知错误, 可能是掷骰语法异常.\nBUG提交: https://gitee.com/unvisitor/issues")
 
     @delcommand.handle()
     async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
@@ -811,7 +820,7 @@ if package == "nonebot2":
         at = get_mentions(event)
 
         if at and not is_super_user(event):
-            await matcher.send("[Oracle] 权限不足, 拒绝执行指令.")
+            await matcher.send("权限不足, 拒绝执行指令.")
             return
 
         mode = get_mode(event)
@@ -846,7 +855,7 @@ if package == "nonebot2":
 
         rolekp(event)
         await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="KP")
-        await matcher.send("[Oracle] 身份组设置为主持人 (KP).")
+        await matcher.send("身份组设置为主持人 (KP).")
 
     @roleobcommand.handle()
     async def roleobhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -856,10 +865,10 @@ if package == "nonebot2":
 
         if json.loads(event.json())['sender']['card'] == "ob":
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id())
-            await matcher.send("[Oracle] 取消旁观者 (OB) 身份.")
+            await matcher.send("取消旁观者 (OB) 身份.")
         else:
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
-            await matcher.send("[Oracle] 身份组设置为旁观者 (OB).")
+            await matcher.send("身份组设置为旁观者 (OB).")
 
     @sncommand.handle()
     async def snhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -879,7 +888,7 @@ if package == "nonebot2":
         """ chatGPT 对话指令 """
         args = format_str(event.get_message(), begin=".chat")
         if not args:
-            await matcher.send("[Oracle] 空消息是不被允许的.")
+            await matcher.send("空消息是不被允许的.")
             return
         await matcher.send(chat(args))
 

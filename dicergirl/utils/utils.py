@@ -26,7 +26,7 @@ except ImportError:
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.2.14"
+version = "3.2.15"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """
@@ -129,6 +129,24 @@ def on_startswith(commands, priority=0, block=True) -> Matcher:
         commands = (commands, )
 
     return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+
+def set_name(name) -> bool | str:
+    """ 给骰娘命名 """
+    if len(name) >= 5:
+        return "我不想要太长的名字!"
+
+    with open(dicer_girl_dir / "name", "w") as f:
+        f.write(name)
+
+    return True
+
+def get_name() -> str:
+    """ 获得骰娘的名字 """
+    path = dicer_girl_dir / "name"
+    if not path.exists():
+        return "欧若可"
+
+    return path.open(mode="r").read()
 
 def load_modes() -> Dict[str, list]:
     """ 加载当前不同群聊的跑团模式 """

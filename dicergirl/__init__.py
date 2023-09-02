@@ -324,6 +324,12 @@ if package == "nonebot2":
             sn = set_name(commands["name"])
 
             if isinstance(sn, bool):
+                await bot.call_api(
+                    "set_qq_profile",
+                    **{
+                        "nickname": commands["name"],
+                    }
+                )
                 await matcher.send(f"倒是好生有趣的名字, 以后我就是 {commands['name']} 了.")
             elif isinstance(sn, str):
                 await matcher.send(sn)

@@ -33,7 +33,6 @@ setuptools.setup(
         'multilogging',
         'psutil',
         'nonebot_plugin_apscheduler',
-        'pypi-simple',
         'httpx',
         'dicergirl-plugin-scp',
     ],

@@ -5,7 +5,6 @@ from nonebot.consts import STARTSWITH_KEY
 from nonebot.plugin import on_message
 from nonebot.rule import Rule
 from nonebot.matcher import Matcher
-from pypi_simple import PyPISimple
 
 import json
 import uuid

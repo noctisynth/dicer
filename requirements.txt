@@ -1,5 +1,10 @@
 nonebot2
-qq-botpy
-watchdog
+nonebot-adapter-onebot
 loguru
 pyyaml
+openai
+multilogging
+psutil
+nonebot_plugin_apscheduler
+httpx
+dicergirl-plugin-scp

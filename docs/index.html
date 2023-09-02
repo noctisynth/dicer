@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DicerGirl - 新一代 TRPG 骰娘框架</title>
+    <title>概览 | DicerGirl - 新一代 TRPG 骰娘框架</title>
     <link href="https://unvisitor.gitee.io/media/unvisitor/images/favicon.ico" rel="icon">
     <!-- 引入Bootstrap CSS文件 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -35,13 +35,18 @@
         /* 项目名称文字样式 */
         h1 {
             color: #333;
-            font-size: 36px;
+            font-size: 30px;
         }
 
         /* 标题文字样式 - 调整为浅蓝色 */
         h2 {
             color: #97b6c2;
             font-size: 24px;
+        }
+
+        h3 {
+            color: #a0b6be;
+            font-size: 18px;
         }
 
         /* 段落文字样式 - 调整为稍浅的灰色 */
@@ -166,45 +171,21 @@
                 </div>
             </div>
             <div class="col-md-7">
-                <h1 class="text-center">骰娘手册</h1>
-                <h2>关于凑合着看的事情</h2>
-                <p>啊, 我们还没写……</p>
-                <p>诶, 这个是骰娘自带的帮助, 先凑合着看:</p>
-                <pre><code class="language-plaintext">欧若可骰娘 Version 3.2.13
-此骰娘基于腾讯 QQ频道(qq-botpy) 及 Nonebot2 搭建.
-最终版本由未知访客团队(Unknow Visitor, 原左旋联盟)完成.
-感谢 灵冬-老孙 提供相关技术支持.
-感谢 @Github: abrahum, 本项目中 COC 模式有部分移植了 @Github: abrahum 的 nonebot_plugin_cocdicer 项目.
-
-.help/.h	帮助信息
-.su/.sudo	进行超级管理员鉴权
-.bot	机器人管理
-.mode/.m	切换当前跑团模式
-.coc	进行车卡, 完成 COC 角色作成
-.scp	进行车卡, 完成 SCP 角色作成
-.dnd	进行车卡, 完成 DND 角色作成
-.set/.st	角色卡设定
-.show/.st show	角色卡查询
-.r	掷骰检定指令
-.dam/.damage	调查员或特工承伤检定
-.at/.attack	调查员或特工伤害检定
-.sc	疯狂检定
-.ti	临时疯狂症状
-.li	总结疯狂症状
-.en/.encourage	技能成长
-.del/.delete	删除数据
-.log	日志管理
-输入`.help [指令名]`获取该指令的详细信息
-注1: 以上的 "aDb" 格式(例如10D100)的内容, 表示模拟投掷100面骰子, 投掷10次, 结果小于检定值则检定通过.
-注2: 该骰娘使用正则表达式对指令解析, 指令参数传递为弱空格需求.
-注3: 该骰娘会对英文大小写及中文字符转换, 指令及指令参数为弱大小写和弱中英文区分需求.
-注4: 指令帮助内容中`Optional[...]`代表参数可选, `[command]`表示该参数为指令且必须为`command`, `[str: ...]`表示参数为字符串, `[int: ...]`表示参数为数字, `[a|b]`表示参数多选.
-
-欧若可骰娘 版本 3.2.13, 未知访客开发, 以Apache-2.0协议开源.
-Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.
-</code></pre>
-                <p>请继续凑合看.</p>
-                <h2 id="标题测试">标题测试</h2>
+                <h1>DicerGirl</h1>
+                <h2 id="概览">概览</h2>
+                <p><code>DicerGirl</code> 是一个开源的、跨平台、可拓展的新一代骰娘框架. 它基于 <code>Nonebot2</code> 搭建, 具有完整的插件管理系统, 你可以在 COC、DND、SCP... 等等不同的跑团模式中自由切换.</p>
+                <p>在 <code>DicerGirl</code> 插件系统的支持下, 你可以安装任何被支持的跑团模式.</p>
+                <h2 id="特色">特色</h2>
+                <h3 id="多模式">多模式</h3>
+                <p><code>DicerGirl</code> 不像传统骰娘那样采用通配式的框架, 而是允许不同的模式采用不同的掷骰方法. 当然, 默认的通配方法同样也被支持.</p>
+                <h3 id="插件系统">插件系统</h3>
+                <p><code>DicerGirl</code> 具有完整的插件管理系统, 任何开发者都可以发布以自定义跑团模式为规则的插件. 插件发布后, 任何骰主都有权限下载安装.</p>
+                <h3 id="自定义昵称">自定义昵称</h3>
+                <p><code>DicerGirl</code> 允许骰主使用指令 <code>.bot name [昵称]</code> 来对骰娘设置一个自定义的昵称.</p>
+                <h3 id="开箱即用">开箱即用</h3>
+                <p><code>DicerGirl</code> 不需要复杂的配置, 它使用 <code><a href="https://gitee.com/unvisitor/dginstaller/releases">DicerGirl Installer</a></code>(下称 DGI) 安装即可使用.</p>
+                <h3 id="同步黑页">同步黑页</h3>
+                <p><code>DicerGirl</code> 使用统一的黑名单, 一旦某个群聊或用户成为任何一个使用<code>DicerGirl</code> 的黑名单中的一员, 其它的骰娘会同步认定黑名单.</p>
             </div>
             <div class="col-md-3">
                 <div class="row position-fixed index" id="index-div">

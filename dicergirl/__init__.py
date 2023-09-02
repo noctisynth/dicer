@@ -328,9 +328,11 @@ if package == "nonebot2":
                 if hasattr(modes[plugin], "__description__"):
                     reply += f"\t简介: {modes[plugin].__description__}\n"
 
-                reply += f"\t切换: .mode {plugin}"
+                reply += f"\t切换: .mode {plugin}\n"
 
+            reply.strip("\n")
             reply += f"[Oracle] 当前的跑团模式为 {get_mode(event).upper()}."
+            await matcher.send(reply)
             return
 
         if commands["install"]:
@@ -619,24 +621,29 @@ if package == "nonebot2":
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=(".mode", ".m"))
+        args = format_str(event.get_message(), begin=(".mode", ".m"))
         if args:
-            if args[0].lower() in modes:
-                set_mode(event, args[0].lower())
+            if args.lower() in modes:
+                set_mode(event, args.lower())
 
                 for user in await bot.get_group_member_list(group_id=event.group_id):
-                    card: Cards = modes[get_mode(event)].__cards__
+                    if not hasattr(modes[args], "__cards__"):
+                        break
+
+                    card: Cards = modes[args].__cards__
                     user_id: int = user['user_id']
                     got = card.get(event, qid=str(user_id))
 
                     if isinstance(got, dict):
                         if "name" not in got.keys():
-                            got = ""
+                            continue
+                    elif not got:
+                        continue
 
                     name = got['name'] if got else ""
                     await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
-                await matcher.send(f"[Oracle] 已切换到 {args[0].upper()} 跑团模式.")
+                await matcher.send(f"[Oracle] 已切换到 {args.upper()} 跑团模式.")
                 return True
             else:
                 await matcher.send("[Oracle] 未知的跑团模式, 忽略指令.")

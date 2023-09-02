@@ -237,16 +237,18 @@ if package == "nonebot2":
         args = format_msg(event.get_message(), begin=".bot")
         commands = CommandParser(
             Commands([
-                Only(("version", "v", "bot")),
-                Only(("exit", "bye", "leave")),
-                Only(("on", "run", "start")),
-                Only(("off", "down", "shutdown")),
-                Only(("upgrade", "up")),
-                Only(("downgrade")),
-                Only(("status")),
-                Optional(("install", "add"), str),
-                Optional(("remove", "del", "rm"), str),
-                Only(("list", "all"))
+                Only(("version", "v", "bot", "版本")),
+                Only(("exit", "bye", "leave", "离开")),
+                Only(("on", "run", "start", "启动")),
+                Only(("off", "down", "shutdown", "关闭")),
+                Only(("upgrade", "up", "升级")),
+                Only(("downgrade", "降级")),
+                Only(("status", "状态")),
+                Optional(("install", "add", "安装"), str),
+                Optional(("remove", "del", "rm", "删除"), str),
+                Only(("mode", "list", "已安装")),
+                Only(("store", "plugins", "商店")),
+                Optional(("search", "搜索"), str)
             ]),
             args=args,
             auto=True
@@ -319,8 +321,16 @@ if package == "nonebot2":
             await matcher.send("当前暂不支持降级!")
             return
 
-        if commands["list"]:
-            await matcher.send("暂不支持列出所以已发布的依赖包.")
+        if commands["mode"]:
+            reply = "当前已正确安装的跑团插件:\n"
+            for plugin in modes.keys():
+                reply += f"{plugin.upper()} 模式:\n"
+                if hasattr(modes[plugin], "__description__"):
+                    reply += f"\t简介: {modes[plugin].__description__}\n"
+
+                reply += f"\t切换: .mode {plugin}"
+
+            reply += f"[Oracle] 当前的跑团模式为 {get_mode(event).upper()}."
             return
 
         if commands["install"]:
@@ -600,7 +610,7 @@ if package == "nonebot2":
             arg = args[0]
         else:
             arg = ""
-        print(arg)
+
         await matcher.send(help_message(arg))
 
     @modecommand.handle()

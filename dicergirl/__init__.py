@@ -230,7 +230,7 @@ if package == "nonebot2":
                 await matcher.send("你取得了管理员权限.")
 
     @botcommand.handle()
-    async def bothandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def bothandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
         """ 机器人管理指令 """
         args = format_msg(event.get_message(), begin=".bot")
         commands = CommandParser(
@@ -309,6 +309,13 @@ if package == "nonebot2":
                     logger.error(upgrade['stderr'])
                     await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
                     return
+
+                # DEBUG
+                if DEBUG:
+                    debug = f"返回码: {upgrade['returncode']}\n"
+                    debug += f"正确返回: {upgrade['stdout']}\n"
+                    debug += f"错误返回: {upgrade['stderr']}"
+                    matcher.send(debug)
 
                 await matcher.send(f"{get_name()}骰娘已更新为版本 {'.'.join(map(str, newest_version))}.")
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.staticfile.org/select2/4.0.13/css/select2.min.css">
     <!-- 引入Prism.js库 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css">
-    <script src="https://cdn.staticfile.org/prism/9000.0.1/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
     <!-- 引入Tocbot的CSS文件 -->
     <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/tocbot/4.21.1/tocbot.min.css">
 
@@ -343,15 +343,6 @@ nb adapter install nonebot-adapter-qqguild
             // 是否添加链接
             hasInnerContainers: true,
             orderedList: false // 设置为false以去除数字索引
-        });
-        // 获取侧边栏元素和按钮
-        var sidebar = document.getElementById('sidebar');
-        var toggleSidebarButton = document.getElementById('toggleSidebar');
-
-        // 监听按钮的点击事件
-        toggleSidebarButton.addEventListener('click', function () {
-            // 使用 Bootstrap 的 Collapse 插件来切换侧边栏的显示状态
-            $(sidebar).collapse('toggle');
         });
     </script>
 </body>

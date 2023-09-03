@@ -35,6 +35,7 @@ setuptools.setup(
         'nonebot_plugin_apscheduler',
         'httpx',
         'dicergirl-plugin-scp',
+        'python-Levenshtein',
     ],
     python_requires=">=3",
 )

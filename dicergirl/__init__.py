@@ -232,6 +232,9 @@ if package == "nonebot2":
     @botcommand.handle()
     async def bothandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
         """ 机器人管理指令 """
+        if get_mentions(event) and not event.to_me:
+            return
+
         args = format_msg(event.get_message(), begin=".bot")
         commands = CommandParser(
             Commands([

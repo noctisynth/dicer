@@ -98,7 +98,7 @@ if package == "nonebot2":
     async def _() -> None:
         """ `Nonebot2`核心加载完成后的初始化方法 """
         global DEBUG
-        logger.info("欧若可骰娘初始化中...")
+        logger.info(f"欧若可骰娘版本 {version} 初始化中...")
         if DEBUG:
             logging.getLogger().setLevel(logging.DEBUG)
             logger.remove()
@@ -289,6 +289,7 @@ if package == "nonebot2":
             total = psutil.virtual_memory().total / 1024 / 1024
 
             reply = f"欧若可骰娘 {version}, {'正常运行' if get_status(event) else '指令限制'}\n"
+            reply += f"骰娘尊名: {get_name()}\n"
             reply += f"操作系统: {system}\n"
             reply += f"CPU 核心: {psutil.cpu_count()} 核心\n"
             reply += f"Python 版本: {platform.python_version()}\n"

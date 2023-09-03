@@ -40,8 +40,8 @@ class Help_Messages():
 Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0."""
         self.su = """.su Optional[str: token]\t管理员鉴权
 \ttoken: 鉴权令牌
-\t- 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`或`qq-botpy`的控制终端输出, 输出模式为`CRITICAL`.
-\t- 如果你使用`Nonebot2`作为欧若可骰娘的后端, 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同.
+\t- 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`的控制终端输出, 输出模式为`CRITICAL`.
+\t- 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同.
 \t\t.su d32ab3...\t管理员验证"""
         self.bot = """.bot\t机器人管理
 \t.bot on\t机器人启用

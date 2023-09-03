@@ -98,26 +98,31 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <!-- 项目图标 -->
-            <a class="navbar-brand" href="/">
-                <img src="https://unvisitor.gitee.io/media/unvisitor/images/unvisitor.png" width="30" height="30" alt="DicerGirl Icon">
-            </a>
+            <div>
+                <a class="navbar-brand" href="/">
+                    <img src="https://unvisitor.gitee.io/media/unvisitor/images/unvisitor.png" width="30" height="30" alt="DicerGirl Icon">
+                </a>
+            </div>
             <!-- 导航链接和下拉框 -->
             <ul class="navbar-nav align-items-center"> <!-- 使用 "align-items-center" 类来垂直居中 -->
                 <li class="nav-item">
                     <select class="form-control form-control-lg">
-                        <option value="v2.0">v3.2.0</option>
-                        <option value="v3.0">v3.2.13</option>
                         <option value="v3.0">v3.3.0</option>
+                        <option value="v3.0">v3.2.13</option>
+                        <option value="v2.0">v3.2.0</option>
                     </select>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="docs/usage/">使用</a>
+                    <a class="nav-link" href="/docs/">概览</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="docs/develop/">开发</a>
+                    <a class="nav-link" href="/docs/usage/">使用</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="docs/faq/">帮助</a>
+                    <a class="nav-link" href="/docs/develop/">开发</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/docs/faq/">帮助</a>
                 </li>
                 <li class="nav-item" style="color: #fff;">
                     <a class="nav-link" href="https://github.com/unvisitor/dicer"><i class="fab fa-github fa-2x"></i></a>
@@ -208,13 +213,23 @@ nb adapter install nonebot-adapter-qqguild
                         <h4>使用 DicerGirl</h4>
                         <ul class="list-unstyled">
                             <li class="list-group-item">
-                                <a href="docs/usage/" target="_blank">
+                                <a href="/docs/" target="_blank">
+                                    <i class="fas fa-link me-2"> 概览</i>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="/docs/usage/" target="_blank">
                                     <i class="fas fa-link me-2"> 使用</i>
                                 </a>
                             </li>
                             <li class="list-group-item">
-                                <a href="docs/develop/" target="_blank">
+                                <a href="/docs/develop/" target="_blank">
                                     <i class="fas fa-link me-2"> 开发</i>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="/docs/faq/" target="_blank">
+                                    <i class="fas fa-link me-2"> FAQ</i>
                                 </a>
                             </li>
                         </ul>
@@ -225,6 +240,11 @@ nb adapter install nonebot-adapter-qqguild
                             <li class="list-group-item">
                                 <a href="https://gitee.com/unvisitor/dicer" target="_blank">
                                     <i class="fas fa-link me-2"> DicerGirl - Gitee</i>
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a href="https://gitee.com/unvisitor/dginstaller" target="_blank">
+                                    <i class="fas fa-link me-2"> DicerGirl Windows 部署</i>
                                 </a>
                             </li>
                             <li class="list-group-item">
@@ -255,7 +275,7 @@ nb adapter install nonebot-adapter-qqguild
         <!-- 下部分 - 版权声明 -->
         <hr>
         <div class="text-center py-2">
-            &copy; CopyRight 2011-2023, Unknown Visitor, org. All Rights Reserved.
+            CopyRight &copy; 2011-2023, Unknown Visitor, org. All Rights Reserved.
         </div>
     </footer>
 

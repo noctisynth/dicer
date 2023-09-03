@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Dict, List, Callable
+from typing import Dict, List, Callable
 from loguru._logger import Logger
 from nonebot.consts import STARTSWITH_KEY
 from nonebot.plugin import on_message
@@ -14,18 +14,14 @@ import json
 import asyncio
 import httpx
 
-try:
-    from .decorators import translate_punctuation
-    from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
-    from .multilogging import multilogger
-except ImportError:
-    from dicergirl.utils.decorators import translate_punctuation
-    from dicergirl.utils.settings import get_package, setconfig, getconfig, change_status, load_status_settings
-    from dicergirl.utils.multilogging import multilogger
+from multilogging import multilogger
+from .decorators import translate_punctuation
+from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
+from .multilogging import multilogger
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.2.17"
+version = "3.2.18"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """
@@ -38,7 +34,8 @@ _loggers_cachepath = data_dir / "loggers.json"
 _modes_cachepath = data_dir / "modes.json"
 logger = multilogger(name="Dicer Girl", payload="utils")
 """ `utils.py`日志系统 """
-su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
+su_uuid: str
+""" 超级管理员鉴权令牌 """
 loggers: Dict[str, Dict[int, List[Logger | str]]] = {}
 """ 正在运行的日志 """
 saved_loggers: Dict[str, dict]
@@ -146,6 +143,16 @@ def get_name() -> str:
         return "欧若可"
 
     return path.open(mode="r").read()
+
+def make_uuid() -> str:
+    """ 创建新的超级管理员鉴权令牌 """
+    global su_uuid
+    su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
+    return su_uuid
+
+def get_uuid() -> str:
+    """ 获取超级管理员鉴权令牌 """
+    return su_uuid
 
 def load_modes() -> Dict[str, list]:
     """ 加载当前不同群聊的跑团模式 """
@@ -268,23 +275,17 @@ def get_handlers(main) -> List[Callable]:
 def get_group_id(event) -> str:
     """ 获取`event`指向的群聊`ID` """
     try:
-        if package == "qqguild":
-            return str(event.channel_id)
-        elif package == "nonebot2":
-            return str(event.group_id)
-    except:
-        logger.warning(f"超出预计的 package: {package}, 将 Group ID 设置为 0.")
+        return str(event.group_id)
+    except Exception as error:
+        logger.exception(error)
         return "0"
 
 def get_user_id(event) -> str:
     """ 获取`event`指向的用户`ID` """
     try:
-        if package == "qqguild":
-            return eval(str(event.author))["id"]
-        elif package == "nonebot2":
-            return str(event.get_user_id())
-    except:
-        logger.warning(f"超出预计的 package: {package}, 将 User ID 设置为 0.")
+        return str(event.user_id)
+    except Exception as error:
+        logger.exception(error)
         return "0"
 
 def get_user_card(event) -> str:

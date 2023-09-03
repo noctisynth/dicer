@@ -39,7 +39,7 @@ if package == "nonebot2":
     from .utils.utils import (
         init, on_startswith,
         get_group_id, get_mentions, get_user_card,
-        is_super_user, add_super_user, rm_super_user, su_uuid,
+        is_super_user, add_super_user, rm_super_user, make_uuid, get_uuid,
         format_msg, format_str,
         get_mode, set_mode,
         get_loggers, loggers, add_logger, remove_logger, log_dir,
@@ -220,10 +220,10 @@ if package == "nonebot2":
             return
 
         if not args:
-            logger.critical(f"超级令牌: {su_uuid}")
+            logger.critical(f"超级令牌: {make_uuid()}")
             await matcher.send("启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
         else:
-            if not args == su_uuid:
+            if not args == get_uuid():
                 await matcher.send("鉴权失败!")
             else:
                 add_super_user(event)

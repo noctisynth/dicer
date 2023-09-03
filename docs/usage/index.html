@@ -6,7 +6,7 @@
     <title>骰娘手册 | DicerGirl - 新一代 TRPG 骰娘框架</title>
     <link href="https://unvisitor.gitee.io/media/unvisitor/images/favicon.ico" rel="icon">
     <!-- 引入Bootstrap CSS文件 -->
-    <link href="https://cdn.staticfile.org/bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- 引入最新版Select2的CSS文件 -->
     <link rel="stylesheet" href="https://cdn.staticfile.org/select2/4.0.13/css/select2.min.css">
     <!-- 引入Prism.js库 -->
@@ -35,13 +35,18 @@
         /* 项目名称文字样式 */
         h1 {
             color: #333;
-            font-size: 36px;
+            font-size: 30px;
         }
 
         /* 标题文字样式 - 调整为浅蓝色 */
         h2 {
             color: #97b6c2;
             font-size: 24px;
+        }
+
+        h3 {
+            color: #a0b6be;
+            font-size: 18px;
         }
 
         /* 段落文字样式 - 调整为稍浅的灰色 */
@@ -105,7 +110,13 @@
 
         .index {
             padding-top: 8vh;
+            top: 5vh;
+            position: sticky;
             overflow: hidden;
+        }
+
+        .fas {
+            font-family: "Cascadia Mono", Arial, sans-serif, "Font Awesome 6 Free"!important;
         }
     </style>
 </head>
@@ -313,9 +324,6 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.
         </div>
     </footer>
 
-    <!-- 引入Bootstrap JS文件 -->
-    <script src="https://cdn.staticfile.org/bootstrap/5.3.1/js/bootstrap.min.js"></script>
-    <script src="https://cdn.staticfile.org/popper.js/2.11.8/cjs/popper.min.js"></script>
     <!-- 引入jQuery库（Select2依赖jQuery） -->
     <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
     <!-- 引入最新版Select2的JavaScript文件 -->
@@ -328,6 +336,9 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.
     <script src="https://cdn.staticfile.org/prism/9000.0.1/components/prism-bash.min.js"></script>
     <!-- 引入Tocbot的JavaScript文件 -->
     <script src="https://cdn.staticfile.org/tocbot/4.21.1/tocbot.min.js"></script>
+    <!-- 引入Bootstrap的JavaScript文件和jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- 初始化Select2 -->
     <script>
         $(document).ready(function() {
@@ -360,42 +371,6 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.
             // 使用 Bootstrap 的 Collapse 插件来切换侧边栏的显示状态
             $(sidebar).collapse('toggle');
         });
-
-
-        var button = document.getElementById('index-bottom');
-        var buttonRect = button.getBoundingClientRect();
-        var buttonTop = buttonRect.bottom;
-        var scrollY = window.scrollY || window.pageYOffset;
-        var buttonVisibleHeight =  buttonTop < window.innerHeight ? window.innerHeight -  buttonTop : 0;
-
-        // 获取页脚的高度并应用于侧边栏的max-height
-        function resize() {
-            var footer = document.querySelector('footer');
-            var div = document.getElementById('index-div');
-
-            // 计算 footer 的顶部位置相对于视口的位置
-            var footerRect = footer.getBoundingClientRect();
-            var footerTop = footerRect.top;
-
-            // 获取页面滚动高度
-            var scrollY = window.scrollY || window.pageYOffset;
-
-            // 计算 footer 露出的高度
-            var footerVisibleHeight = footerTop < window.innerHeight ? window.innerHeight - footerTop : 0;
-
-            if (footerVisibleHeight!==0) {
-                if (buttonVisibleHeight < footerVisibleHeight) {
-                    div.style.bottom = 'calc(' + footerVisibleHeight + 'px + 2vh)';
-                    div.style.paddingTop = '';
-                }
-            } else {
-                div.style.paddingTop = "5vh";
-                div.style.bottom = "";
-            }
-        }
-
-        window.addEventListener('scroll', resize);
-        window.addEventListener('resize', resize);
     </script>
 </body>
 </html>

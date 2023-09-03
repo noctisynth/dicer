@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DicerGirl - 新一代 TRPG 骰娘框架</title>
+    <title>骰娘手册 | DicerGirl - 新一代 TRPG 骰娘框架</title>
     <link href="https://unvisitor.gitee.io/media/unvisitor/images/favicon.ico" rel="icon">
     <!-- 引入Bootstrap CSS文件 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
     <!-- 引入最新版Select2的CSS文件 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2/dist/css/select2.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/select2/4.0.13/css/select2.min.css">
     <!-- 引入Prism.js库 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css">
-    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.min.js"></script>
+    <script src="https://cdn.staticfile.org/prism/9000.0.1/prism.min.js"></script>
     <!-- 引入Tocbot的CSS文件 -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tocbot@4.10.1/dist/tocbot.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/tocbot/4.21.1/tocbot.min.css">
 
     <!-- 自定义样式 -->
     <style>
@@ -314,22 +314,20 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.
     </footer>
 
     <!-- 引入Bootstrap JS文件 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.staticfile.org/bootstrap/5.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/2.11.8/cjs/popper.min.js"></script>
     <!-- 引入jQuery库（Select2依赖jQuery） -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.7.1/jquery.min.js"></script>
     <!-- 引入最新版Select2的JavaScript文件 -->
-    <script src="https://cdn.jsdelivr.net/npm/select2/dist/js/select2.min.js"></script>
+    <script src="https://cdn.staticfile.org/select2/4.0.13/js/select2.min.js"></script>
     <!-- 导入FontAwesome的CSS文件 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.2/css/all.min.css">
     <!-- 引入所需的语言扩展文件，例如JavaScript、Python和Bash -->
-    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
+    <script src="https://cdn.staticfile.org/prism/9000.0.1/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.staticfile.org/prism/9000.0.1/components/prism-python.min.js"></script>
+    <script src="https://cdn.staticfile.org/prism/9000.0.1/components/prism-bash.min.js"></script>
     <!-- 引入Tocbot的JavaScript文件 -->
-    <script src="https://cdn.jsdelivr.net/npm/tocbot@4.10.1/dist/tocbot.min.js"></script>
-    <!-- 引入Bootstrap的JavaScript文件和jQuery -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.staticfile.org/tocbot/4.21.1/tocbot.min.js"></script>
     <!-- 初始化Select2 -->
     <script>
         $(document).ready(function() {
@@ -366,7 +364,7 @@ Copyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.
 
         var button = document.getElementById('index-bottom');
         var buttonRect = button.getBoundingClientRect();
-        var buttonTop = buttonRect.top;
+        var buttonTop = buttonRect.bottom;
         var scrollY = window.scrollY || window.pageYOffset;
         var buttonVisibleHeight =  buttonTop < window.innerHeight ? window.innerHeight -  buttonTop : 0;
 

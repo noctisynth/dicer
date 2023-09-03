@@ -1,10 +1,9 @@
 from pathlib import Path
 from datetime import datetime
 from nonebot.plugin import PluginMetadata
-from typing import Dict
 from .utils.settings import set_package, get_package
 from .utils.multilogging import multilogger
-from .utils.utils import version as __version__
+from .utils.utils import version
 
 import logging
 import sys
@@ -12,7 +11,9 @@ import platform
 import psutil
 import html
 import nonebot
+import re
 
+__version__ = version
 __plugin_meta__ = PluginMetadata(
     name="欧若可骰娘",
     description="新一代跨平台开源 TRPG 骰娘框架",
@@ -23,8 +24,8 @@ __plugin_meta__ = PluginMetadata(
 )
 __author__ = "苏向夜 <fu050409@163.com>"
 
-logger = multilogger(name="Dicer Girl", payload="Nonebot2")
 DEBUG = False
+logger = multilogger(name="Dicer Girl", payload="Nonebot2")
 current_dir = Path(__file__).resolve().parent
 
 try:
@@ -35,7 +36,7 @@ except ValueError:
 package = get_package()
 
 if package == "nonebot2":
-    from .utils.messages import help_message, version
+    from .utils.messages import help_message
     from .utils.utils import (
         init, on_startswith,
         get_group_id, get_mentions, get_user_card,
@@ -639,7 +640,11 @@ if package == "nonebot2":
         else:
             arg = ""
 
-        await matcher.send(help_message(arg))
+        message = help_message(arg)
+        message = re.sub(r"\{version\}", version, message)
+        message = re.sub(r"\{py_version\}", platform.python_version(), message)
+        message = re.sub(r"\{nonebot_version\}", nonebot.__version__, message)
+        await matcher.send(message)
 
     @modecommand.handle()
     async def modehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):

@@ -1,9 +1,6 @@
 from pathlib import Path
 from typing import List, Dict
-try:
-    from dicergirl.utils.multilogging import multilogger
-except ImportError:
-    from .multilogging import multilogger
+from multilogging import multilogger
 
 import sys
 import yaml

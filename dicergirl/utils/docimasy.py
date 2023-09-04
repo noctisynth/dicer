@@ -1,8 +1,5 @@
 import random
-try:
-    from .dicer import Dicer
-except ImportError:
-    from dicergirl.utils.dicer import Dicer
+from .dicer import Dicer
 
 class Docimasy:
     """

@@ -17,11 +17,10 @@ import httpx
 from multilogging import multilogger
 from .decorators import translate_punctuation
 from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
-from .multilogging import multilogger
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.2.20"
+version = "3.2.21"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """

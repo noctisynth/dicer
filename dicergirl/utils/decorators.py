@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from functools import wraps
 from typing import Union
-try:
-    from .settings import get_package
-except ImportError:
-    from dicergirl.utils.settings import get_package
+from .settings import get_package
 
 import re
 

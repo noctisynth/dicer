@@ -13,7 +13,7 @@ async def install(name):
     elif name in modes.keys():
         return PluginExistsError
 
-    rsc = await run_shell_command(f"{sys.executable} -m pip install {plugins[name]['package']}")
+    rsc = await run_shell_command(f"{sys.executable} -m pip install {plugins[name]['package']} -i https://pypi.org/simple")
     if rsc["returncode"] != 0:
         return PluginInstallFailedError
 
@@ -27,7 +27,7 @@ async def remove(name):
     else:
         package = name
 
-    rsc = await run_shell_command(f"{sys.executable} -m pip uninstall {package}")
+    rsc = await run_shell_command(f"{sys.executable} -m pip uninstall {package} -y")
 
     if rsc["returncode"] != 0:
         return PluginUninstallFailedError
@@ -35,15 +35,12 @@ async def remove(name):
     return True
 
 async def upgrade(name):
-    if name not in modes.keys():
-        return PluginNotFoundError
-
     plugins = await get_plugins_mixed()
 
-    if name not in plugins.keys() or name not in modes.keys():
+    if name not in plugins.keys():
         return PluginNotFoundError
 
-    rsc = await run_shell_command(f"{sys.executable} -m pip install {plugins[name]['package']}")
+    rsc = await run_shell_command(f"{sys.executable} -m pip install {plugins[name]['package']} -i https://pypi.org/simple")
     if rsc["returncode"] != 0:
         return PluginInstallFailedError
 

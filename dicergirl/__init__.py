@@ -56,7 +56,8 @@ if package == "nonebot2":
     from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
 
     from .plugins.parse import get_plugins
-    from .plugins.operation import install, remove, upgrade
+    from .plugins.operation import install, remove, upgrade as plgupgrade
+    from .errors.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
 
     from nonebot.matcher import Matcher
     from nonebot.plugin import on
@@ -240,7 +241,7 @@ if package == "nonebot2":
         if get_mentions(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=".bot")
+        args = format_msg(event.get_message(), begin=".bot", zh_en=True)
         commands = CommandParser(
             Commands([
                 Only(("version", "v", "bot", "版本")),
@@ -251,9 +252,9 @@ if package == "nonebot2":
                 Only(("downgrade", "降级")),
                 Optional(("name", "命名"), str),
                 Only(("status", "状态")),
-                Optional(("upgrade", "up", "升级"), str),
+                Optional(("plgup", "pluginup", "插件升级"), str),
                 Optional(("install", "add", "安装"), str),
-                Optional(("remove", "del", "rm", "删除"), str),
+                Optional(("remove", "del", "rm", "删除", "卸载"), str),
                 Only(("mode", "list", "已安装")),
                 Only(("store", "plugins", "商店")),
                 Optional(("search", "搜索"), str)
@@ -308,15 +309,6 @@ if package == "nonebot2":
             return
 
         if commands["upgrade"]:
-            if not isinstance(commands["upgrade"], bool):
-                up = upgrade(commands["upgrade"])
-                if issubclass(up, Exception):
-                    await matcher.send("诶? 报错了?")
-                    return
-
-                await matcher.send(f"插件 {commands['upgrade']} 更新完毕.")
-                return
-
             await matcher.send("检查版本更新中...")
             newest_version = await get_latest_version("dicergirl")
 
@@ -393,6 +385,7 @@ if package == "nonebot2":
             
             reply.rstrip("\n")
             await matcher.send(reply)
+            return
 
         if commands["install"]:
             if commands["install"] in modes.keys():
@@ -400,24 +393,35 @@ if package == "nonebot2":
                 return
 
             ins = await install(commands["install"])
-
-            if issubclass(ins, Exception):
-                await matcher.send(f"诶? 报错了?")
+            if isinstance(ins, PluginNotFoundError):
+                await matcher.send(f"包 {commands['install']} 不存在.")
                 return
+            elif isinstance(ins, PluginInstallFailedError):
+                await matcher.send(f"")
 
             await matcher.send(f"模块 {commands['install']} 安装完毕.")
             return
 
         if commands["remove"]:
-            if not commands["remove"] in modes.keys():
-                await matcher.send(f"模块 {commands['remove']} 未安装, 故忽略删除指令.")
-                return
-
             uns = await remove(commands["remove"])
-            if issubclass(uns, Exception):
-                await matcher.send(f"诶? 报错了?")
+
+            if uns is PluginUninstallFailedError:
+                await matcher.send(f"诶? 卸载失败?")
 
             await matcher.send(f"模块 {commands['remove']} 卸载完毕.")
+            return
+
+        if commands["plgup"]:
+            up = await plgupgrade(commands["plgup"])
+
+            if up is PluginNotFoundError:
+                await matcher.send(f"包 {commands['plgup']} 似乎不存在?")
+                return
+            elif up is PluginInstallFailedError:
+                await matcher.send(f"包 {commands['plgup']} 更新失败了.")
+                return
+
+            await matcher.send(f"插件 {commands['plgup']} 更新完毕.")
             return
 
         await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
@@ -960,7 +964,7 @@ if package == "nonebot2":
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher):
         """ 骰娘版本及开源声明指令 """
-        await matcher.send(f"欧若可骰娘 版本 {version}, 未知访客开发, 以Apache-2.0协议开源.\nCopyright © 2011-2023 Unknown Visitor. Open source as protocol Apache-2.0.")
+        await matcher.send(f"Unvisitor DicerGirl 版本 {version} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助.")
         return
 elif package == "qqguild":
     pass

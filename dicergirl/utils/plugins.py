@@ -13,7 +13,8 @@ def modules():
     if loaded:
         return modes
 
-    modules_dict = {}
+    modes_dict = {}
+    library_dict = {}
     sys.path.append(Path(__file__).resolve().parent.parent.__str__())
 
     for folder in Path(__file__).resolve().parent.parent.iterdir():
@@ -28,7 +29,7 @@ def modules():
             if not hasattr(module, "__type__"):
                 continue
 
-            if module.__type__ != "plugin":
+            if module.__type__ not in ("plugin", "library"):
                 continue
 
             if hasattr(module, "__nbcommands__"):
@@ -40,7 +41,7 @@ def modules():
                 logger.error(f"插件 {folder.name} 配置异常, 导入失败.")
                 continue
 
-            if hasattr(module, "__nbcommands__"):
+            if hasattr(module, "__nbhandler__"):
                 handlers = module.__nbhandler__
             else:
                 handlers = {}
@@ -55,13 +56,19 @@ def modules():
                     logger.error("未知错误:")
                     logger.exception(error)
 
-            modules_dict[module.__name__] = module
+            if module.__type__ == "plugin":
+                modes_dict[module.__name__] = module
+            elif module.__type__ == "library":
+                library_dict[module.__name__] = module
+            
             logger.success(f"插件 {folder.name.upper()} 导入完成.")
 
     sys.path.pop(-1)
     loaded = True
-    return modules_dict
+    return modes_dict, library_dict
 
-modules_dict = modules()
+modules_dict, library_dict = modules()
+
 modes: dict = {module.split(".")[-1]: modules_dict[module] for module in modules_dict}
 """ 已导入的跑团模块 """
+library: dict = {module.split(".")[-1]: library_dict[module] for module in library_dict}

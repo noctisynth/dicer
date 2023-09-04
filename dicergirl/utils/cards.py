@@ -1,10 +1,6 @@
 from pathlib import Path
 from multilogging import multilogger
-
-try:
-    from .utils import get_group_id, get_user_id
-except ImportError:
-    from dicergirl.utils.utils import get_group_id, get_user_id
+from .utils import get_group_id, get_user_id
 
 import json
 
@@ -20,7 +16,7 @@ class Cards():
 
     def init(self):
         logger.info(f"{self.mode.upper()} 存储文件未建立, 建立它.")
-        with open(self.cache_path, "w", encoding="utf-8") as f:
+        with self.cache_path.open(mode="w", encoding="utf-8") as f:
             json.dump({}, f, ensure_ascii=False)
 
     def save(self):
@@ -28,14 +24,14 @@ class Cards():
         if not self.cache_path.parent.exists():
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(self.cache_path, "w", encoding="utf-8") as f:
+        with self.cache_path.open(mode="w", encoding="utf-8") as f:
             json.dump(self.data, f, ensure_ascii=False)
 
     def load(self) -> dict:
         if not self.cache_path.exists():
             self.init()
 
-        with open(self.cache_path, "r", encoding="utf-8") as f:
+        with self.cache_path.open(mode="r", encoding="utf-8") as f:
             data = f.read()
             if not data:
                 self.data = {}

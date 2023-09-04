@@ -52,7 +52,11 @@ if package == "nonebot2":
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.cards import Cards
     from .utils.chat import chat
+
     from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
+
+    from .plugins.parse import get_plugins
+    from .plugins.operation import install, remove, upgrade
 
     from nonebot.matcher import Matcher
     from nonebot.plugin import on
@@ -247,6 +251,7 @@ if package == "nonebot2":
                 Only(("downgrade", "降级")),
                 Optional(("name", "命名"), str),
                 Only(("status", "状态")),
+                Optional(("upgrade", "up", "升级"), str),
                 Optional(("install", "add", "安装"), str),
                 Optional(("remove", "del", "rm", "删除"), str),
                 Only(("mode", "list", "已安装")),
@@ -303,6 +308,15 @@ if package == "nonebot2":
             return
 
         if commands["upgrade"]:
+            if not isinstance(commands["upgrade"], bool):
+                up = upgrade(commands["upgrade"])
+                if issubclass(up, Exception):
+                    await matcher.send("诶? 报错了?")
+                    return
+
+                await matcher.send(f"插件 {commands['upgrade']} 更新完毕.")
+                return
+
             await matcher.send("检查版本更新中...")
             newest_version = await get_latest_version("dicergirl")
 
@@ -362,12 +376,36 @@ if package == "nonebot2":
             await matcher.send(reply)
             return
 
+        if commands["store"]:
+            official, community = await get_plugins()
+            reply = "从商店搜索到以下插件:\n"
+            reply += "Unvisitor 官方插件:\n"
+
+            i = 1
+            for name, detail in official.items():
+                reply += f"  {i}. {detail['name']}[安装: .bot install {name}]\n"
+                i += 1
+
+            reply += "社区提供插件:\n"
+            i = 1
+            for name, detail in community.items():
+                reply += f"  {i}. {detail['name']}[安装: .bot install {name}]\n"
+            
+            reply.rstrip("\n")
+            await matcher.send(reply)
+
         if commands["install"]:
             if commands["install"] in modes.keys():
                 await matcher.send(f"模块 {commands['install']} 已经安装了!")
                 return
 
-            await matcher.send("暂不支持新增模式.")
+            ins = await install(commands["install"])
+
+            if issubclass(ins, Exception):
+                await matcher.send(f"诶? 报错了?")
+                return
+
+            await matcher.send(f"模块 {commands['install']} 安装完毕.")
             return
 
         if commands["remove"]:
@@ -375,8 +413,13 @@ if package == "nonebot2":
                 await matcher.send(f"模块 {commands['remove']} 未安装, 故忽略删除指令.")
                 return
 
-            await matcher.send("暂不支持删除依赖包.")
+            uns = await remove(commands["remove"])
+            if issubclass(uns, Exception):
+                await matcher.send(f"诶? 报错了?")
+
+            await matcher.send(f"模块 {commands['remove']} 卸载完毕.")
             return
+
         await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @logcommand.handle()

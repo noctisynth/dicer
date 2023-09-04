@@ -31,6 +31,11 @@ def modules():
 
             if module.__type__ not in ("plugin", "library"):
                 continue
+            else:
+                if module.__type__ == "plugin":
+                    module_type = "插件"
+                elif module.__type__ == "library":
+                    module_type = "库"
 
             if hasattr(module, "__nbcommands__"):
                 commands: dict = module.__nbcommands__
@@ -38,7 +43,7 @@ def modules():
                 commands = {}
 
             if commands and not hasattr(module, "__nbhandler__"):
-                logger.error(f"插件 {folder.name} 配置异常, 导入失败.")
+                logger.error(f"{module_type} {folder.name} 配置异常, 导入失败.")
                 continue
 
             if hasattr(module, "__nbhandler__"):
@@ -50,7 +55,7 @@ def modules():
                 try:
                     getattr(handlers, command)(getattr(handlers, handler))
                 except AttributeError:
-                    logger.error(f"插件 {folder.name} 中 Nonebot2 指令配置异常, 导入失败.")
+                    logger.error(f"{module_type} {folder.name} 中 Nonebot2 指令配置异常, 导入失败.")
                     continue
                 except Exception as error:
                     logger.error("未知错误:")
@@ -61,7 +66,7 @@ def modules():
             elif module.__type__ == "library":
                 library_dict[module.__name__] = module
             
-            logger.success(f"插件 {folder.name.upper()} 导入完成.")
+            logger.success(f"{module_type} {folder.name.upper()} 导入完成.")
 
     sys.path.pop(-1)
     loaded = True

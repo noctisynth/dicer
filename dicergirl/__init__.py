@@ -15,9 +15,9 @@ import re
 
 __version__ = version
 __plugin_meta__ = PluginMetadata(
-    name="欧若可骰娘",
+    name="DicerGirl",
     description="新一代跨平台开源 TRPG 骰娘框架",
-    usage="安装即可使用.",
+    usage="开箱即用",
     type="application",
     homepage="https://gitee.com/unvisitor/dicer",
     supported_adapters={"~onebot.v11"},
@@ -314,21 +314,15 @@ if package == "nonebot2":
 
             if tuple(map(int, version.split("."))) < newest_version:
                 await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
-                upgrade = await run_shell_command(f"{sys.executable} -m pip install dicergirl -i https://pypi.org/simple --upgrade")
+                upgrade = await run_shell_command(f"\"{sys.executable}\" -m pip install dicergirl -i https://pypi.org/simple --upgrade")
 
                 if upgrade["returncode"] != 0:
                     logger.error(upgrade['stderr'])
                     await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
                     return
 
-                # DEBUG
-                if DEBUG:
-                    debug = f"返回码: {upgrade['returncode']}\n"
-                    debug += f"正确返回: {upgrade['stdout']}\n"
-                    debug += f"错误返回: {upgrade['stderr']}"
-                    matcher.send(debug)
-
                 await matcher.send(f"{get_name()}骰娘已更新为版本 {'.'.join(map(str, newest_version))}.")
+                return
 
             await matcher.send(f"我已经是最新版本的{get_name()}了!")
             return
@@ -393,13 +387,17 @@ if package == "nonebot2":
                 return
 
             ins = await install(commands["install"])
-            if isinstance(ins, PluginNotFoundError):
+
+            if ins is PluginNotFoundError:
                 await matcher.send(f"包 {commands['install']} 不存在.")
                 return
-            elif isinstance(ins, PluginInstallFailedError):
-                await matcher.send(f"")
+            elif ins is PluginInstallFailedError:
+                await matcher.send(f"包 {commands['install']} 安装失败.")
+                return
+            elif ins == True:
+                await matcher.send(f"模块 {commands['install']} 安装完毕.")
+                return
 
-            await matcher.send(f"模块 {commands['install']} 安装完毕.")
             return
 
         if commands["remove"]:
@@ -407,6 +405,7 @@ if package == "nonebot2":
 
             if uns is PluginUninstallFailedError:
                 await matcher.send(f"诶? 卸载失败?")
+                return
 
             await matcher.send(f"模块 {commands['remove']} 卸载完毕.")
             return
@@ -420,8 +419,10 @@ if package == "nonebot2":
             elif up is PluginInstallFailedError:
                 await matcher.send(f"包 {commands['plgup']} 更新失败了.")
                 return
+            elif up == True:
+                await matcher.send(f"插件 {commands['plgup']} 更新完毕.")
+                return
 
-            await matcher.send(f"插件 {commands['plgup']} 更新完毕.")
             return
 
         await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")

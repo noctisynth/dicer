@@ -2,8 +2,10 @@ import sys
 from dicergirl.utils.utils import run_shell_command
 from dicergirl.errors.pluginerror import PluginNotFoundError, PluginExistsError, PluginInstallFailedError, PluginUninstallFailedError
 from dicergirl.utils.plugins import modes
-
+from multilogging import multilogger
 from .parse import get_plugins_mixed
+
+logger = multilogger(name="DicerGirl", payload="Plugins")
 
 async def install(name):
     plugins = await get_plugins_mixed()
@@ -13,8 +15,9 @@ async def install(name):
     elif name in modes.keys():
         return PluginExistsError
 
-    rsc = await run_shell_command(f"{sys.executable} -m pip install {plugins[name]['package']} -i https://pypi.org/simple")
+    rsc = await run_shell_command(f"\"{sys.executable}\" -m pip install {plugins[name]['package']} -i https://pypi.org/simple")
     if rsc["returncode"] != 0:
+        logger.error(rsc["stderr"])
         return PluginInstallFailedError
 
     return True
@@ -27,9 +30,10 @@ async def remove(name):
     else:
         package = name
 
-    rsc = await run_shell_command(f"{sys.executable} -m pip uninstall {package} -y")
+    rsc = await run_shell_command(f"\"{sys.executable}\" -m pip uninstall {package} -y")
 
     if rsc["returncode"] != 0:
+        logger.error(rsc["stderr"])
         return PluginUninstallFailedError
 
     return True
@@ -40,8 +44,9 @@ async def upgrade(name):
     if name not in plugins.keys():
         return PluginNotFoundError
 
-    rsc = await run_shell_command(f"{sys.executable} -m pip install {plugins[name]['package']} -i https://pypi.org/simple")
+    rsc = await run_shell_command(f"\"{sys.executable}\" -m pip install {plugins[name]['package']} -i https://pypi.org/simple")
     if rsc["returncode"] != 0:
+        logger.error(rsc["stderr"])
         return PluginInstallFailedError
 
     return True

@@ -20,7 +20,7 @@ from .settings import get_package, setconfig, getconfig, change_status, load_sta
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.3.0"
+version = "3.3.1"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """

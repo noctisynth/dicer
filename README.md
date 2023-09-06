@@ -21,6 +21,8 @@ DicerGirl 新一代跨平台开源 TRPG 骰娘框架.
 
 此项目目前已支持自定义跑团模块, 详见[开发](docs/develop.md).
 
+该项目公测 QQ 群号：[770386358](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=hvaf8JGmEXA3N9r4SGgpghDti31aW1bR&authKey=%2Bux%2BedOIguriMYBMGe40coeOT7mx%2B99%2FVMbK0MvE2w1AsVQLLK%2B0hBO6vVB%2Bmlws&noverify=0&group_code=770386358)
+
 ## 安装教程
 ### Windows 快速部署
 下载最新版的[`Dicergirl Installer`安装包](https://gitee.com/unvisitor/dginstaller/releases), 安装完成后 DGI 会自动部署 DicerGirl, 你可以在终端中提示的`https://127.0.0.1:{port}/go-cqhttp/`中配置 QQ 账号.
@@ -69,6 +71,10 @@ nb adapter install nonebot-adapter-qqguild
  - [Nonebot2](https://github.com/nonebot/nonebot2/) @[yanyongyu](https://github.com/yanyongyu)
  - [go-cqhttp](https://github.com/Mrs4s/go-cqhttp) @[Mrs4s](https://github.com/Mrs4s)
  - [nonebot-plugin-cocdicer](https://github.com/abrahum/nonebot_plugin_cocdicer) @[abrahum](https://github.com/abrahum)
+
+## 骰娘公测群
+
+公测 QQ 群号：[770386358](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=hvaf8JGmEXA3N9r4SGgpghDti31aW1bR&authKey=%2Bux%2BedOIguriMYBMGe40coeOT7mx%2B99%2FVMbK0MvE2w1AsVQLLK%2B0hBO6vVB%2Bmlws&noverify=0&group_code=770386358)
 
 ## 版权声明
 此项目以 Apache-2.0 协议开源, 使用代码时, 请注意遵照开源协议.

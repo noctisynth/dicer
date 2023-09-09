@@ -12,6 +12,7 @@ import psutil
 import html
 import nonebot
 import re
+import json
 
 __version__ = version
 __plugin_meta__ = PluginMetadata(
@@ -248,11 +249,11 @@ if package == "nonebot2":
                 Only(("exit", "bye", "leave", "离开")),
                 Only(("on", "run", "start", "启动")),
                 Only(("off", "down", "shutdown", "关闭")),
-                Only(("upgrade", "up", "升级")),
+                Only(("upgrade", "up", "更新")),
                 Only(("downgrade", "降级")),
                 Optional(("name", "命名"), str),
                 Only(("status", "状态")),
-                Optional(("plgup", "pluginup", "插件升级"), str),
+                Optional(("plgup", "pluginup", "升级"), str),
                 Optional(("install", "add", "安装"), str),
                 Optional(("remove", "del", "rm", "删除", "卸载"), str),
                 Only(("mode", "list", "已安装")),
@@ -562,9 +563,12 @@ if package == "nonebot2":
 
     def trpg_log(event):
         """ 外置的日志记录方法 """
-        import json
+        if not isinstance(event, GroupMessageEvent):
+            return
+
         if not get_group_id(event) in loggers.keys():
             return
+
         for log in loggers[get_group_id(event)].keys():
             if isinstance(event, GroupMessageEvent):
                 raw_json = json.loads(event.json())

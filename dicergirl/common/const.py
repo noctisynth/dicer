@@ -21,16 +21,16 @@ def load_template_methods():
 # 占位符对应的方法列表
 TEMPLATE_METHODS = load_template_methods()
 # Provider列表
-DGI_PROVIDERS: list[Provider] = []
+DG_PROVIDERS: list[Provider] = []
 CUSTOM_PROVIDERS: list[CustomProvider] = []
 # 家目录
 HOME_PATH = pathlib.Path.home()
-# dgi配置存放路径
-CONFIG_PATH = f"{HOME_PATH}\\.config\\dgi"
-# dgi回复配置存放路径
-REPLY_FILE_PATH = f"{CONFIG_PATH}\\reply"
-# 示例自定义回复文件
-EXAMPLE_REPLY_FILE_PATH = f"{REPLY_FILE_PATH}\\example.yml"
+# Dice Girl 数据文件夹路径
+DG_FOLDER_PATH = f"{HOME_PATH}\\.dicergirl"
+# Dice Girl 自定义回复文件夹路径
+REPLY_FOLDER_PATH = f"{DG_FOLDER_PATH}\\reply"
+# 示例自定义回复文件路径
+EXAMPLE_REPLY_FILE_PATH = f"{REPLY_FOLDER_PATH}\\example.yml"
 # 示例模板
 EXAMPLE_TEMPLATE = """\
 # 是否启用

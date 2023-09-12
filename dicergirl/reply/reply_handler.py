@@ -13,15 +13,15 @@ class ReplyHandler:
         self.matcher = TextMatcher()
         self.parser = MessageParser()
 
-    async def handle(self, key: string, *args, **kwargs):
+    def handle(self, key: string, *args, **kwargs):
         """
         原生Dice Girl或Dice Girl插件的处理方法
         """
-        for provider in const.DGI_PROVIDERS:
+        for provider in const.DG_PROVIDERS:
             if provider.key == key:
                 return self.parser.replacement(provider.value, **kwargs)
 
-    async def custom_handle(self, message) -> string:
+    def custom_handle(self, message) -> string:
         """
         匹配并处理文本
         """
@@ -32,7 +32,7 @@ class ReplyHandler:
                 else:
                     return None
 
-    async def __custom_handle(self, key: string, *args, **kwargs):
+    def __custom_handle(self, key: string, *args, **kwargs):
         """
         [内部方法]自定义回复的处理方法
         """

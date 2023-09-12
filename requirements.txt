@@ -2,6 +2,7 @@ nonebot2
 nonebot-adapter-onebot
 loguru
 pyyaml
+ruamel.yaml
 openai
 multilogging
 psutil

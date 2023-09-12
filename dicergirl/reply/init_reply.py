@@ -17,8 +17,8 @@ def init():
     """
         初始化方法
     """
-    if not os.path.exists(const.REPLY_FILES_PATH):
-        os.makedirs(const.REPLY_FILES_PATH)
+    if not os.path.exists(const.REPLY_FOLDER_PATH):
+        os.makedirs(const.REPLY_FOLDER_PATH)
     __init_example_provider()
     __init_provider()
 
@@ -27,9 +27,9 @@ def __init_provider():
     """
     加载reply文件数组中
     """
-    for filename in os.listdir(const.REPLY_FILES_PATH):
+    for filename in os.listdir(const.REPLY_FOLDER_PATH):
         pattern = re.compile(r'^dg-.*\.yml$')
-        file_path = os.path.join(const.REPLY_FILES_PATH, filename)
+        file_path = os.path.join(const.REPLY_FOLDER_PATH, filename)
         logger.info(f"载入{filename},完整路径[{file_path}]")
         if os.path.isfile(file_path):
             if pattern.match(filename):

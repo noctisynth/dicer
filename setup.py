@@ -34,6 +34,7 @@ setuptools.setup(
         'psutil',
         'nonebot_plugin_apscheduler',
         'httpx',
+        'ruamel.yaml',
         'dicergirl-plugin-scp',
         'python-Levenshtein',
     ],

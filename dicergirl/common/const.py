@@ -1,8 +1,10 @@
 """
 存放常量的文件
 """
+import inspect
 import pathlib
 
+from ruamel.yaml import YAML
 from dicergirl.reply.parser import default_templates
 from dicergirl.reply.provider.provider import Provider, CustomProvider
 
@@ -13,11 +15,13 @@ def load_template_methods():
     """
     methods = {}
     for name, method in vars(default_templates).items():
-        if callable(method):
+        if callable(method) and not inspect.signature(method).parameters:
             methods[name] = method
     return methods
 
 
+REPLY_YAML = YAML()
+""" ruamel.yaml的YAML对象实例化 """
 TEMPLATE_METHODS = load_template_methods()
 """ 占位符对应的方法列表 """
 DG_PROVIDERS: list[Provider] = []
@@ -29,9 +33,13 @@ HOME_PATH = pathlib.Path.home()
 DG_FOLDER_PATH = HOME_PATH / ".dicergirl"
 """ DicerGirl 数据文件夹路径 """
 REPLY_FOLDER_PATH = DG_FOLDER_PATH / "reply"
-""" Dicerirl 自定义回复文件夹路径 """
+""" Dicergirl 自定义回复文件夹路径 """
 EXAMPLE_REPLY_FILE_PATH = REPLY_FOLDER_PATH / "example.yml"
 """ 示例自定义回复文件路径 """
+IS_ONE_TIME_MATCH = False
+""" 自定义是否只匹配一次 """
+
+
 EXAMPLE_TEMPLATE = """\
 # 是否启用
 enable: false
@@ -53,4 +61,3 @@ version: 1.0
 # 自定义功能描述
 description: "示例模板"
 """
-""" 示例模板 """

@@ -3,13 +3,12 @@
 """
 import os
 import re
-import yaml
 
 from dicergirl.common import const
 from multilogging import multilogger
 from dicergirl.reply.provider.provider import Provider, CustomProvider
 
-logger = multilogger(name="Dice Girl", payload="ReplyFile")
+logger = multilogger(name="DicerGirl", payload="ReplyFile")
 
 
 def init():
@@ -33,7 +32,7 @@ def __init_provider():
         if os.path.isfile(file_path):
             if pattern.match(filename):
                 with (open(file_path, "rb") as file):
-                    data = yaml.load(file)
+                    data = const.REPLY_YAML.load(file)
                     items = data["items"]
                     # logger.info(items)
                     for item in items:
@@ -46,7 +45,7 @@ def __init_provider():
                             )
             elif filename.endswith(".yml"):
                 with (open(file_path, "rb") as file):
-                    data = yaml.load(file)
+                    data = const.REPLY_YAML.load(file)
                     enable = data["enable"]
                     if not enable:
                         continue
@@ -71,8 +70,8 @@ def __init_example_provider():
     """
     if not os.path.exists(const.EXAMPLE_REPLY_FILE_PATH):
         with open(file=const.EXAMPLE_REPLY_FILE_PATH, mode='wb') as drf:
-            raw_data = yaml.load(const.EXAMPLE_TEMPLATE)
-            yaml.dump(data=raw_data, stream=drf)
+            raw_data = const.REPLY_YAML.load(const.EXAMPLE_TEMPLATE)
+            const.REPLY_YAML.dump(data=raw_data, stream=drf)
 
 
 # 测试用例
@@ -81,5 +80,4 @@ def __init_example_provider():
 #     logger.info(f"Key:{provider.key},Value:{provider.value}")
 #
 # for provider in const.CUSTOM_PROVIDERS:
-#     logger.info(f"Key:{provider.key},Value:{provider.value},Message:{provider.message}")
-#     logger.info(f"MatchType: {provider.matchType},Enable:{provider.enable}")
+#     logger.info(f"Key:{provider.key},Value:{provider.value},Message:{provider.message}MatchType: {provider.matchType},Enable:{provider.enable}")

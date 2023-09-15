@@ -2,6 +2,8 @@ import re
 import string
 from dicergirl.common import const
 from dicergirl.reply import init_reply
+from dicergirl.reply.parser.text_matcher import MatchType
+from dicergirl.reply.provider.provider import CustomProvider
 
 
 class MessageParser:
@@ -25,6 +27,11 @@ class MessageParser:
         # replace方法的返回值有类型限定
         return re.sub(self.regex, replace, text)
 
+    def custom_replacement(self, text, custom_provider: CustomProvider):
+        if custom_provider.matchType is MatchType.REGEX_MATCH:
+            return self.replacement(custom_provider.message, result=str(re.findall(custom_provider.value, text)))
+        return self.replacement(custom_provider.message)
+
     def get_placeholders(self, text):
         """
         提取消息中的%内的文本
@@ -41,6 +48,7 @@ class MessageParser:
                 method = const.TEMPLATE_METHODS[placeholder]
                 replacement = method()
                 text = text.replace(f'%{placeholder}%', replacement)
+
         return text
 
     @staticmethod
@@ -49,4 +57,3 @@ class MessageParser:
         判断是否有对应的方法
         """
         return method_name in const.TEMPLATE_METHODS
-

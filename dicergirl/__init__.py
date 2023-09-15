@@ -180,7 +180,7 @@ if package == "nonebot2":
                     sys.stdout,
                     level = "INFO"
                 )
-                logger.info("[cocdicer] 输出等级设置为 INFO.")
+                logger.info("输出等级设置为 INFO.")
                 await matcher.send("DEBUG 模式已关闭.")
                 return
         else:
@@ -191,7 +191,7 @@ if package == "nonebot2":
                 sys.stdout,
                 level = "INFO"
             )
-            logger.info("[cocdicer] 输出等级设置为 DEBUG.")
+            logger.info("输出等级设置为 DEBUG.")
             await matcher.send("DEBUG 模式已启动.")
             return
 
@@ -203,7 +203,7 @@ if package == "nonebot2":
                 sys.stdout,
                 level = "INFO"
             )
-            logger.info("[cocdicer] 输出等级设置为 DEBUG.")
+            logger.info("输出等级设置为 DEBUG.")
             await matcher.send("DEBUG 模式已启动.")
         else:
             await matcher.send("错误, 我无法解析你的指令.")

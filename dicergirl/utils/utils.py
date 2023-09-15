@@ -20,7 +20,7 @@ from .settings import get_package, setconfig, getconfig, change_status, load_sta
 
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.3.1"
+version = "3.3.2"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """
@@ -41,7 +41,7 @@ saved_loggers: Dict[str, dict]
 """ 存储的日志 """
 
 try:
-    from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent
+    from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, PrivateMessageEvent
 except ModuleNotFoundError:
     logger.warning("未找到依赖`Nonebot2`, 请检查你的配置.")
     class MessageEvent:
@@ -274,7 +274,10 @@ def get_handlers(main) -> List[Callable]:
 def get_group_id(event) -> str:
     """ 获取`event`指向的群聊`ID` """
     try:
-        return str(event.group_id)
+        if not isinstance(event, PrivateMessageEvent):
+            return str(event.group_id)
+        else:
+            return "0"
     except Exception as error:
         logger.exception(error)
         return "0"
@@ -282,7 +285,10 @@ def get_group_id(event) -> str:
 def get_user_id(event) -> str:
     """ 获取`event`指向的用户`ID` """
     try:
-        return str(event.user_id)
+        if not isinstance(event, PrivateMessageEvent):
+            return str(event.user_id)
+        else:
+            return "0"
     except Exception as error:
         logger.exception(error)
         return "0"
@@ -367,9 +373,16 @@ def get_status(event):
 
     return status[get_group_id(event)]
 
-def load_status():
+def load_status() -> dict:
     """ 导入目前所存储的机器人在各群聊中状态 """
-    change_status(json.load(open(_dicer_girl_status, "r")))
+    status_text = _dicer_girl_status.read_text(encoding="utf-8")
+    if status_text:
+        status = json.load(status_text)
+    else:
+        status = {}
+
+    change_status(status)
+    return status
 
 def rolekp(event):
     ...

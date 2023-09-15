@@ -299,7 +299,7 @@ if package == "nonebot2":
             rss = memi.rss / 1024 / 1024
             total = psutil.virtual_memory().total / 1024 / 1024
 
-            reply = f"欧若可骰娘 {version}, {'正常运行' if get_status(event) else '指令限制'}\n"
+            reply = f"DicerGirl {version}, {'正常运行' if get_status(event) else '指令限制'}\n"
             reply += f"骰娘尊名: {get_name()}\n"
             reply += f"操作系统: {system}\n"
             reply += f"CPU 核心: {psutil.cpu_count()} 核心\n"

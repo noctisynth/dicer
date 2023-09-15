@@ -18,20 +18,20 @@ def load_template_methods():
     return methods
 
 
-# 占位符对应的方法列表
 TEMPLATE_METHODS = load_template_methods()
-# Provider列表
+""" 占位符对应的方法列表 """
 DG_PROVIDERS: list[Provider] = []
+""" Provider 列表 """
 CUSTOM_PROVIDERS: list[CustomProvider] = []
-# 家目录
+""" 自定义 Provider """
 HOME_PATH = pathlib.Path.home()
-# Dice Girl 数据文件夹路径
-DG_FOLDER_PATH = f"{HOME_PATH}\\.dicergirl"
-# Dice Girl 自定义回复文件夹路径
-REPLY_FOLDER_PATH = f"{DG_FOLDER_PATH}\\reply"
-# 示例自定义回复文件路径
-EXAMPLE_REPLY_FILE_PATH = f"{REPLY_FOLDER_PATH}\\example.yml"
-# 示例模板
+""" 主目录 """
+DG_FOLDER_PATH = HOME_PATH / ".dicergirl"
+""" DicerGirl 数据文件夹路径 """
+REPLY_FOLDER_PATH = DG_FOLDER_PATH / "reply"
+""" Dicerirl 自定义回复文件夹路径 """
+EXAMPLE_REPLY_FILE_PATH = REPLY_FOLDER_PATH / "example.yml"
+""" 示例自定义回复文件路径 """
 EXAMPLE_TEMPLATE = """\
 # 是否启用
 enable: false
@@ -53,3 +53,4 @@ version: 1.0
 # 自定义功能描述
 description: "示例模板"
 """
+""" 示例模板 """

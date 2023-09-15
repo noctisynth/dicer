@@ -3,14 +3,13 @@
 """
 import os
 import re
+import yaml
 
-from ruamel.yaml import YAML
 from dicergirl.common import const
 from multilogging import multilogger
 from dicergirl.reply.provider.provider import Provider, CustomProvider
 
 logger = multilogger(name="Dice Girl", payload="ReplyFile")
-yaml = YAML()
 
 
 def init():

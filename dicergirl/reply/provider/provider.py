@@ -7,7 +7,6 @@ class Provider:
     :argument key 注册名，用于检索对应的键值
     :argument value 待发送的文本或其他格式
     """
-
     def __init__(self, key: string, value: string):
         self.key = key
         self.value = value
@@ -21,7 +20,6 @@ class CustomProvider(Provider):
     :argument matchType 匹配类型
     :argument enable 是否启用该参数
     """
-
     def __init__(self, key: string,
                  value: string,
                  message: string,

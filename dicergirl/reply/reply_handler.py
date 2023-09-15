@@ -8,14 +8,13 @@ class ReplyHandler:
     """
     自定义回复处理器
     """
-
     def __init__(self):
         self.matcher = TextMatcher()
         self.parser = MessageParser()
 
     def handle(self, key: string, *args, **kwargs):
         """
-        原生Dice Girl或Dice Girl插件的处理方法
+        原生 DicerGirl 或 DicerGirl 插件的处理方法
         """
         for provider in const.DG_PROVIDERS:
             if provider.key == key:

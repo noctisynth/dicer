@@ -65,7 +65,7 @@ def init() -> None:
         if not dir[0].exists():
             logger.info(f"{name}{'文件夹' if dir[1] == 'dir' else '文件'}未建立, 建立它.")
             if dir[1] == "dir":
-                dir[0].mkdir()
+                dir[0].mkdir(parents=True, exist_ok=True)
             else:
                 with open(dir[0], "w", encoding="utf-8") as f:
                     f.write("{}")
@@ -73,7 +73,8 @@ def init() -> None:
     load_status()
 
 class StartswithRule:
-    """自定义的指令检查方法
+    """
+    自定义的指令检查方法
     允许:
         1. 无视中英文字符串
         2. 无视前后多余空字符

@@ -277,7 +277,7 @@ def get_group_id(event) -> str:
         if not isinstance(event, PrivateMessageEvent):
             return str(event.group_id)
         else:
-            return "0"
+            return "private"
     except Exception as error:
         logger.exception(error)
         return "0"
@@ -288,7 +288,7 @@ def get_user_id(event) -> str:
         if not isinstance(event, PrivateMessageEvent):
             return str(event.user_id)
         else:
-            return "0"
+            return "private"
     except Exception as error:
         logger.exception(error)
         return "0"
@@ -365,7 +365,12 @@ def boton(event):
 def get_status(event):
     """ 判断机器人在`event`所指向的群聊中是否处于完全功能状态 """
     status = load_status_settings()
-    if not get_group_id(event) in status.keys():
+    group_id = get_group_id(event)
+
+    if group_id == "private":
+        return True
+
+    if group_id not in status.keys():
         status[get_group_id(event)] = True
         f = open(_dicer_girl_status, "w")
         json.dump(status, f)

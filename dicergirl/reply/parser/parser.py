@@ -1,8 +1,8 @@
 import re
 import string
 from dicergirl.common import const
-from dicergirl.reply import init_reply
-from dicergirl.reply.parser.text_matcher import MatchType
+from dicergirl.reply import init
+from dicergirl.reply.parser.matcher import MatchType
 from dicergirl.reply.provider.provider import CustomProvider
 
 

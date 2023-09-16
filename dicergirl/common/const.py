@@ -5,16 +5,16 @@ import inspect
 import pathlib
 
 from ruamel.yaml import YAML
-from dicergirl.reply.parser import default_templates
+from dicergirl.reply.parser import templates
 from dicergirl.reply.provider.provider import Provider, CustomProvider
 
 
 def load_template_methods():
     """
-    获取 default_templates.py 中的所有方法
+    获取 templates.py 中的所有方法
     """
     methods = {}
-    for name, method in vars(default_templates).items():
+    for name, method in vars(templates).items():
         if callable(method) and not inspect.signature(method).parameters:
             methods[name] = method
     return methods

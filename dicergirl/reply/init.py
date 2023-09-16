@@ -72,12 +72,3 @@ def __init_example_provider():
         with open(file=const.EXAMPLE_REPLY_FILE_PATH, mode='wb') as drf:
             raw_data = const.REPLY_YAML.load(const.EXAMPLE_TEMPLATE)
             const.REPLY_YAML.dump(data=raw_data, stream=drf)
-
-
-# 测试用例
-# init()
-# for provider in const.DG_PROVIDERS:
-#     logger.info(f"Key:{provider.key},Value:{provider.value}")
-#
-# for provider in const.CUSTOM_PROVIDERS:
-#     logger.info(f"Key:{provider.key},Value:{provider.value},Message:{provider.message}MatchType: {provider.matchType},Enable:{provider.enable}")

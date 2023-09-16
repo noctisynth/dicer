@@ -1,5 +1,5 @@
 import string
-from dicergirl.reply.parser.text_matcher import MatchType
+from dicergirl.reply.parser.matcher import MatchType
 
 
 class Provider:

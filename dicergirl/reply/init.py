@@ -37,7 +37,7 @@ def __init_provider():
                     # logger.info(items)
                     for item in items:
                         for key, value in item.items():
-                            const.DG_PROVIDERS.append(
+                            const.HARDCODED_PROVIDERS.append(
                                 Provider(
                                     key=key,
                                     value=value
@@ -53,7 +53,7 @@ def __init_provider():
                     # logger.info(items)
                 for item in items:
                     for key, value in item.items():
-                        const.CUSTOM_PROVIDERS.append(
+                        const.KEYWORD_PROVIDERS.append(
                             CustomProvider(
                                 key=key,
                                 value=value["value"],

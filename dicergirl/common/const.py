@@ -24,9 +24,9 @@ REPLY_YAML = YAML()
 """ ruamel.yaml的YAML对象实例化 """
 TEMPLATE_METHODS = load_template_methods()
 """ 占位符对应的方法列表 """
-DG_PROVIDERS: list[Provider] = []
+HARDCODED_PROVIDERS: list[Provider] = []
 """ Provider 列表 """
-CUSTOM_PROVIDERS: list[CustomProvider] = []
+KEYWORD_PROVIDERS: list[CustomProvider] = []
 """ 自定义 Provider """
 HOME_PATH = pathlib.Path.home()
 """ 主目录 """

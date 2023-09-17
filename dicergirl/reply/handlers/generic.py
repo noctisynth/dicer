@@ -5,7 +5,7 @@ from dicergirl.reply.parser.matcher import TextMatcher
 from dicergirl.common import const
 
 
-class ReplyHandler:
+class GenericResponseHandler:
     """
     自定义回复处理器
     """
@@ -18,7 +18,7 @@ class ReplyHandler:
         """
         原生 DicerGirl 或 DicerGirl 插件的处理方法
         """
-        for provider in const.DG_PROVIDERS:
+        for provider in const.HARDCODED_PROVIDERS:
             if provider.key == key:
                 return self.parser.replacement(provider.value, **kwargs)
 
@@ -31,7 +31,7 @@ class ReplyHandler:
             保存多次匹配后处理的待发送文本
         """
         text_list = []
-        for provider in const.CUSTOM_PROVIDERS:
+        for provider in const.KEYWORD_PROVIDERS:
             if self.matcher.match(text, provider.value, provider.matchType):
                 if provider.enable:
                     tmp = self.__custom_handle(text, provider)
@@ -47,6 +47,6 @@ class ReplyHandler:
         """
         [内部方法]自定义回复的处理方法
         """
-        for provider in const.CUSTOM_PROVIDERS:
+        for provider in const.KEYWORD_PROVIDERS:
             if provider.key == custom_provider.key:
                 return self.parser.custom_replacement(text, custom_provider)

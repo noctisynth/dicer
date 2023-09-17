@@ -48,7 +48,7 @@ if package == "nonebot2":
         get_status, boton, botoff, set_name, get_name,
         rolekp, roleob,
         run_shell_command, get_latest_version
-        )
+    )
     from .utils.plugins import modes
     from .utils.parser import CommandParser, Commands, Only, Optional, Required
     from .utils.cards import Cards
@@ -105,7 +105,7 @@ if package == "nonebot2":
     async def _() -> None:
         """ `Nonebot2`核心加载完成后的初始化方法 """
         global DEBUG
-        logger.info(f"欧若可骰娘版本 {version} 初始化中...")
+        logger.info(f"DicerGirl 版本 {version} 初始化中...")
         if DEBUG:
             logging.getLogger().setLevel(logging.DEBUG)
             logger.remove()
@@ -115,7 +115,7 @@ if package == "nonebot2":
             )
             logger.info("DEBUG 模式已启动.")
         init()
-        logger.success("欧若可骰娘初始化完毕.")
+        logger.success("DicerGirl 初始化完毕.")
 
     @testcommand.handle()
     async def testhandler(matcher: Matcher, event: MessageEvent):

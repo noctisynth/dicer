@@ -68,36 +68,64 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
 功能建议: https://gitee.com/unvisitor/dicer/issues
 公测 QQ 群: 770386358
 项目负责人: 1264983312"""
-    sudo = """.su Optional[str: token]  管理员鉴权
-  token: 鉴权令牌
-  - 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`的控制终端输出, 输出模式为`CRITICAL`.
-  - 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同.
-    .su d32ab3...  管理员验证"""
-    bot = """.bot  机器人管理
-  .bot on  机器人启用
-  .bot off  机器人禁用
-  .bot status  机器人当前状态
-  .bot exit  机器人退出群聊"""
-    mode = """.mode [str: mode]  切换跑团模式
-  mode: 跑团模式缩略式
-    .mode coc  切换到 COC 跑团模式
-  - 如果骰娘管理员加入了第三方跑团插件, `mode`参数应该设置为该插件中`__init__.py`的`__name__`参数, 不区分大小写.
-  - 默认的跑团模式为`SCP`, 每一次机器人重启或更新后, 跑团模式都会更改为`SCP`."""
-    set = """.set [str: name] [int: data|str: data]
-  name: 属性或技能名称
-  - SCP 跑团中不支持设置属性, 同时设置非自定义技能也是不推荐的, 在设置前, 建议先询问主持人的意见.
-  data: 目标属性值
-    .set 名字 阿斯塔特  将你的名字设置`阿斯塔特`
-    - 注意, 当属性或技能名称均为中文或均为英文时, 指令是强空格需求的.
-    .set 计算机 80  将你的计算机技能设置为 80
-    .set 幸运 +10  将你的幸运增加 10 点
-在群聊中输入单独的`.set`指令, 欧若可将自动读取最近一次车卡(即人物卡作成)指令的结果进行保存.
-`.set`指令支持批量设置技能来完成录卡, 例如:
-  .set 名字 阿斯塔特 幸运 80 ...(将你的名字设置为 “阿斯塔特” 并将你的幸运设置为 80)
-  - 值得注意的是, 录卡一般常见于 COC 跑团和 DND 跑团, SCP 模式是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡.
-注意, 虽然该指令同样为弱空格指令解析, 即你不需要在参数之间键入空格, 但是这样的指令是不允许的:
-  .set名字阿斯塔特
-欧若可将会将该指令识别为同一个参数."""
+    sudo = """用法：.su [鉴权令牌]
+描述：
+   进行管理员鉴权, 获得骰娘的管理员权限。
+示例:
+   .su d32ab3...
+注意：
+   - 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`的控制终端输出, 输出模式为`CRITICAL`.
+   - 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同."""
+    bot = """用法：.bot <指令> [参数]
+描述：
+   执行与管理插件和机器人设置相关的各种任务。
+指令：
+   version (v, bot, 版本)          显示机器人版本
+   exit (bye, leave, 离开)         退出机器人
+   on (run, start, 启动)           启动机器人
+   off (down, shutdown, 关闭)      关闭机器人
+   upgrade (up, 更新)              升级机器人
+   downgrade (降级)                降级机器人
+   name (命名) <名称>              设置或显示机器人名称
+   status (状态)                   显示机器人当前状态
+   plgup (pluginup, 升级) [名称]    升级特定插件
+   install (add, 安装) [名称]      安装插件
+   remove (del, rm, 删除, 卸载) [名称]    删除插件
+   mode (list, 已安装)             列出已安装的插件
+   store (plugins, 商店)           显示商店中可用的插件
+   search (搜索) [名称]            在商店中搜索插件
+示例：
+   .bot version
+   .bot install 插件名称
+   .bot remove 插件名称"""
+    mode = """用法：.mode [模式名称]
+描述：
+   切换跑团模式
+示例：
+   .mode coc  切换到 COC 跑团模式
+注意：
+   - 如果骰娘管理员加入了第三方跑团插件, `mode`参数应该设置为该插件中`__init__.py`的`__name__`参数, 不区分大小写.
+   - 默认的跑团模式为`SCP`, 每一次机器人重启或更新后, 跑团模式都会更改为`SCP`."""
+    set = """用法：.set (.st) <指令> [属性名称] [属性值] ...
+描述：
+   设置角色卡信息。
+指令：
+   show (=.show)    显示角色卡信息
+   del (=.del)     删除角色卡
+   clear    清空所有角色卡信息
+示例：
+   .set 毁灭人类 99 打爆地球 99
+   .set 幸运 +10
+   .set show
+   .set del 毁灭人类
+   .set clear
+注意：
+   - 请确保在录卡之前执行无参数的`.set(.st)`指令保存人物卡。
+   - 在保存人物卡之前请先确保当前模式与车卡模式相同.
+   - 部分跑团模式(如SCP)中不支持设置属性, 同时设置非自定义技能也是不推荐的, 在设置前, 建议先询问主持人的意见.
+   - 在群聊中输入单独的`.set`指令, 欧若可将自动读取最近一次车卡(即人物卡作成)指令的结果进行保存.
+   - 当属性或技能名称均为中文或均为英文时, 指令是强空格需求的.
+   - 录卡一般常见于类似 COC 跑团和 DND 跑团的跑团模式, 部分模式(如SCP模式)是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡."""
     show = """.show [skill|all|str: attribute] Optional[CQ:at]  人物卡展示
   skill: 查看自身人物卡技能
   all: 查询所有存储的人物卡
@@ -159,13 +187,22 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
   card: 删除使用中的人物卡(谨慎使用)
   talent: 删除指定的自定义技能
   - 删除自定义技能时, 支持多个参数, 可以一次指定多个技能名."""
-    log = """.log [add|remove|start|stop|clear] [str: name]
-  add: 新增日志
-    name: 指定日志文件名
-  remove: 删除日志
-  start: 启动停止记录的日志
-  stop: 中止正在记录的日志
-  clear: 删除所有日志(慎用)"""
+    log = """用法：.log <指令> [选项]
+描述：
+   执行与管理日志相关的各种任务。
+指令：
+   show          显示所有日志
+   add (new) [名称]   添加一个新日志，可选择提供一个名称
+   stop [ID]     停止特定 ID 的日志记录
+   start [ID]    启动特定 ID 的日志记录
+   remove (rm) [ID]  删除特定 ID 的日志记录
+   download (load) [ID] 下载特定 ID 的日志记录
+示例：
+   .log show
+   .log add 日志名称
+   .log stop 日志ID
+注意：
+   - 使用 'add' 指令而不带参数以创建一个未命名的日志。"""
 
     def __init__(self) -> None:
         self.coc = """.coc [age] [roll] [name] [sex] Optioanl[cache]  完成 COC 人物作成

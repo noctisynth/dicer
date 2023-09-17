@@ -13,6 +13,18 @@ class Messages:
         "指令": ["commands", "command", "cmd", "指令"],
         "管理": ["admin", "管理"],
         "支持": ["supports", "support", "spt", "支持"],
+        "管理员鉴权": ["sudo", "su", "管理员鉴权", "鉴权"],
+        "模式": ["mode", "m", "模式"],
+        "机器人管理": ["bot", "manage", "机器人管理"],
+        "录卡": ["set", "st", "录卡"],
+        "展示": ["show", "展示"],
+        "掷骰": ["roll", "r", "rd", "掷骰"],
+        "检定": ["ra", "技能检定", "检定"],
+        "承伤": ["dam", "damage", "承伤检定", "承伤检定"],
+        "伤害": ["at", "attack", "伤害检定", "伤害"],
+        "激励": ["en", "激励检定", "激励检定"],
+        "删除": ["delete", "del", "remove", "rm", "删除"],
+        "日志": ["log", "logger", "日志管理", "日志系统", "日志"]
     }
     main = """Unvisitor DicerGirl 版本 {version} [Python {py_version} For Nonebot2 {nonebot_version}]
 .help/.h  展示此帮助信息
@@ -56,23 +68,106 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
 功能建议: https://gitee.com/unvisitor/dicer/issues
 公测 QQ 群: 770386358
 项目负责人: 1264983312"""
-
-    def __init__(self) -> None:
-        self.su = """.su Optional[str: token]  管理员鉴权
+    sudo = """.su Optional[str: token]  管理员鉴权
   token: 鉴权令牌
   - 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`的控制终端输出, 输出模式为`CRITICAL`.
   - 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同.
     .su d32ab3...  管理员验证"""
-        self.bot = """.bot  机器人管理
+    bot = """.bot  机器人管理
   .bot on  机器人启用
   .bot off  机器人禁用
   .bot status  机器人当前状态
   .bot exit  机器人退出群聊"""
-        self.mode = """.mode [str: mode]  切换跑团模式
+    mode = """.mode [str: mode]  切换跑团模式
   mode: 跑团模式缩略式
     .mode coc  切换到 COC 跑团模式
   - 如果骰娘管理员加入了第三方跑团插件, `mode`参数应该设置为该插件中`__init__.py`的`__name__`参数, 不区分大小写.
   - 默认的跑团模式为`SCP`, 每一次机器人重启或更新后, 跑团模式都会更改为`SCP`."""
+    set = """.set [str: name] [int: data|str: data]
+  name: 属性或技能名称
+  - SCP 跑团中不支持设置属性, 同时设置非自定义技能也是不推荐的, 在设置前, 建议先询问主持人的意见.
+  data: 目标属性值
+    .set 名字 阿斯塔特  将你的名字设置`阿斯塔特`
+    - 注意, 当属性或技能名称均为中文或均为英文时, 指令是强空格需求的.
+    .set 计算机 80  将你的计算机技能设置为 80
+    .set 幸运 +10  将你的幸运增加 10 点
+在群聊中输入单独的`.set`指令, 欧若可将自动读取最近一次车卡(即人物卡作成)指令的结果进行保存.
+`.set`指令支持批量设置技能来完成录卡, 例如:
+  .set 名字 阿斯塔特 幸运 80 ...(将你的名字设置为 “阿斯塔特” 并将你的幸运设置为 80)
+  - 值得注意的是, 录卡一般常见于 COC 跑团和 DND 跑团, SCP 模式是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡.
+注意, 虽然该指令同样为弱空格指令解析, 即你不需要在参数之间键入空格, 但是这样的指令是不允许的:
+  .set名字阿斯塔特
+欧若可将会将该指令识别为同一个参数."""
+    show = """.show [skill|all|str: attribute] Optional[CQ:at]  人物卡展示
+  skill: 查看自身人物卡技能
+  all: 查询所有存储的人物卡
+  attribute: 该模式下存在的可查看参数
+  - 部分参数可能并不在其它模式中支持, 如果管理员加入了第三方插件, 准允的可选参数请询问主持人、骰娘管理员或插件开发者.
+  - 例如在 SCP 模式中:
+    .show level  展示特工等级 
+    .show ability  展示特工能力
+    .show money  展示特工余额
+  at: 在群聊中`@`一个玩家, `.show`指令将会指向该玩家, 该参数是可选的."""
+    roll = """.r[a|d|#|h]  投掷指令 例如:
+    .r 10 100 (10D100)
+  d  指定骰子面数
+    .r 10d100 (10D100)
+    - 值得注意的是, `.r 10d100`与`.r 10 100`的效果是等同的.
+  a [str: 属性或技能名] [int: 检定难度]  基础属性或技能检定
+    .ra 幸运
+    在 SCP 模式中, 还支持以下指令:
+      .ra 命运 10  检定命运同时指定检定的事件难度为 10(默认为12)
+      .ra 灵感/计算机 24  指定以灵感检定计算机技能, 事件难度为24
+      - 值得注意的是, 在SCP跑团中, 检定难度应当在 1~25 之间, >25 的难度会直接返回致命失败.
+  h  暗骰
+    .rh  发起一次`1d100`的暗骰
+  #  多轮检定
+  b|p  奖励骰 | 惩罚骰
+    .rb 4  奖励骰掷骰 4 次
+  +|-  附加计算
+  .r 1d10+2d6  结果为`1d10`与`2d6`结果的和
+  .r 1d8-2  结果为`1d8`与`2`的差
+  - 除`.r`指令外, 其它需要进行掷骰的指令均支持附加计算."""
+    ra = """.ra [str: name] Optional[int: difficulty]  基础属性或技能检定
+  name: 属性或技能名称
+  difficulty: 事件难度(可选参数)
+    .ra 命运  快速检定`命运`属性
+    - 在 SCP 模式中, 还支持以下指令:
+      .ra 命运 10  检定命运同时指定检定的事件难度为 10(默认为12)
+      .ra 灵感/计算机 24  指定以灵感检定计算机技能, 事件难度为24
+    - 值得注意的是, 在SCP跑团中, 检定难度应当在 1~25 之间, >25 的难度会直接返回致命失败."""
+    dam = """.dam Optional[check|int: dice|str: dice]
+  check: 检定人物当前生命状态
+    .dam check
+  dice: 伤害掷骰
+    .dam 1d6  人物受到`1d6`掷骰结果的伤害
+    .dam 6  人物受到 6 点伤害"""
+    at = """.at Optional[str: dice|str: weapon]
+- 无参数的`.at`指令会进行该模式默认的近战伤害检定
+  dice: 掷骰伤害检定
+  - SCP 模式中不支持该语法.
+    .at 1d6  人物造成`1d6`掷骰结果的伤害
+  weapon: 使用武器进行伤害检定
+  - 该语法仅在 SCP 模式中支持.
+  .at 燃烧瓶  使用燃烧瓶进行伤害检定"""
+    en = """.en [str: attribute] [int: encourage]  属性激励
+  attribute: 技能名
+  encourage: 消耗激励点
+    .en 强度 2  激励属性`强度`2 点"""
+    delele = """.del [cache|card|str: talent]
+  cache: 删除暂存数据
+  card: 删除使用中的人物卡(谨慎使用)
+  talent: 删除指定的自定义技能
+  - 删除自定义技能时, 支持多个参数, 可以一次指定多个技能名."""
+    log = """.log [add|remove|start|stop|clear] [str: name]
+  add: 新增日志
+    name: 指定日志文件名
+  remove: 删除日志
+  start: 启动停止记录的日志
+  stop: 中止正在记录的日志
+  clear: 删除所有日志(慎用)"""
+
+    def __init__(self) -> None:
         self.coc = """.coc [age] [roll] [name] [sex] Optioanl[cache]  完成 COC 人物作成
   age: 调查员年龄
   roll: 天命次数
@@ -110,74 +205,6 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
         self.dnd = """.dnd Optional[str: age]  完成 DND 人物作成
   age: 冒险者年龄(可选参数)
   - 值得注意的是, 冒险者的年龄与冒险者的外貌、教育值相关."""
-        self.set = """.set [str: name] [int: data|str: data]
-  name: 属性或技能名称
-  - SCP 跑团中不支持设置属性, 同时设置非自定义技能也是不推荐的, 在设置前, 建议先询问主持人的意见.
-  data: 目标属性值
-    .set 名字 阿斯塔特  将你的名字设置`阿斯塔特`
-    - 注意, 当属性或技能名称均为中文或均为英文时, 指令是强空格需求的.
-    .set 计算机 80  将你的计算机技能设置为 80
-    .set 幸运 +10  将你的幸运增加 10 点
-在群聊中输入单独的`.set`指令, 欧若可将自动读取最近一次车卡(即人物卡作成)指令的结果进行保存.
-`.set`指令支持批量设置技能来完成录卡, 例如:
-  .set 名字 阿斯塔特 幸运 80 ...(将你的名字设置为 “阿斯塔特” 并将你的幸运设置为 80)
-  - 值得注意的是, 录卡一般常见于 COC 跑团和 DND 跑团, SCP 模式是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡.
-注意, 虽然该指令同样为弱空格指令解析, 即你不需要在参数之间键入空格, 但是这样的指令是不允许的:
-  .set名字阿斯塔特
-欧若可将会将该指令识别为同一个参数."""
-        self.show = """.show [skill|all|str: attribute] Optional[CQ:at]  人物卡展示
-  skill: 查看自身人物卡技能
-  all: 查询所有存储的人物卡
-  attribute: 该模式下存在的可查看参数
-  - 部分参数可能并不在其它模式中支持, 如果管理员加入了第三方插件, 准允的可选参数请询问主持人、骰娘管理员或插件开发者.
-  - 例如在 SCP 模式中:
-    .show level  展示特工等级 
-    .show ability  展示特工能力
-    .show money  展示特工余额
-  at: 在群聊中`@`一个玩家, `.show`指令将会指向该玩家, 该参数是可选的."""
-        self.r = """.r[a|d|#|h]  投掷指令 例如:
-    .r 10 100 (10D100)
-  d  指定骰子面数
-    .r 10d100 (10D100)
-    - 值得注意的是, `.r 10d100`与`.r 10 100`的效果是等同的.
-  a [str: 属性或技能名] [int: 检定难度]  基础属性或技能检定
-    .ra 幸运
-    在 SCP 模式中, 还支持以下指令:
-      .ra 命运 10  检定命运同时指定检定的事件难度为 10(默认为12)
-      .ra 灵感/计算机 24  指定以灵感检定计算机技能, 事件难度为24
-      - 值得注意的是, 在SCP跑团中, 检定难度应当在 1~25 之间, >25 的难度会直接返回致命失败.
-  h  暗骰
-    .rh  发起一次`1d100`的暗骰
-  #  多轮检定
-  b|p  奖励骰 | 惩罚骰
-    .rb 4  奖励骰掷骰 4 次
-  +|-  附加计算
-  .r 1d10+2d6  结果为`1d10`与`2d6`结果的和
-  .r 1d8-2  结果为`1d8`与`2`的差
-  - 除`.r`指令外, 其它需要进行掷骰的指令均支持附加计算."""
-        self.ra = """.ra [str: name] Optional[int: difficulty]  基础属性或技能检定
-  name: 属性或技能名称
-  difficulty: 事件难度(可选参数)
-    .ra 命运  快速检定`命运`属性
-    - 在 SCP 模式中, 还支持以下指令:
-      .ra 命运 10  检定命运同时指定检定的事件难度为 10(默认为12)
-      .ra 灵感/计算机 24  指定以灵感检定计算机技能, 事件难度为24
-    - 值得注意的是, 在SCP跑团中, 检定难度应当在 1~25 之间, >25 的难度会直接返回致命失败."""
-        self.sra = self.ra
-        self.dam = """.dam Optional[check|int: dice|str: dice]
-  check: 检定人物当前生命状态
-    .dam check
-  dice: 伤害掷骰
-    .dam 1d6  人物受到`1d6`掷骰结果的伤害
-    .dam 6  人物受到 6 点伤害"""
-        self.at = """.at Optional[str: dice|str: weapon]
-- 无参数的`.at`指令会进行该模式默认的近战伤害检定
-  dice: 掷骰伤害检定
-  - SCP 模式中不支持该语法.
-    .at 1d6  人物造成`1d6`掷骰结果的伤害
-  weapon: 使用武器进行伤害检定
-  - 该语法仅在 SCP 模式中支持.
-  .at 燃烧瓶  使用燃烧瓶进行伤害检定"""
         self.sc = """.sc [int: success]/[int: failure] Optional[int: SAN]  COC 疯狂检定
   success: 判定成功降低san值, 支持aDb语法(a、b与x为数字)
   failure: 判定失败降低san值, 支持aDb语法(a、b与x为数字)
@@ -185,22 +212,6 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
   - 缺省该参数则会自动使用该用户已保存的人物卡数据."""
         self.ti = ".ti  对调查员进行临时疯狂检定"
         self.li = ".li  对调查员进行总结疯狂检定"
-        self.en = """.en [str: attribute] [int: encourage]  属性激励
-  attribute: 技能名
-  encourage: 消耗激励点
-    .en 强度 2  激励属性`强度`2 点"""
-        self.delele = """.del [cache|card|str: talent]
-  cache: 删除暂存数据
-  card: 删除使用中的人物卡(谨慎使用)
-  talent: 删除指定的自定义技能
-  - 删除自定义技能时, 支持多个参数, 可以一次指定多个技能名."""
-        self.log = """.log [add|remove|start|stop|clear] [str: name]
-  add: 新增日志
-    name: 指定日志文件名
-  remove: 删除日志
-  start: 启动停止记录的日志
-  stop: 中止正在记录的日志
-  clear: 删除所有日志(慎用)"""
 
     def get(self, key) -> None | str:
         for _, alias in self.keys.items():
@@ -245,5 +256,14 @@ def help_message(args: str) -> str:
     reply += "使用.help [以上参数]来获得相关帮助内容."
     return reply 
 
+def regist(name, message, alias=[]):
+    if not alias:
+        alias = [name, ]
+
+    messages.keys[name] = alias
+    setattr(messages, alias[0], message)
+
 if __name__ == "__main__":
+    regist("test", "测试指令", alias=["test", "测试指令"])
+    print(help_message("test"))
     print(help_message("支持"))

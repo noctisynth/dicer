@@ -383,7 +383,7 @@ def load_status() -> dict:
     """ 导入目前所存储的机器人在各群聊中状态 """
     status_text = _dicer_girl_status.read_text(encoding="utf-8")
     if status_text:
-        status = json.load(status_text)
+        status = json.loads(status_text)
     else:
         status = {}
 

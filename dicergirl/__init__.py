@@ -330,7 +330,8 @@ if package == "nonebot2":
                 return
 
             await matcher.send("警告! 执行降级之后可能导致无法再次自动升级!")
-            await matcher.send("当前暂不支持降级!")
+            await run_shell_command(f"\"{sys.executable}\" -m pip install dicergirl=={commands['downgrade']} -i https://pypi.org/simple")
+            await matcher.send(f"{get_name()}已降级到 {commands['downgrade']}.")
             return
 
         if commands["name"]:

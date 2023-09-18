@@ -4,9 +4,10 @@
 import inspect
 import pathlib
 
+from typing import List, Dict
 from ruamel.yaml import YAML
-from dicergirl.reply.parser import templates
-from dicergirl.reply.provider.provider import Provider, CustomProvider
+from dicergirl.reply.parsers import templates
+from dicergirl.reply.response import GenericResponse, ConditionResponse
 
 
 def load_template_methods():
@@ -20,14 +21,10 @@ def load_template_methods():
     return methods
 
 
+TEMPLATE_METHODS = load_template_methods()
+""" 存储用于替换字符串的特定参数的模板方法，例如: %time%对应time() """
 REPLY_YAML = YAML()
 """ ruamel.yaml的YAML对象实例化 """
-TEMPLATE_METHODS = load_template_methods()
-""" 占位符对应的方法列表 """
-HARDCODED_PROVIDERS: list[Provider] = []
-""" Provider 列表 """
-KEYWORD_PROVIDERS: list[CustomProvider] = []
-""" 自定义 Provider """
 HOME_PATH = pathlib.Path.home()
 """ 主目录 """
 DG_FOLDER_PATH = HOME_PATH / ".dicergirl"
@@ -39,7 +36,6 @@ EXAMPLE_REPLY_FILE_PATH = REPLY_FOLDER_PATH / "example.yml"
 IS_ONE_TIME_MATCH = False
 """ 自定义是否只匹配一次 """
 
-
 EXAMPLE_TEMPLATE = """\
 # 是否启用
 enable: false
@@ -50,12 +46,12 @@ items:
     - default.example:
         # 是否启用
         enable: true
-        # 匹配字段
-        value: "笨蛋！"
         # 发送内容
+        send_text: "笨蛋！"
+        # 匹配字段
         message: "不许说笨蛋！"
         # EXACT_MATCH(完全匹配),PARTIAL_MATCH(部分匹配),REGEX_MATCH(正则匹配),FUNCTION_MATCH(方法匹配)
-        matchType: EXACT_MATCH 
+        match_field: EXACT_MATCH 
 # 版本号
 version: 1.0
 # 自定义功能描述

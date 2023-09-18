@@ -1,6 +1,6 @@
+import re
 import string
 from enum import Enum, unique
-import re
 
 
 @unique
@@ -58,3 +58,5 @@ class TextMatcher:
         """
         return bool(re.match(regex, str(text)))
 
+
+matcher = TextMatcher()

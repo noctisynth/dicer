@@ -1,9 +1,8 @@
 import re
-import string
+
 from dicergirl.common import const
-from dicergirl.reply import init
-from dicergirl.reply.parser.matcher import MatchType
-from dicergirl.reply.provider.provider import CustomProvider
+from dicergirl.reply.parsers.matcher import MatchType
+from dicergirl.reply.response import ConditionResponse
 
 
 class MessageParser:
@@ -12,7 +11,7 @@ class MessageParser:
     """
 
     def __init__(self):
-        self.regex = r'%([^%]+)%'
+        self.regex = '{([^{}]+)}'
 
     def replacement(self, text, *args, **kwargs):
         """
@@ -27,16 +26,16 @@ class MessageParser:
         # replace方法的返回值有类型限定
         return re.sub(self.regex, replace, text)
 
-    def custom_replacement(self, text, custom_provider: CustomProvider):
-        if custom_provider.matchType is MatchType.REGEX_MATCH:
-            return self.replacement(custom_provider.message, result=str(re.findall(custom_provider.value, text)))
-        return self.replacement(custom_provider.message)
+    def custom_replacement(self, text, response: ConditionResponse):
+        if response.match_type is MatchType.REGEX_MATCH:
+            return self.replacement(response.send_text, result=str(re.findall(response.match_field, text)))
+        return self.replacement(response.send_text)
 
-    def get_placeholders(self, text):
+    def get_placeholders(self, send_text):
         """
         提取消息中的%内的文本
         """
-        return re.findall(self.regex, text)
+        return re.findall(self.regex, send_text)
 
     def process_message(self, text):
         """
@@ -47,7 +46,7 @@ class MessageParser:
             if self.__check_method_exists(placeholder):
                 method = const.TEMPLATE_METHODS[placeholder]
                 replacement = method()
-                text = text.replace(f'%{placeholder}%', replacement)
+                text = text.replace(f'{{{placeholder}}}', replacement)
 
         return text
 
@@ -57,3 +56,6 @@ class MessageParser:
         判断是否有对应的方法
         """
         return method_name in const.TEMPLATE_METHODS
+
+
+parser = MessageParser()

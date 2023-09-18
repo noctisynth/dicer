@@ -48,6 +48,22 @@ class Only:
     def __str__(self):
         return self.key[0]
 
+class Positional:
+    """ 定位指令 """
+    def __init__(self, key, cls: type, default: Any=None):
+        if not key:
+            raise NoneTypeCommandError("Postional parameter must not be `None`.")
+
+        if isinstance(key, str):
+            key = [key, ]
+
+        self.key = key
+        self.cls = cls
+        self.default = default
+
+    def __str__(self):
+        return self.key[0]
+
 class Commands(list):
     """ 指令集合 """
     def __init__(self, *args, **kwargs):
@@ -59,11 +75,17 @@ class Commands(list):
     def __optional__(self) -> List[Optional]:
         return [optional for optional in self if isinstance(optional, Optional)]
 
+    def __positional__(self) -> List[Positional]:
+        return [positional for positional in self if isinstance(positional, Positional)]
+
     def get_plain_required(self) -> List[str]:
         return [str(required) for required in self if isinstance(required, Required)]
 
     def get_plain_optional(self) -> List[str]:
         return [str(optional) for optional in self if isinstance(optional, Optional)]
+
+    def get_plain_positional(self) -> List[str]:
+        return [str(positional) for positional in self if isinstance(positional, Positional)]
 
     def get_plain_commands(self) -> List[str]:
         return [str(command) for command in self]
@@ -73,6 +95,9 @@ def required(commands: Commands):
 
 def optional(commands: Commands):
     return commands.__optional__()
+
+def positional(commands: Commands):
+    return commands.__positional__()
 
 class CommandParser:
     """指令解析类
@@ -107,6 +132,7 @@ class CommandParser:
         """ 开始拆析指令集合 """
         if not args:
             args = self.args
+        iter_args = args
 
         if not isinstance(args, (list, tuple)):
             raise TypeError("指令切片必须传入列或数组.")
@@ -115,26 +141,30 @@ class CommandParser:
         nothing: bool = True
 
         for command in self.commands:
+            key = list(set(command.key) & set(args))
+            if len(key) > 1:
+                raise TooManyAliasCommandError("Too many alias parameters.")
+
             if isinstance(command, Only):
-                if set(command.key) & set(args):
+                if key:
                     results[command.key[0]] = True
+                    iter_args.remove(key[0])
                     nothing = False
                 else:
                     results[command.key[0]] = False
                 continue
 
-            key = list(set(command.key) & set(args))
-            if len(key) > 1:
-                raise TooManyAliasCommandError("Too many alias parameters.")
-
             if key:
                 index = args.index(key[0])
+                iter_index = iter_args.index(key[0])
                 if len(args) > index + 1:
                     try:
                         value = command.cls(args[index+1])
                     except ValueError:
                         raise TypeError(f"Value type of {command.key} is mismatch, {command.key} required but {type(args[index+1])} was given.")
                     results[command.key[0]] = value
+                    iter_args.pop(iter_index)
+                    iter_args.pop(iter_index)
                     nothing = False
                 else:
                     results[command.key[0]] = command.default
@@ -144,6 +174,15 @@ class CommandParser:
 
                 results[command.key[0]] = command.default
 
+        positionals = self.commands.get_plain_positional()
+        for str_positional in positionals:
+            if len(iter_args) == 0:
+                break
+
+            index = positionals.index(str_positional)
+            if len(iter_args) >= index+1:
+                results[str_positional] = iter_args[index]
+
         self.results = results
         self.nothing = nothing
 
@@ -152,9 +191,9 @@ class CommandParser:
 
 if __name__ == "__main__":
     cp = CommandParser(
-        Commands([Only("cache"), Optional("age", int), Optional(("name", "n"), str, "欧若可"), Optional("sex", str), Optional("roll", int)]),
+        Commands([Positional("roll", int), Only("cache"), Positional("test", int), Optional("age", int), Optional(("name", "n"), str, "欧若可"), Optional("sex", str)]),
         )
-    cp.args = ["cache", "age", "20", "n", "先生"]
+    cp.args = ["cache", "age", "20", "n", "先生", "7", "10"]
     cp.shlex()
     print(cp.results)
     cp = CommandParser(

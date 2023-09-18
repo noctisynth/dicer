@@ -204,52 +204,6 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
 注意：
    - 使用 'add' 指令而不带参数以创建一个未命名的日志。"""
 
-    def __init__(self) -> None:
-        self.coc = """.coc [age] [roll] [name] [sex] Optioanl[cache]  完成 COC 人物作成
-  age: 调查员年龄
-  roll: 天命次数
-  name: 调查员姓名
-  sex: 调查员性别
-  - 以上参数均可缺省
-    .coc age 20 roll 5 name 欧若可 sex 女  进行5次姓名为`欧若可`的20岁女性调查员天命
-  cache: 展示已天命的人物卡
-    .coc cache
-  - 值得注意的是, 调查员的年龄与调查员的外貌、教育值相关."""
-        self.scp = """.scp Optional[begin|reset|deal|upgrade]  完成 SCP 人物卡作成
-  begin: 展示基金会基本介绍
-    .scp begin
-  reset Optional[hp|p|enp|rep|card]: 重置人物卡
-  - 无参数的`.scp reset`指令会重置人物所有附加属性, 包括生命值、熟练值、激励点和声望, 但不会改变已升级的技能和特工等级、类别.
-    hp: 重置人物卡生命值为最大生命值
-      .scp reset hp
-    p: 重置人物卡熟练值为最大熟练值
-      .scp reset p
-    enp: 重置人物卡激励点为最大激励点
-      .scp reset enp
-    rep: 重置人物卡声望为最大声望
-      .scp reset rep
-    card: 重置人物卡(请谨慎使用)
-    `.scp reset card`指令会重置人物卡为初始状态, 请谨慎使用.
-      .scp reset card
-  deal Optional[str: weapon]  装备购买
-  - 无参数的`.scp deal`指令会给出当前特工允许的购买的武器.
-    weapon: 武器名称
-      .scp deal 燃烧瓶  购买一个燃烧瓶
-  upgrade [str: name] [int: level]  升级技能
-    name: 技能名称
-    level: 需要提升到的等级
-      .scp upgrade 计算机 5  将计算机提升到 5 级."""
-        self.dnd = """.dnd Optional[str: age]  完成 DND 人物作成
-  age: 冒险者年龄(可选参数)
-  - 值得注意的是, 冒险者的年龄与冒险者的外貌、教育值相关."""
-        self.sc = """.sc [int: success]/[int: failure] Optional[int: SAN]  COC 疯狂检定
-  success: 判定成功降低san值, 支持aDb语法(a、b与x为数字)
-  failure: 判定失败降低san值, 支持aDb语法(a、b与x为数字)
-  SAN: 指定检定的 SAN 值(可选参数)
-  - 缺省该参数则会自动使用该用户已保存的人物卡数据."""
-        self.ti = ".ti  对调查员进行临时疯狂检定"
-        self.li = ".li  对调查员进行总结疯狂检定"
-
     def get(self, key) -> None | str:
         for _, alias in self.keys.items():
             if key in alias:

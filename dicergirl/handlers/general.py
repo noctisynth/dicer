@@ -91,7 +91,7 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
             return f"未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
 
         if len(args) % 2 != 0:
-            return "参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量.\n此外, 这看起来不像是来源于我的错误."
+            return "参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量.\n此外, 这看起来不像是来源于我的错误.\n使用`.help set`查看使用帮助."
 
         elif len(args) == 2:
             sd = __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
@@ -117,11 +117,12 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
             for sub_li in li:
                 sd = __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
                 if sd:
+                    reply.append(sd)
                     continue
 
                 reply = __set_skill(sub_li, event, reply, cards=cards, cha=inv, module=module, qid=qid)
 
-            rep = "[Oracle]\n"
+            rep = ""
             for r in reply:
                 rep += r + "\n"
             return rep.rstrip("\n")
@@ -168,10 +169,13 @@ def show_handler(message, args, at, mode=None):
         if cards.get(message, qid=qid):
             card_data = cards.get(message, qid=qid)
             cha = charactor().load(card_data)
-            try:
-                r.append(getattr(cha, "out_"+args[0])())
-            except:
-                r.append("查询时出现异常, 可能你想要查询的内容不存在?")
+            if hasattr(cha, "out_"+args[0]):
+                try:
+                    r.append(getattr(cha, "out_"+args[0])())
+                except:
+                    r.append("查询时出现异常, 可能你想要查询的内容不存在?")
+            else:
+                r.append("错误的查询方式.")
 
     if not r:
         r.append("未查询到保存或暂存信息.")

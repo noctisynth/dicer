@@ -270,10 +270,6 @@ if package == "nonebot2":
             commands = commands.results
 
         if commands["exit"]:
-            if not is_super_user(event):
-                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
-                return
-
             logger.info(f"{get_name()}退出群聊: {event.group_id}")
             await matcher.send(f"{get_name()}离开群聊.")
             await bot.set_group_leave(group_id=event.group_id)
@@ -329,11 +325,19 @@ if package == "nonebot2":
             return
 
         if commands["downgrade"]:
+            if not is_super_user(event):
+                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
+                return
+
             await matcher.send("警告! 执行降级之后可能导致无法再次自动升级!")
             await matcher.send("当前暂不支持降级!")
             return
 
         if commands["name"]:
+            if not is_super_user(event):
+                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
+                return
+
             sn = set_name(commands["name"])
 
             if isinstance(sn, bool):
@@ -402,6 +406,10 @@ if package == "nonebot2":
             return
 
         if commands["remove"]:
+            if not is_super_user(event):
+                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
+                return
+
             uns = await remove(commands["remove"])
 
             if uns is PluginUninstallFailedError:
@@ -693,6 +701,7 @@ if package == "nonebot2":
             arg = ""
 
         message = help_message(arg)
+        message = re.sub(r"\{name\}", get_name(), message)
         message = re.sub(r"\{version\}", version, message)
         message = re.sub(r"\{py_version\}", platform.python_version(), message)
         message = re.sub(r"\{nonebot_version\}", nonebot.__version__, message)

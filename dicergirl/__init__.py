@@ -37,7 +37,7 @@ except ValueError:
 package = get_package()
 
 if package == "nonebot2":
-    from .utils.messages import help_message
+    from .common.messages import help_message
     from .utils.utils import (
         init, on_startswith,
         get_group_id, get_mentions, get_user_card,

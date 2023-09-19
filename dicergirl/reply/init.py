@@ -48,7 +48,7 @@ def _init_reply_config():
                     with (open(file_path, "rb") as file):
                         data = const.REPLY_YAML.load(file)
                         items = data["items"]
-                        # logger.info(items)
+                        logger.debug(items)
                         for item in items:
                             for event_name, send_text in item.items():
                                 manager.register(event_name, send_text)
@@ -59,7 +59,7 @@ def _init_reply_config():
                         if not enable:
                             continue
                         items = data["items"]
-                        # logger.info(items)
+                        logger.debug(items)
                     for item in items:
                         for event_name, response in item.items():
                             manager.register_event(

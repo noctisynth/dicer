@@ -1,7 +1,6 @@
 from typing import Dict
 
 from multilogging import multilogger
-
 from dicergirl.common.response import GenericResponse, ConditionResponse
 from dicergirl.reply.parsers.matcher import MatchType
 

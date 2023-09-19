@@ -18,7 +18,6 @@ class MatchType(Enum):
 
 
 class TextMatcher:
-
     def match(self, send_text, match_field: string, match_type: MatchType) -> bool:
         """
         匹配方法

@@ -1,7 +1,5 @@
 import re
 
-from dicergirl.common.response import ConditionResponse
-
 
 class MessageParser:
     """
@@ -11,11 +9,10 @@ class MessageParser:
     def __init__(self):
         self.regex = '{([^{}]+)}'
 
-    def replacement(self, text, *args, **kwargs):
+    def replacement(self, text, **kwargs):
         """
         替换基本元素
         """
-
         def replace(match):
             key = match.group(1)
             return str(kwargs.get(key, match.group(0)))

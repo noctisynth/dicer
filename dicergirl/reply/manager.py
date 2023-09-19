@@ -39,7 +39,7 @@ class ReplyRegistryManager(ReplyRegistry):
             return True
         return False
 
-    def register_variable(self, *arg, **kwargs):
+    def register_variable(self, **kwargs):
         for key, value in kwargs.items():
             self.global_variable[key] = (type(value), value)
             logger.info(f"注册全局变量: {key}")
@@ -51,7 +51,7 @@ class ReplyRegistryManager(ReplyRegistry):
             return True
         return False
 
-    def process_generic_event(self, event_name: str, *args, **kwargs):
+    def process_generic_event(self, event_name: str, **kwargs):
         custom_result = self._handle_generic_event(event_name, self._custom_generic_responses, **kwargs)
         if custom_result is not None:
             return custom_result
@@ -72,7 +72,7 @@ class ReplyRegistryManager(ReplyRegistry):
             return None
         return result
 
-    def call_method(self, method_name: str, *args, **kwargs):
+    def call_method(self, method_name: str, **kwargs):
         method_info = self.global_method[method_name]
         if method_info is not None:
             kwargs = self._prepare_arguments(method_name, kwargs)
@@ -85,7 +85,6 @@ class ReplyRegistryManager(ReplyRegistry):
     def _handle_generic_event(self,
                               event_name: str,
                               response_dict: Dict[str, GenericResponse],
-                              *args,
                               **kwargs) -> str | None:
 
         if event_name not in response_dict:

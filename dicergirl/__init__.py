@@ -253,7 +253,7 @@ if package == "nonebot2":
                 Only(("on", "run", "start", "启动")),
                 Only(("off", "down", "shutdown", "关闭")),
                 Only(("upgrade", "up", "更新")),
-                Only(("downgrade", "降级")),
+                Optional(("downgrade", "降级"), str),
                 Optional(("name", "命名"), str),
                 Only(("status", "状态")),
                 Optional(("plgup", "pluginup", "升级"), str),

@@ -24,12 +24,12 @@ class ReplyRegistryManager(ReplyRegistry):
     global_method: Dict[str, MethodInfo] = {}
     global_variable: Dict[str, Tuple[Type, Any]] = {}
 
-    def register_method(self, method: Callable):
-
-        parameter_type_list = [param.annotation for param in inspect.signature(method).parameters.values()]
-        self.global_method[method.__name__] = MethodInfo(method, {name: parameter.annotation
-                                                                  for name, parameter in
-                                                                  inspect.signature(method).parameters.items()})
+    def register_method(self, method: Callable, method_name: str = None):
+        if method_name is None:
+            method_name = method.__name__
+        self.global_method[method_name] = MethodInfo(method, {name: parameter.annotation
+                                                              for name, parameter in
+                                                              inspect.signature(method).parameters.items()})
         logger.info(f"注册全局方法: {method}")
 
     def remove_method(self, method_name: str) -> bool:

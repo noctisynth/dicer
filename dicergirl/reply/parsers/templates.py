@@ -8,6 +8,7 @@ def time() -> str:
     current_time = datetime.datetime.now()
     return current_time.strftime("%H:%M:%S")
 
+
 def date() -> str:
     current_date = datetime.datetime.now()
     return current_date.strftime("%Y-%m-%d")

@@ -79,7 +79,7 @@ class ReplyRegistryManager(ReplyRegistry):
             if kwargs is not None:
                 return self._execute_method(method_info.callable, kwargs)
         else:
-            logger.warning(f"Global method '{method_name}' not found.")
+            logger.warning(f"未找到全局方法 '{method_name}'。")
         return None
 
     def _handle_generic_event(self,
@@ -110,8 +110,8 @@ class ReplyRegistryManager(ReplyRegistry):
             kwargs = self._filter_arguments(parameters, kwargs)
         if set(kwargs.keys()) != set(parameters.keys()):
             logger.warning(
-                f"Method '{method_name}' expects arguments with keys {list(parameters.keys())}, "
-                f"but keys {list(kwargs.keys())} were provided."
+                f"方法 '{method_name}' 需要拥有参数 {list(parameters.keys())} ，"
+                f"但仅提供了 {list(kwargs.keys())}。"
             )
             return None
         kwargs = self._check_argument_types(method_name, kwargs, parameters)
@@ -130,8 +130,8 @@ class ReplyRegistryManager(ReplyRegistry):
             if (not isinstance(parameter, parameters[parameter_name]) and
                     parameters[parameter_name] is not self._inspect_empty):
                 logger.warning(
-                    f"Argument '{parameter_name}' for method '{method_name}' has an unexpected type. "
-                    f"Expected type: {parameters[parameter_name]}, but got type: {type(parameter)}."
+                    f"方法 '{method_name}' 的参数 '{parameter_name}' 传递的类型错误。 "
+                    f"期望的类型为：{parameters[parameter_name]}，但实际类型为：{type(parameter)}。"
                 )
                 return None
         return kwargs
@@ -154,8 +154,12 @@ class ReplyRegistryManager(ReplyRegistry):
         try:
             return method(**kwargs)
         except Exception as e:
-            logger.error(f"Error executing method '{method.__name__}': {str(e)}")
+            logger.warning(f"执行方法 '{method.__name__}' 时发生错误：{str(e)}")
             return None
 
 
 manager = ReplyRegistryManager()
+
+
+def test(name, age, sum, size):
+    print(f"{name},{age},{sum},{size}")

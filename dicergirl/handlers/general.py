@@ -3,6 +3,10 @@ from ..utils.dicer import Dicer
 from ..utils.docimasy import expr
 from ..utils.utils import get_group_id, get_name
 from ..utils.plugins import modes
+from ..reply.manager import manager
+
+manager.register_event("SetDefault", "设置{CharactorName} {Property} 为: {Value}")
+manager.register_event("SetDefaultFailed", "基础数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
 
 def __set_plus_format(args: list):
     """ `.set 技能 +x`语法解析 """
@@ -41,9 +45,18 @@ def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, c
                     elif args[1].startswith("-"):
                         cha.__dict__[alias[0]] -= int(args[1][1:])
                 except ValueError:
-                    return "基础数据 %s 要求正整数数据, 但你传入了 %s." % (args[0], args[1])
+                    return manager.process_generic_event(
+                        "SetDefaultFailed",
+                        Property=args[0],
+                        Value=args[1]
+                        )
             cards.update(event, cha.__dict__, qid=qid)
-            return "设置%s %s 为: %s" % (module.__cname__, attr, cha.__dict__[alias[0]])
+            return manager.process_generic_event(
+                "SetDefault",
+                CharactorName=module.__cname__,
+                Property=attr,
+                Value=cha.__dict__[alias[0]]
+                )
 
 def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid=None):
     """ 设置技能 """
@@ -97,7 +110,7 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
             sd = __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
             if sd:
                 return sd
-            
+
             return __set_skill(args, event, [], cards=cards, cha=inv, module=module, qid=qid)[0]
         elif len(args) > 2:
             reply = []

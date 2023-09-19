@@ -5,6 +5,10 @@ from nonebot.consts import STARTSWITH_KEY
 from nonebot.plugin import on_message
 from nonebot.rule import Rule
 from nonebot.matcher import Matcher
+from multilogging import multilogger
+from .decorators import translate_punctuation
+from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
+from ..reply.init import init as reply_init
 
 import json
 import uuid
@@ -14,13 +18,9 @@ import json
 import asyncio
 import httpx
 
-from multilogging import multilogger
-from .decorators import translate_punctuation
-from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
-
 package = get_package()
 """ 当前 Dicer Girl 运行平台 """
-version = "3.3.5"
+version = "3.3.7"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """
@@ -71,6 +71,7 @@ def init() -> None:
                     f.write("{}")
     saved_loggers = load_loggers()
     load_status()
+    reply_init()
 
 class StartswithRule:
     """

@@ -19,17 +19,17 @@ class MatchType(Enum):
 
 class TextMatcher:
 
-    def match(self, text, match_text: string, match_type: MatchType) -> bool:
+    def match(self, send_text, match_field: string, match_type: MatchType) -> bool:
         """
         匹配方法
         """
         if match_type == MatchType.EXACT_MATCH:
-            return self.__exact_matcher(text, match_text)
+            return self.__exact_matcher(send_text, match_field)
         elif match_type == MatchType.PARTIAL_MATCH:
-            tmp = match_text.split(";")
-            return self.__partial_matcher(text, *tmp)
+            tmp = match_field.split(";")
+            return self.__partial_matcher(send_text, *tmp)
         elif match_type == MatchType.REGEX_MATCH:
-            return self.__regex_matcher(text, match_text)
+            return self.__regex_matcher(send_text, match_field)
         elif match_type == MatchType.FUNCTION_MATCH:
             # TODO
             pass

@@ -3,7 +3,6 @@
 """
 import datetime
 import string
-from typing import Any
 
 
 def time() -> string:

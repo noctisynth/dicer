@@ -1,8 +1,6 @@
 import re
 
-from dicergirl.common import const
-from dicergirl.reply.parsers.matcher import MatchType
-from dicergirl.reply.response import ConditionResponse
+from dicergirl.common.response import ConditionResponse
 
 
 class MessageParser:
@@ -17,7 +15,6 @@ class MessageParser:
         """
         替换基本元素
         """
-        text = self.process_message(text)
 
         def replace(match):
             key = match.group(1)
@@ -26,36 +23,11 @@ class MessageParser:
         # replace方法的返回值有类型限定
         return re.sub(self.regex, replace, text)
 
-    def custom_replacement(self, text, response: ConditionResponse):
-        if response.match_type is MatchType.REGEX_MATCH:
-            return self.replacement(response.send_text, result=str(re.findall(response.match_field, text)))
-        return self.replacement(response.send_text)
-
     def get_placeholders(self, send_text):
         """
-        提取消息中的%内的文本
+        提取消息中的{}内的文本
         """
         return re.findall(self.regex, send_text)
-
-    def process_message(self, text):
-        """
-        处理消息并替换%方法名%
-        """
-        placeholders = self.get_placeholders(text)
-        for placeholder in placeholders:
-            if self.__check_method_exists(placeholder):
-                method = const.TEMPLATE_METHODS[placeholder]
-                replacement = method()
-                text = text.replace(f'{{{placeholder}}}', replacement)
-
-        return text
-
-    @staticmethod
-    def __check_method_exists(method_name):
-        """
-        判断是否有对应的方法
-        """
-        return method_name in const.TEMPLATE_METHODS
 
 
 parser = MessageParser()

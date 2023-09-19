@@ -1,7 +1,11 @@
 from typing import Dict
 
+from multilogging import multilogger
+
 from dicergirl.common.response import GenericResponse, ConditionResponse
 from dicergirl.reply.parsers.matcher import MatchType
+
+logger = multilogger(name="DicerGirl", payload="ReplyRegistry")
 
 
 class ReplyRegistry(object):
@@ -61,13 +65,16 @@ class ReplyRegistry(object):
                 self._condition_specific_responses[event_name] = ConditionResponse(event_name, send_text, match_field,
                                                                                    match_type,
                                                                                    enable)
+                logger.info(f"载入自定义条件回复: {event_name}")
             elif is_custom:
                 if event_name in self._default_generic_responses:
                     self._custom_generic_responses[event_name] = GenericResponse(event_name, send_text)
+                    logger.info(f"载入自定义回复: {event_name}")
                 else:
                     return False
             else:
                 self._default_generic_responses[event_name] = GenericResponse(event_name, send_text)
+                logger.info(f"注册回复事件: {event_name}")
             return True
 
     def remove_event(self, event_name: str, is_custom=False):

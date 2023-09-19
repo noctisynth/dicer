@@ -38,6 +38,8 @@ package = get_package()
 
 if package == "nonebot2":
     from .common.messages import help_message
+    from .common.registers import regist_vars
+
     from .utils.utils import (
         init, on_startswith,
         get_group_id, get_mentions, get_user_card,
@@ -114,6 +116,7 @@ if package == "nonebot2":
                 level = "DEBUG"
             )
             logger.info("DEBUG 模式已启动.")
+        regist_vars()
         init()
         logger.success("DicerGirl 初始化完毕.")
 

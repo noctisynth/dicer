@@ -181,7 +181,11 @@ class CommandParser:
 
             index = positionals.index(str_positional)
             if len(iter_args) >= index+1:
-                results[str_positional] = iter_args[index]
+                try:
+                    value = command.cls(iter_args[index])
+                except ValueError:
+                    raise TypeError(f"Value type of {command.key} is mismatch, {command.key} required but {type(args[index+1])} was given.")
+                results[str_positional] = value
 
         self.results = results
         self.nothing = nothing

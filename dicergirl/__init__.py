@@ -27,7 +27,7 @@ from .plugins.operation import install, remove, upgrade as plgupgrade
 from .errors.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
 
 from .common.messages import help_message
-from .common.registers import regist_vars
+from .common.registers import regist_all
 
 from nonebot.matcher import Matcher
 from nonebot.plugin import on, PluginMetadata
@@ -114,7 +114,7 @@ if initalized:
                 level = "DEBUG"
             )
             logger.info("DEBUG 模式已启动.")
-        regist_vars()
+        regist_all()
         init()
         logger.success("DicerGirl 初始化完毕.")
 

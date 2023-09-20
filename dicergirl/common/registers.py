@@ -9,6 +9,10 @@ from ..utils.utils import (
     version
 )
 
+def regist_all():
+    regist_events()
+    regist_vars()
+
 def regist_vars():
     manager.register_method(get_name, "BotName")
     manager.register_method(get_group_id, "GroupID")

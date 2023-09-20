@@ -95,6 +95,7 @@ if initalized:
     rolekpcommand = on_startswith(".kp", priority=2, block=True)
     roleobcommand = on_startswith(".ob", priority=2, block=True)
     sncommand = on_startswith(".sn", priority=2, block=True)
+    registcommand = on_startswith((".regist", ".reg"), priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
 
@@ -1039,6 +1040,15 @@ if initalized:
         else:
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
             await matcher.send("身份组设置为旁观者 (OB).")
+
+    @registcommand.handle()
+    async def registhandler(matcher: Matcher, event: GroupMessageEvent):
+        args = format_str(event.get_message(), begin=(".regist", ".reg")).split(" ")
+        args = list(filter(None, args))
+        event_name = args[0]
+        message = args[1]
+        manager.register_event(event_name, message, is_custom=True)
+        await matcher.send(f"消息事件 {event_name} 已被更改.")
 
     @sncommand.handle()
     async def snhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):

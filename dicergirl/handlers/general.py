@@ -1,4 +1,4 @@
-from nonebot.adapters.onebot.v12 import GroupMessageEvent
+from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from ..utils.dicer import Dicer
 from ..utils.docimasy import expr
 from ..utils.utils import get_group_id
@@ -25,7 +25,7 @@ def __set_plus_format(args: list):
 
     return args
 
-def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, cha=None, qid=None) -> bool:
+def __set_default(args: list, event: GroupMessageEvent, cards=None, module=None, attrs_dict=None, cha=None, qid=None) -> bool:
     """ 技能或属性设置 """
     for attr, alias in attrs_dict.items():
         if args[0] in alias:
@@ -33,6 +33,7 @@ def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, c
                 if attr == "性别" and not args[1] in ["男", "女"]:
                     return manager.process_generic_event(
                         "BadSex",
+                        event=event,
                         CharactorName=module.__cname__,
                         Value=args[1]
                     )
@@ -48,18 +49,20 @@ def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, c
                 except ValueError:
                     return manager.process_generic_event(
                         "SetDefaultFailed",
+                        event=event,
                         Property=args[0],
                         Value=args[1]
                         )
             cards.update(event, cha.__dict__, qid=qid)
             return manager.process_generic_event(
                 "SetDefault",
+                event=event,
                 CharactorName=module.__cname__,
                 Property=attr,
                 Value=cha.__dict__[alias[0]]
                 )
 
-def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid=None):
+def __set_skill(args, event: GroupMessageEvent, reply: list, cards=None, cha=None, module=None, qid=None):
     """ 设置技能 """
     try:
         if not args[1].startswith(("-", "+")):
@@ -71,6 +74,7 @@ def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid
         cards.update(event, cha.__dict__, qid=qid)
         reply.append(manager.process_generic_event(
             "SetSkill",
+            event=event,
             CharactorName=module.__cname__,
             Property=args[0],
             Value=cha.skills[args[0]]
@@ -78,6 +82,7 @@ def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid
     except ValueError:
         reply.append(manager.process_generic_event(
             "SetSkillFailed",
+            event=event,
             Property=args[0],
             Value=args[1]
         ))
@@ -105,6 +110,7 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
             inv = charactor().load(card_data)
             return manager.process_generic_event(
                 "CardSaved",
+                event=event,
                 CardDetail=inv.output()
             )
         else:
@@ -119,6 +125,7 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
         if len(args) % 2 != 0:
             return manager.process_generic_event(
                 "AttributeCountError",
+                event=event,
                 Command="set"
                 )
 
@@ -143,6 +150,7 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
                 else:
                     return manager.process_generic_event(
                         "AttributeCountError",
+                        event=event,
                         Command="set"
                         )
 
@@ -161,10 +169,11 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
         else:
             return manager.process_generic_event(
                     "AttributeCountError",
+                    event=event,
                     Command="set"
                     )
 
-def show_handler(message, args, at, mode=None):
+def show_handler(event: GroupMessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.show`指令后端方法 """
     module = modes[mode]
     cards = module.__cards__
@@ -178,37 +187,39 @@ def show_handler(message, args, at, mode=None):
 
     r = []
     if not args:
-        if cards.get(message, qid=qid):
-            card_data = cards.get(message, qid=qid)
+        if cards.get(event, qid=qid):
+            card_data = cards.get(event, qid=qid)
             inv = charactor().load(card_data)
             data = manager.process_generic_event(
                 "CardInUse",
+                event=event,
                 CardDetail=inv.output()
             )
             r.append(data)
-        if cache_cards.get(message, qid=qid):
-            card_data = cache_cards.get(message, qid=qid)
+        if cache_cards.get(event, qid=qid):
+            card_data = cache_cards.get(event, qid=qid)
             inv = charactor().load(card_data)
             data = manager.process_generic_event(
                 "CardInCache",
+                event=event,
                 CardDetail=inv.output()
             )
             r.append(data)
     elif args[0] in ["detail", "de", "details"]:
-        if cards.get(message, qid=qid):
-            card_data = cards.get(message, qid=qid)
+        if cards.get(event, qid=qid):
+            card_data = cards.get(event, qid=qid)
             inv = charactor().load(card_data)
             r.append(inv.skills_output())
     elif args[0] == "all":
-        cd = cards.data[get_group_id(message)]
+        cd = cards.data[get_group_id(event)]
         for data in cd:
             inv = charactor().load(cd[data])
             d = inv.output() + "\n"
             d += inv.skills_output()
             r.append(d)
     else:
-        if cards.get(message, qid=qid):
-            card_data = cards.get(message, qid=qid)
+        if cards.get(event, qid=qid):
+            card_data = cards.get(event, qid=qid)
             cha = charactor().load(card_data)
             if hasattr(cha, "out_"+args[0]):
                 try:
@@ -223,7 +234,7 @@ def show_handler(message, args, at, mode=None):
 
     return r
 
-def del_handler(message, args, at, mode=None):
+def del_handler(event: GroupMessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.del`指令后端方法 """
     module = modes[mode]
     cache_cards = module.__cache__
@@ -239,33 +250,38 @@ def del_handler(message, args, at, mode=None):
         if not arg:
             pass
         elif arg == "cache":
-            if cache_cards.get(message, qid=qid):
-                if cache_cards.delete(message, save=False):
+            if cache_cards.get(event, qid=qid):
+                if cache_cards.delete(event, save=False):
                     r.append(manager.process_generic_event(
                         "CacheCardCleared",
+                        event=event,
                     ))
                 else:
                     r.append(manager.process_generic_event(
                         "UnknownError",
+                        event=event,
                     ))
             else:
                 r.append("暂无缓存人物卡数据.")
         elif arg == "card":
-            if cards.get(message):
-                if cards.delete(message):
+            if cards.get(event):
+                if cards.delete(event):
                     r.append(manager.process_generic_event(
                         "CardDeleted",
+                        event=event,
                     ))
                 else:
                     r.append(manager.process_generic_event(
                         "UnknownError",
+                        event=event,
                     ))
             else:
                 r.append("暂无使用中的人物卡.")
         else:
-            if cards.delete_skill(message, arg):
+            if cards.delete_skill(event, arg):
                 r.append(manager.process_generic_event(
                         "SkillDeleted",
+                        event=event,
                         SkillName=arg
                     ))
 
@@ -284,7 +300,8 @@ def roll(args: str, name: str=None) -> str:
             time = int(args[0].strip())
         except ValueError:
             return manager.process_generic_event(
-                "MultipleRollStringError"
+                "MultipleRollStringError",
+                SenderCard=name
             )
 
         if len(args) == 1:
@@ -305,9 +322,10 @@ def roll(args: str, name: str=None) -> str:
     except ValueError:
         return manager.process_generic_event(
             "BadRollString",
+            SenderCard=name
         )
 
-def shoot():
+def shoot(event: GroupMessageEvent):
     dice = Dicer("1d20").roll()
     result = dice.outcome
 
@@ -328,6 +346,7 @@ def shoot():
 
     return manager.process_generic_event(
         "ShootDocimasy",
+        event=event,
         DiceDescription=dice.description(),
         OnShoot=rstr
     )

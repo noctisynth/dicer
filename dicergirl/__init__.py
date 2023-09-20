@@ -826,7 +826,7 @@ if initalized:
         if not get_status(event) and not event.to_me:
             return
 
-        await matcher.send(shoot())
+        await matcher.send(shoot(event))
 
     @attackcommand.handle()
     async def attackhandler(matcher: Matcher, event: GroupMessageEvent):

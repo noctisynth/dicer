@@ -1,5 +1,5 @@
 from typing import Dict, List, Any
-from ..errors.parseerror import NoneTypeCommandError, CommandRequired, TooManyAliasCommandError
+from dicergirl.errors.parseerror import NoneTypeCommandError, CommandRequired, TooManyAliasCommandError
 
 class Optional:
     """ 可选指令 """
@@ -174,18 +174,19 @@ class CommandParser:
 
                 results[command.key[0]] = command.default
 
-        positionals = self.commands.get_plain_positional()
-        for str_positional in positionals:
+        positional_commands = positional(self.commands)
+        str_positionals = self.commands.get_plain_positional()
+        for positional_command in positional_commands:
             if len(iter_args) == 0:
                 break
 
-            index = positionals.index(str_positional)
+            index = str_positionals.index(str(positional_command))
             if len(iter_args) >= index+1:
                 try:
-                    value = command.cls(iter_args[index])
+                    value = positional_command.cls(iter_args[index])
                 except ValueError:
-                    raise TypeError(f"Value type of {command.key} is mismatch, {command.key} required but {type(args[index+1])} was given.")
-                results[str_positional] = value
+                    raise TypeError(f"Value type of {positional_command.key} is mismatch, {positional_command.key} required but {type(iter_args[index])} was given.")
+                results[str(positional_command)] = value
 
         self.results = results
         self.nothing = nothing
@@ -200,9 +201,4 @@ if __name__ == "__main__":
     cp.args = ["cache", "age", "20", "n", "先生", "7", "10"]
     cp.shlex()
     print(cp.results)
-    cp = CommandParser(
-        Commands([Only("cache"), Required("test", int)])
-    )
-    cp.args = ["cache", "test", "222"]
-    cp.shlex()
-    print(dict(cp))
+    print(type(cp.results["roll"]))

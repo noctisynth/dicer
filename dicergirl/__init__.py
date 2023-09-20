@@ -2,6 +2,8 @@ from pathlib import Path
 from datetime import datetime
 from multilogging import multilogger
 
+from .reply.manager import manager
+
 from .utils.utils import (
     version, init, on_startswith,
     get_group_id, get_mentions, get_user_card,
@@ -131,7 +133,10 @@ if initalized:
         )
 
         if not is_super_user(event):
-            await matcher.send("权限不足, 拒绝执行测试指令.")
+            await matcher.send(manager.process_generic_event(
+                "PermissionDenied",
+                event=event
+            ))
             return
 
         reply = ""
@@ -166,7 +171,10 @@ if initalized:
         global DEBUG
         args = format_msg(event.get_message(), begin=".debug")
         if not is_super_user(event):
-            await matcher.send("权限不足, 拒绝执行指令.")
+            await matcher.send(manager.process_generic_event(
+                "PermissionDenied",
+                event=event
+            ))
             return
 
         if args:
@@ -180,7 +188,10 @@ if initalized:
                     level = "INFO"
                 )
                 logger.info("输出等级设置为 INFO.")
-                await matcher.send("DEBUG 模式已关闭.")
+                await matcher.send(manager.process_generic_event(
+                    "DebugOff",
+                    event=event
+                ))
                 return
         else:
             DEBUG = True
@@ -191,7 +202,10 @@ if initalized:
                 level = "INFO"
             )
             logger.info("输出等级设置为 DEBUG.")
-            await matcher.send("DEBUG 模式已启动.")
+            await matcher.send(manager.process_generic_event(
+                "DebugOn",
+                event=event
+            ))
             return
 
         if args[0] == "on":
@@ -203,7 +217,10 @@ if initalized:
                 level = "INFO"
             )
             logger.info("输出等级设置为 DEBUG.")
-            await matcher.send("DEBUG 模式已启动.")
+            await matcher.send(manager.process_generic_event(
+                "DebugOn",
+                event=event
+            ))
         else:
             await matcher.send("错误, 我无法解析你的指令.")
 
@@ -216,24 +233,42 @@ if initalized:
         if len(arg) >= 1:
             if arg[0].lower() == "exit":
                 if not rm_super_user(event):
-                    await matcher.send("你还不是超级管理员, 无法撤销超级管理员身份.")
+                    await matcher.send(manager.process_generic_event(
+                        "NotManagerYet",
+                        event=event
+                    ))
                     return
-                await matcher.send("你已撤销超级管理员身份.")
+
+                await matcher.send(manager.process_generic_event(
+                    "ManagerExit",
+                    event=event
+                ))
                 return
 
         if is_super_user(event):
-            await matcher.send("你已经是超级管理员.")
+            await matcher.send(manager.process_generic_event(
+                "AlreadyManager",
+                event=event
+            ))
             return
 
         if not args:
             logger.critical(f"超级令牌: {make_uuid()}")
-            await matcher.send("启动超级管理员鉴权, 鉴权令牌已在控制终端展示.")
+            await matcher.send(manager.process_generic_event(
+                "AuthenticateStarted",
+                event=event
+            ))
         else:
             if not args == get_uuid():
-                await matcher.send("鉴权失败!")
-            else:
+                await matcher.send(manager.process_generic_event(
+                    "AuthenticateFailed",
+                    event=event
+                ))
                 add_super_user(event)
-                await matcher.send("你取得了管理员权限.")
+                await matcher.send(manager.process_generic_event(
+                    "AuthenticateSuccess",
+                    event=event
+                ))
 
     @botcommand.handle()
     async def bothandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
@@ -270,18 +305,27 @@ if initalized:
 
         if commands["exit"]:
             logger.info(f"{get_name()}退出群聊: {event.group_id}")
-            await matcher.send(f"{get_name()}离开群聊.")
+            await matcher.send(manager.process_generic_event(
+                "GroupLeaveSet",
+                event=event
+            ))
             await bot.set_group_leave(group_id=event.group_id)
             return
 
         if commands["on"]:
             boton(event)
-            await matcher.send(f"{get_name()}已开放指令限制.")
+            await matcher.send(manager.process_generic_event(
+                "BotOn",
+                event=event
+            ))
             return
 
         if commands["off"]:
             botoff(event)
-            await matcher.send(f"{get_name()}已开启指令限制.")
+            await matcher.send(manager.process_generic_event(
+                "BotOff",
+                event=event
+            ))
             return
 
         if commands["status"]:
@@ -347,7 +391,11 @@ if initalized:
                         "nickname": commands["name"],
                     }
                 )
-                await matcher.send(f"倒是好生有趣的名字, 以后我就是 {commands['name']} 了.")
+                await matcher.send(manager.process_generic_event(
+                    "NameSet",
+                    event=event,
+                    NewName=commands["name"]
+                ))
             elif isinstance(sn, str):
                 await matcher.send(sn)
 
@@ -413,7 +461,10 @@ if initalized:
             uns = await remove(commands["remove"])
 
             if uns is PluginUninstallFailedError:
-                await matcher.send(f"诶? 卸载失败?")
+                await matcher.send(manager.process_generic_event(
+                    "UninstallFailed",
+                    event=event
+                ))
                 return
 
             await matcher.send(f"模块 {commands['remove']} 卸载完毕.")
@@ -623,9 +674,15 @@ if initalized:
                 sh = show_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
-                sh = [f"错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+                sh = [manager.process_generic_event(
+                    "CommandFailed",
+                    event=event
+                )]
         else:
-            await matcher.send("未知的跑团模式.")
+            await matcher.send(manager.process_generic_event(
+                "UnknownMode",
+                event=event
+            ))
             return True
 
         for msg in sh:
@@ -650,8 +707,10 @@ if initalized:
             auto=True
         ).results
 
-        if at and not is_super_user(event):
-            await matcher.send("权限不足, 拒绝执行指令.")
+        if at and not get_user_card(event).upper() == "KP" and not event.to_me:
+            await matcher.send(manager.process_generic_event(
+                "SetPermissionDenied"
+            ))
             return
 
         if commands["show"]:
@@ -680,9 +739,15 @@ if initalized:
                 sh = set_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)
-                sh = [f"错误: 执行指令失败, 疑似模式 {mode} 不存在该指令."]
+                sh = [manager.process_generic_event(
+                    "CommandFailed",
+                    event=event
+                )]
         else:
-            await matcher.send("未知的跑团模式.")
+            await matcher.send(manager.process_generic_event(
+                "UnknownMode",
+                event=event
+            ))
             return True
 
         await matcher.send(sh)
@@ -735,10 +800,17 @@ if initalized:
                     name = got['name'] if got else ""
                     await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
-                await matcher.send(f"已切换到 {args.upper()} 跑团模式.")
+                await matcher.send(manager.process_generic_event(
+                    "ModeChanged",
+                    event=event,
+                    Mode=args.upper()
+                ))
                 return True
             else:
-                await matcher.send("未知的跑团模式, 忽略指令.")
+                await matcher.send(manager.process_generic_event(
+                    "UnknownMode",
+                    event=event
+                ))
                 return True
         else:
             reply = "当前已正确安装的跑团插件:\n"
@@ -776,7 +848,10 @@ if initalized:
             handler = modes[mode].__commands__["at"]
             await matcher.send(handler(event, args))
         else:
-            await matcher.send("未知的跑团模式.")
+            await matcher.send(manager.process_generic_event(
+                "UnknownMode",
+                event=event
+            ))
 
     @damcommand.handle()
     async def damhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -798,7 +873,10 @@ if initalized:
             handler = modes[mode].__commands__["dam"]
             await matcher.send(handler(event, args))
         else:
-            await matcher.send("未知的跑团模式.")
+            await matcher.send(manager.process_generic_event(
+                "UnknownMode",
+                event=event
+            ))
 
     @encommand.handle()
     async def enhandler(matcher: Matcher, event: GroupMessageEvent):
@@ -820,7 +898,10 @@ if initalized:
             handler = modes[mode].__commands__["en"]
             await matcher.send(handler(event, args))
         else:
-            await matcher.send("未知的跑团模式.")
+            await matcher.send(manager.process_generic_event(
+                "UnknownMode",
+                event=event
+            ))
 
     @racommand.handle()
     async def rahandler(matcher: Matcher, event: GroupMessageEvent):
@@ -848,7 +929,10 @@ if initalized:
 
             await matcher.send(replies)
         else:
-            await matcher.send("未知的跑团模式.")
+            await matcher.send(manager.process_generic_event(
+                "UnknownMode",
+                event=event
+            ))
 
     @rhcommand.handle()
     async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -903,7 +987,10 @@ if initalized:
         at = get_mentions(event)
 
         if at and not is_super_user(event):
-            await matcher.send("权限不足, 拒绝执行指令.")
+            await matcher.send(manager.process_generic_event(
+                "DeletePermissionDenied",
+                event=event
+            ))
             return
 
         mode = get_mode(event)

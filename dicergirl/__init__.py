@@ -1,8 +1,37 @@
 from pathlib import Path
 from datetime import datetime
-from nonebot.plugin import PluginMetadata
 from multilogging import multilogger
 from .utils.utils import version
+from .common.messages import help_message
+from .common.registers import regist_vars
+
+from .utils.utils import (
+    init, on_startswith,
+    get_group_id, get_mentions, get_user_card,
+    is_super_user, add_super_user, rm_super_user, make_uuid, get_uuid,
+    format_msg, format_str,
+    get_mode, set_mode,
+    get_loggers, loggers, add_logger, remove_logger, log_dir,
+    get_status, boton, botoff, set_name, get_name,
+    rolekp, roleob,
+    run_shell_command, get_latest_version
+)
+from .utils.plugins import modes
+from .utils.parser import CommandParser, Commands, Only, Optional, Required
+from .utils.cards import Cards
+from .utils.chat import chat
+
+from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
+
+from .plugins.parse import get_plugins
+from .plugins.operation import install, remove, upgrade as plgupgrade
+from .errors.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
+
+from nonebot.matcher import Matcher
+from nonebot.plugin import on, PluginMetadata
+from nonebot.adapters import Bot as Bot
+from nonebot.adapters.onebot.v11 import Bot as V11Bot
+from nonebot.internal.matcher.matcher import Matcher
 
 import logging
 import sys
@@ -35,37 +64,6 @@ except ValueError:
     initalized = False
 
 if initalized:
-    from .common.messages import help_message
-    from .common.registers import regist_vars
-
-    from .utils.utils import (
-        init, on_startswith,
-        get_group_id, get_mentions, get_user_card,
-        is_super_user, add_super_user, rm_super_user, make_uuid, get_uuid,
-        format_msg, format_str,
-        get_mode, set_mode,
-        get_loggers, loggers, add_logger, remove_logger, log_dir,
-        get_status, boton, botoff, set_name, get_name,
-        rolekp, roleob,
-        run_shell_command, get_latest_version
-    )
-    from .utils.plugins import modes
-    from .utils.parser import CommandParser, Commands, Only, Optional, Required
-    from .utils.cards import Cards
-    from .utils.chat import chat
-
-    from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
-
-    from .plugins.parse import get_plugins
-    from .plugins.operation import install, remove, upgrade as plgupgrade
-    from .errors.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
-
-    from nonebot.matcher import Matcher
-    from nonebot.plugin import on
-    from nonebot.adapters import Bot as Bot
-    from nonebot.adapters.onebot.v11 import Bot as V11Bot
-    from nonebot.internal.matcher.matcher import Matcher
-
     if driver._adapters.get("OneBot V12"):
         from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, Event, MessageSegment
     else:

@@ -32,6 +32,33 @@ DicerGirl 新一代跨平台开源 TRPG 骰娘框架.
 网页版`go-cqhttp`基于`nonebot-plugin-gocqhttp`.
 
 但值的注意的是, DGI 目前仅适用于 Windows 系统.
+### Linux/MacOS/Other
+所有支持Python3的操作系统(包括Windows)均可以安装 DicerGirl.
+
+在使用原始方法安装`DicerGirl`, 请先确保你已经安装了`Python3`并正确配置环境变量.
+
+如果你已有`Nonebot2`项目, 请在`Nonebot2`项目中使用指令:
+```bash
+nb plugin install dicergirl
+```
+
+如果你尚未创建`Nonebot2`项目, 请在确保你已正确安装`nb-cli`:
+```bash
+pip install nb-cli
+```
+并使用`nb-cli`创建项目:
+```bash
+nb create -t bootstrap
+```
+驱动器请选择`FastAPi`、`HTTPX`与`websockets`, 适配器请选择`OneBot V11`.
+
+创建完成后, 在生成的项目目录中执行:
+```bash
+nb plugin install dicergirl
+nb run --reload
+```
+
+Nonebot2的项目创建与插件增删详见[Nonebot CLI](https://cli.nonebot.dev/).
 
 ## 使用教程
 你可以在部署完成后, 在相应的平台中发送消息`.help`来查看使用方法.

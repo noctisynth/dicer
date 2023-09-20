@@ -6,8 +6,8 @@ from nonebot.plugin import on_message
 from nonebot.rule import Rule
 from nonebot.matcher import Matcher
 from multilogging import multilogger
-from .decorators import translate_punctuation
-from .settings import get_package, setconfig, getconfig, change_status, load_status_settings
+from ..common.decorators import translate_punctuation
+from .settings import change_status, load_status_settings
 from ..reply.init import init as reply_init
 
 import json
@@ -18,8 +18,6 @@ import json
 import asyncio
 import httpx
 
-package = get_package()
-""" 当前 Dicer Girl 运行平台 """
 version = "3.3.7"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
@@ -205,14 +203,6 @@ def remove_logger(event: GroupMessageEvent, id: int) -> Dict[str, list]:
     saved_loggers[get_group_id(event)].pop(id)
     json.dump(saved_loggers, open(_loggers_cachepath, "w"))
     return saved_loggers
-
-def set_config(appid, token) -> dict:
-    """ 在`QQGuild`模式中设置频道机器人`appid`以及`token`. """
-    return setconfig(appid, token, path=dicer_girl_dir, filename="config.yaml")
-
-def get_config() -> dict:
-    """ 获取`QQGuild`模式中频道机器人的`appid`以及`token`. """
-    return getconfig(path=dicer_girl_dir, filename="config.yaml")
 
 def format_msg(message, begin=None, zh_en=False) -> List[str]:
     """ 骰娘指令拆析为`list`的方法 """

@@ -2,7 +2,6 @@ from pathlib import Path
 from datetime import datetime
 from nonebot.plugin import PluginMetadata
 from multilogging import multilogger
-from .utils.settings import set_package, get_package
 from .utils.utils import version
 
 import logging
@@ -31,12 +30,11 @@ current_dir = Path(__file__).resolve().parent
 
 try:
     driver = nonebot.get_driver()
-    set_package("nonebot2")
+    initalized = True
 except ValueError:
-    set_package("qqguild")
-package = get_package()
+    initalized = False
 
-if package == "nonebot2":
+if initalized:
     from .common.messages import help_message
     from .common.registers import regist_vars
 
@@ -984,8 +982,5 @@ if package == "nonebot2":
         """ 骰娘版本及开源声明指令 """
         await matcher.send(f"Unvisitor DicerGirl 版本 {version} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助.")
         return
-elif package == "qqguild":
-    pass
 else:
-    logger.critical(f"未知的包模式: {package}!")
-    sys.exit()
+    logger.warning("Nonebot2 初始化失败, DicerGirl 无法启动!")

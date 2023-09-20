@@ -7,7 +7,14 @@ from ..reply.manager import manager
 
 manager.register_event("SetDefault", "[{SenderCard}]设置{CharactorName} {Property} 为: {Value}")
 manager.register_event("SetDefaultFailed", "基础数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
+manager.register_event("SetSkill", "[{SenderCard}]设置{CharactorName}技能 {Property} 为: {Value}")
+manager.register_event("SetSkillFailed", "技能数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
+manager.register_event("CardInUse", "[{SenderCard}]使用中人物卡: \n{CardDetail}")
+manager.register_event("CardInCache", "[{SenderCard}]已暂存人物卡: \n{CardDetail}")
+manager.register_event("CardSaved", "[{SenderCard}]成功从缓存保存人物卡属性: \n{CardDetail}")
+manager.register_event("CardDeleted", "[{SenderCard}]已删除使用中的人物卡！")
 manager.register_event("BadRollString", "诶, 出错了, 请检查你的掷骰表达式.\n使用`.help roll`获得掷骰指令使用帮助.")
+manager.register_event("MultipleRollStringError", "参数错误, `#`提示符前应当跟随整型数.")
 manager.register_event("BadSex", "{BotName}拒绝将{CharactorName}性别将设置为 {Value}, 这是对物种的侮辱.")
 manager.register_event("AttributeCountError", "参数错误, 这是由于传输的数据数量错误, {BotName}只接受为偶数的参数数量, 这看起来不像是来源于我的错误.\n使用`.help {Command}`查看使用帮助.")
 manager.register_event("CardCleared", "[{SenderCard}]已清空暂存人物卡数据.")
@@ -79,9 +86,18 @@ def __set_skill(args, event, reply: list, cards=None, cha=None, module=None, qid
         elif args[1].startswith("-"):
             cha.skills[args[0]] -= int(args[1][1:])
         cards.update(event, cha.__dict__, qid=qid)
-        reply.append("设置%s %s 技能为: %s." % (module.__cname__, args[0], cha.skills[args[0]]))
+        reply.append(manager.process_generic_event(
+            "SetSkill",
+            CharactorName=module.__cname__,
+            Property=args[0],
+            Value=cha.skills[args[0]]
+        ))
     except ValueError:
-        reply.append("技能 %s 要求正整数数据, 但你传入了 %s." % (args[0], args[1]))
+        reply.append(manager.process_generic_event(
+            "SetSkillFailed",
+            Property=args[0],
+            Value=args[1]
+        ))
     finally:
         return reply
 
@@ -104,7 +120,10 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
             card_data = cache_cards.get(event, qid=qid)
             cards.update(event, inv_dict=card_data, qid=qid)
             inv = charactor().load(card_data)
-            return "成功从缓存保存人物卡属性: \n" + inv.output()
+            return manager.process_generic_event(
+                "CardSaved",
+                CardDetail=inv.output()
+            )
         else:
             return f"未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
     else:
@@ -139,7 +158,10 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
                     li.append(sub_li)
                     sub_li = []
                 else:
-                    return "参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量.\n此外, 这看起来不像是来源于我的错误."
+                    return manager.process_generic_event(
+                        "AttributeCountError",
+                        Command="set"
+                        )
 
             for sub_li in li:
                 sd = __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
@@ -154,7 +176,10 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
                 rep += r + "\n"
             return rep.rstrip("\n")
         else:
-            return "参数错误, 可能是由于传输的数据数量错误.\n此外, 这看起来不像是来源于我的错误."
+            return manager.process_generic_event(
+                    "AttributeCountError",
+                    Command="set"
+                    )
 
 def show_handler(message, args, at, mode=None):
     """ 兼容所有模式的`.show`指令后端方法 """
@@ -173,13 +198,19 @@ def show_handler(message, args, at, mode=None):
         if cards.get(message, qid=qid):
             card_data = cards.get(message, qid=qid)
             inv = charactor().load(card_data)
-            data = "使用中人物卡: \n" 
-            data += inv.output()
+            data = manager.process_generic_event(
+                "CardInUse",
+                CardDetail=inv.output()
+            )
             r.append(data)
         if cache_cards.get(message, qid=qid):
             card_data = cache_cards.get(message, qid=qid)
             inv = charactor().load(card_data)
-            r.append("已暂存人物卡: \n" + inv.output())
+            data = manager.process_generic_event(
+                "CardInCache",
+                CardDetail=inv.output()
+            )
+            r.append(data)
     elif args[0] in ["detail", "de", "details"]:
         if cards.get(message, qid=qid):
             card_data = cards.get(message, qid=qid)
@@ -239,7 +270,9 @@ def del_handler(message, args, at, mode=None):
         elif arg == "card":
             if cards.get(message):
                 if cards.delete(message):
-                    r.append("已删除使用中的人物卡！")
+                    r.append(manager.process_generic_event(
+                        "CardDeleted",
+                    ))
                 else:
                     r.append(manager.process_generic_event(
                         "UnknownError",
@@ -267,7 +300,9 @@ def roll(args: str, name: str=None) -> str:
         try:
             time = int(args[0].strip())
         except ValueError:
-            return "参数错误, `#`提示符前应当跟随整型数."
+            return manager.process_generic_event(
+                "MultipleRollStringError"
+            )
 
         if len(args) == 1:
             args = "1d100"
@@ -287,7 +322,6 @@ def roll(args: str, name: str=None) -> str:
     except ValueError:
         return manager.process_generic_event(
             "BadRollString",
-
         )
 
 def shoot():

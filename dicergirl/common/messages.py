@@ -1,6 +1,10 @@
 from typing import Dict, List
+from ..reply.manager import manager
 
 import Levenshtein
+
+manager.register_event("HelpNotFoundRelated", "{BotName}没有找到相关帮助, 你是否是指: {MostRelated}?")
+manager.register_event("HelpNotFoundSomeRelated", "{BotName}没有找到相关帮助, 你是否是指:\n{MostRelated}\n使用.help [以上参数]来获得相关帮助内容.")
 
 def similar(str1, str2):
     distance = Levenshtein.distance(str1, str2)
@@ -238,14 +242,22 @@ def help_message(args: str) -> str:
             most_related = [cmd, similarity]
 
     if not related:
-        return "{name}没有找到相关帮助, 你是否是指: %s?" % (most_related[0])
+        return manager.process_generic_event(
+            "HelpNotFound",
+            MostRelated=most_related[0]
+        )
 
     i = 1
-    reply = "{name}没有找到相关帮助, 你是否是指:\n"
+    reply = ""
     for relate in related:
         reply += f"{i}. {relate}\n"
-    reply += "使用.help [以上参数]来获得相关帮助内容."
-    return reply 
+        i += 1
+
+    reply = manager.process_generic_event(
+        "HelpNotFoundSomeRelated",
+        MostRelated=reply
+    )
+    return reply
 
 def regist(name, message, alias=[]):
     if not alias:

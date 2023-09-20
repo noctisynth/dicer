@@ -1,12 +1,19 @@
 from nonebot.adapters.onebot.v12 import GroupMessageEvent
 from ..utils.dicer import Dicer
 from ..utils.docimasy import expr
-from ..utils.utils import get_group_id, get_name
+from ..utils.utils import get_group_id
 from ..utils.plugins import modes
 from ..reply.manager import manager
 
-manager.register_event("SetDefault", "设置{CharactorName} {Property} 为: {Value}")
+manager.register_event("SetDefault", "[{SenderCard}]设置{CharactorName} {Property} 为: {Value}")
 manager.register_event("SetDefaultFailed", "基础数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
+manager.register_event("BadRollString", "诶, 出错了, 请检查你的掷骰表达式.\n使用`.help roll`获得掷骰指令使用帮助.")
+manager.register_event("BadSex", "{BotName}拒绝将{CharactorName}性别将设置为 {Value}, 这是对物种的侮辱.")
+manager.register_event("AttributeCountError", "参数错误, 这是由于传输的数据数量错误, {BotName}只接受为偶数的参数数量, 这看起来不像是来源于我的错误.\n使用`.help {Command}`查看使用帮助.")
+manager.register_event("CardCleared", "[{SenderCard}]已清空暂存人物卡数据.")
+manager.register_event("UnknownError", "诶, 貌似发生了未知的错误?")
+manager.register_event("SkillDeleted", "[{SenderCard}]已删除技能 {SkillName}, 唔, 真是可惜.")
+manager.register_event("ShootDocimasy", "[{SenderCard}]进行射击检定:\n{DiceDescription}\n检定命中了 {OnShoot}.")
 
 def __set_plus_format(args: list):
     """ `.set 技能 +x`语法解析 """
@@ -34,7 +41,11 @@ def __set_default(args: list, event, cards=None, module=None, attrs_dict=None, c
         if args[0] in alias:
             if attr in ["名字", "性别"]:
                 if attr == "性别" and not args[1] in ["男", "女"]:
-                    return f"{get_name()}拒绝将{module.__cname__}性别将设置为 {args[1]}, 这是对物种的侮辱."
+                    return manager.process_generic_event(
+                        "BadSex",
+                        CharactorName=module.__cname__,
+                        Value=args[1]
+                    )
                 cha.__dict__[alias[0]] = args[1]
             else:
                 try:
@@ -104,7 +115,10 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
             return f"未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
 
         if len(args) % 2 != 0:
-            return "参数错误, 这是由于传输的数据数量错误, 我只接受为偶数的参数数量.\n此外, 这看起来不像是来源于我的错误.\n使用`.help set`查看使用帮助."
+            return manager.process_generic_event(
+                "AttributeCountError",
+                Command="set"
+                )
 
         elif len(args) == 2:
             sd = __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
@@ -213,9 +227,13 @@ def del_handler(message, args, at, mode=None):
         elif arg == "cache":
             if cache_cards.get(message, qid=qid):
                 if cache_cards.delete(message, save=False):
-                    r.append("已清空暂存人物卡数据.")
+                    r.append(manager.process_generic_event(
+                        "CacheCardCleared",
+                    ))
                 else:
-                    r.append("诶, 发生了未知的错误.")
+                    r.append(manager.process_generic_event(
+                        "UnknownError",
+                    ))
             else:
                 r.append("暂无缓存人物卡数据.")
         elif arg == "card":
@@ -223,12 +241,17 @@ def del_handler(message, args, at, mode=None):
                 if cards.delete(message):
                     r.append("已删除使用中的人物卡！")
                 else:
-                    r.append("诶, 发生了未知的错误.")
+                    r.append(manager.process_generic_event(
+                        "UnknownError",
+                    ))
             else:
                 r.append("暂无使用中的人物卡.")
         else:
             if cards.delete_skill(message, arg):
-                r.append(f"已删除技能 {arg}.")
+                r.append(manager.process_generic_event(
+                        "SkillDeleted",
+                        SkillName=arg
+                    ))
 
     if not r:
         r.append("使用`.help del`获得指令使用帮助.")
@@ -262,7 +285,10 @@ def roll(args: str, name: str=None) -> str:
 
         return r.detail
     except ValueError:
-        return "诶, 出错了, 请检查你的掷骰表达式.\n使用`.help r`获得掷骰指令使用帮助."
+        return manager.process_generic_event(
+            "BadRollString",
+
+        )
 
 def shoot():
     dice = Dicer("1d20").roll()
@@ -283,4 +309,8 @@ def shoot():
     elif result < 21:
         rstr = "头部"
 
-    return f"进行射击检定:\n{dice.description()}\n命中了 {rstr}."
+    return manager.process_generic_event(
+        "ShootDocimasy",
+        DiceDescription=dice.description(),
+        OnShoot=rstr
+    )

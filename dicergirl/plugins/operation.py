@@ -44,7 +44,7 @@ async def upgrade(name):
     if name not in plugins.keys():
         return PluginNotFoundError
 
-    rsc = await run_shell_command(f"\"{sys.executable}\" -m pip install {plugins[name]['package']} -i https://pypi.org/simple")
+    rsc = await run_shell_command(f"\"{sys.executable}\" -m pip install {plugins[name]['package']} -i https://pypi.org/simple --upgrade")
     if rsc["returncode"] != 0:
         logger.error(rsc["stderr"])
         return PluginInstallFailedError

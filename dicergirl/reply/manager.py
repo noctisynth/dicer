@@ -5,8 +5,9 @@ from typing import Callable, Dict, Type, Tuple, Any, List
 from multilogging import multilogger
 
 from dicergirl.common import const
+from dicergirl.common.const import DEFAULT_GROUP_NAME as NAME
 from dicergirl.common.response import GenericResponse
-from dicergirl.reply.parsers.matcher import matcher
+from dicergirl.reply.data import GenericData, ConditionData
 from dicergirl.reply.parsers.parser import parser
 from dicergirl.reply.registry import ReplyRegistry
 
@@ -52,13 +53,18 @@ class ReplyRegistryManager(ReplyRegistry):
         return False
 
     def process_generic_event(self, event_name: str, **kwargs):
-        custom_result = self._handle_generic_event(event_name, self._custom_generic_responses, **kwargs)
-        if custom_result is not None:
-            return custom_result
-        default_result = self._handle_generic_event(event_name, self._default_generic_responses, **kwargs)
-        if default_result is not None:
-            return default_result
-        return None
+        for container in self._custom_generic_data.values():
+            response = container.get_response(event_name)
+            if response and response.enable:
+                result = self._handle_generic_event(response, **kwargs)
+                if result:
+                    return result
+
+        response = self._default_generic_data[NAME].get_response(event_name)
+        result = self._handle_generic_event(response, **kwargs)
+        if not result:
+            logger.warning(f"{event_name}执行结果为: {result}")
+        return result
 
     def process_message_event(self, message: str):
         """
@@ -83,15 +89,12 @@ class ReplyRegistryManager(ReplyRegistry):
         return None
 
     def _handle_generic_event(self,
-                              event_name: str,
-                              response_dict: Dict[str, GenericResponse],
+                              response: GenericResponse,
                               **kwargs) -> str | None:
-
-        if event_name not in response_dict:
+        if not response:
             return None
-        send_text = response_dict[event_name].send_text
-        kwargs = self._handle_placeholders(send_text, **kwargs)
-        return parser.replacement(send_text, **kwargs)
+        kwargs = self._handle_placeholders(response.send_text, **kwargs)
+        return parser.replacement(response.send_text, **kwargs)
 
     def _handle_placeholders(self, send_text, *args, **kwargs):
         for placeholder in parser.get_placeholders(send_text):
@@ -136,10 +139,14 @@ class ReplyRegistryManager(ReplyRegistry):
         return kwargs
 
     def _handle_condition_event(self, message: str) -> List[str]:
+        tmp_dict = {}
         messages = []
         is_one_time_match = const.IS_ONE_TIME_MATCH
-        for response in self._condition_specific_responses.values():
-            if matcher.match(message, response.match_field, response.match_type) and response.enable:
+        for container in self._condition_specific_data.values():
+            responses = container.get_responses(message)
+            tmp_dict.update(responses)
+        for container, response in tmp_dict.items():
+            if container.is_enable(response.event_name):
                 kwarg = self._handle_placeholders(response.send_text)
                 result = parser.replacement(response.send_text, **kwarg)
                 if result is not None:
@@ -158,7 +165,3 @@ class ReplyRegistryManager(ReplyRegistry):
 
 
 manager = ReplyRegistryManager()
-
-
-def test(name, age, sum, size):
-    print(f"{name},{age},{sum},{size}")

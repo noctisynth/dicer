@@ -5,6 +5,8 @@ import pathlib
 
 from ruamel.yaml import YAML
 
+DEFAULT_GROUP_NAME = "default-group"
+""" 默认组名 """
 REPLY_YAML = YAML()
 """ ruamel.yaml的YAML对象实例化 """
 HOME_PATH = pathlib.Path.home()
@@ -18,7 +20,22 @@ EXAMPLE_REPLY_FILE_PATH = REPLY_FOLDER_PATH / "example.yml"
 IS_ONE_TIME_MATCH = False
 """ 自定义是否只匹配一次 """
 
-EXAMPLE_TEMPLATE = """\
+CUSTOM_GENERIC_TEMPLATE = """\
+enable: true
+author: "佚名"
+# 自定义规则列表
+items: 
+    - default.example: 
+        enable: false
+        send_text:"{BotName}! {Test}!"
+# 版本号
+version: 1.0
+# 自定义功能描述
+description: "示例模板"
+
+"""
+
+CONDITION_SPECIFIC_TEMPLATE = """\
 # 是否启用
 enable: true
 # 作者

@@ -220,10 +220,11 @@ def format_msg(message, begin=None, zh_en=False) -> List[str]:
     logger.debug(msg)
     return msg
 
-def format_str(message: str, begin=None) -> str:
+def format_str(message: str, begin=None, lower=True) -> str:
     """ 骰娘指令转义及解析 """
     regex = r"[<\[](.*?)[\]>]"
-    msg = re.sub("\s+", " ", re.sub(regex, "", str(message).lower())).strip(" ")
+    message = str(message).lower() if lower else str(message)
+    msg = re.sub("\s+", " ", re.sub(regex, "", message)).strip(" ")
     msg = translate_punctuation(msg)
     logger.debug(msg)
 

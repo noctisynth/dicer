@@ -16,7 +16,7 @@ from .utils.utils import (
     run_shell_command, get_latest_version
 )
 from .utils.plugins import modes
-from .utils.parser import CommandParser, Commands, Only, Optional, Required
+from .utils.parser import CommandParser, Commands, Only, Optional, Required, Positional
 from .utils.cards import Cards
 from .utils.chat import chat
 
@@ -77,7 +77,7 @@ if initalized:
     superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
     botcommand = on_startswith(".bot", priority=1, block=True)
     logcommand = on_startswith(".log", priority=1, block=True)
-    loghandlercommand = on_startswith("", priority=1, block=False)
+    messagemonitor = on_startswith("", priority=1, block=False)
     selflogcommand = on("message_sent", priority=1, block=False)
     showcommand = on_startswith((".show", ".display"), priority=2, block=True)
     setcommand = on_startswith((".set", ".st"), priority=2, block=True)
@@ -430,7 +430,7 @@ if initalized:
             i = 1
             for name, detail in community.items():
                 reply += f"  {i}. {detail['name']}[安装: .bot install {name}]\n"
-            
+
             reply.rstrip("\n")
             await matcher.send(reply)
             return
@@ -651,7 +651,7 @@ if initalized:
             loggers[get_group_id(event)][log][0].info(message)
 
     @selflogcommand.handle()
-    @loghandlercommand.handle()
+    @messagemonitor.handle()
     def loggerhandler(event: Event):
         """ 消息记录日志指令 """
         trpg_log(event)
@@ -1043,12 +1043,25 @@ if initalized:
 
     @registcommand.handle()
     async def registhandler(matcher: Matcher, event: GroupMessageEvent):
-        args = format_str(event.get_message(), begin=(".regist", ".reg")).split(" ")
+        args = format_str(event.get_message(), begin=(".regist", ".reg"), lower=False).split(" ")
         args = list(filter(None, args))
-        event_name = args[0]
-        message = args[1]
+        cp = CommandParser(
+            Commands([
+                Positional("event_name", str),
+                Positional("message", str)
+            ]),
+            args=args,
+            auto=True
+        ).results
+
+        event_name = cp["event_name"]
+        message = cp["message"]
+        if not event_name or not message:
+            await matcher.send("消息事件注册参数不全, 使用`.help regist`获取帮助信息.")
+            return
+
         manager.register_event(event_name, message, is_custom=True)
-        await matcher.send(f"消息事件 {event_name} 已被更改.")
+        await matcher.send(f"消息事件 {event_name} 已被更改为 {message}.")
 
     @sncommand.handle()
     async def snhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):

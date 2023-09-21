@@ -132,7 +132,7 @@ class CommandParser:
         """ 开始拆析指令集合 """
         if not args:
             args = self.args
-        iter_args = args
+        iter_args = [arg for arg in args]
 
         if not isinstance(args, (list, tuple)):
             raise TypeError("指令切片必须传入列或数组.")

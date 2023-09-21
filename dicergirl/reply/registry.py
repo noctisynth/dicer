@@ -341,7 +341,7 @@ class ReplyRegistry:
         Returns:
             bool: 如果成功删除事件，则返回 True；否则返回 False。
         """
-        filename = f"dg-{group_name}.yml"
+        filename = f"{group_name}.yml"
         cache = const.GENERIC_REPLY_FILE_CACHE
 
         container = self._custom_generic_data[group_name]
@@ -413,7 +413,7 @@ class ReplyRegistry:
                             data["items"].append({event_name: save_data})
                         with open(file=filepath, mode='wb') as drf:
                             const.REPLY_YAML.dump(data=data, stream=drf)
-                    break
+                            break
         except Exception as e:
             logger.error(f"数据持久化异常")
             logger.error(f"Error: {e}")
@@ -451,7 +451,8 @@ class ReplyRegistry:
                                     tmp.append(tmp_map)
                         with open(file=filepath, mode='wb') as drf:
                             const.REPLY_YAML.dump(data=data, stream=drf)
-                    break
+                            break
+
         except Exception as e:
             logger.error(f"数据擦除异常")
             logger.error(f"Error: {e}")

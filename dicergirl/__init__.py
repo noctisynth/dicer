@@ -1060,7 +1060,8 @@ if initalized:
             await matcher.send("消息事件注册参数不全, 使用`.help regist`获取帮助信息.")
             return
 
-        manager.register_event(event_name, message, is_custom=True)
+        message = html.unescape(message)
+        manager.register_event(event_name, message.replace("\\n", "\n"), is_custom=True)
         await matcher.send(f"消息事件 {event_name} 已被更改为 {message}.")
 
     @sncommand.handle()

@@ -1052,7 +1052,7 @@ if initalized:
                 Positional("message", str),
                 Optional(("remove", "rm", "delete", "del"), str),
                 Optional("enable", str),
-                Optional("disable ", str),
+                Optional("disable", str),
             ]),
             args=args,
             auto=True

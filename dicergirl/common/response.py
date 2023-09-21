@@ -15,6 +15,9 @@ class GenericResponse:
         self.send_text = send_text
         self.enable = enable
 
+    def to_dict(self):
+        return {self.event_name: {'enable': self.enable, 'send_text': self.send_text}}
+
 
 class ConditionResponse(GenericResponse):
     """
@@ -33,3 +36,7 @@ class ConditionResponse(GenericResponse):
         super().__init__(event_name, send_text, enable)
         self.match_type = match_type
         self.match_field = match_field
+
+    def to_dict(self):
+        return {self.event_name: {'enable': self.enable, 'send_text': self.send_text, 'match_field': self.match_field,
+                                  'match_type': str(self.match_type)}}

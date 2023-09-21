@@ -1,8 +1,10 @@
+import os
 from enum import unique, Enum
-from typing import Dict
+from typing import Dict, List
 
 from multilogging import multilogger
 
+from dicergirl.common import const
 from dicergirl.common.const import DEFAULT_GROUP_NAME as NAME
 from dicergirl.common.response import GenericResponse, ConditionResponse
 from dicergirl.reply.data import GenericData, ConditionData
@@ -42,7 +44,7 @@ class ReplyRegistry(object):
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._default_generic_data[NAME] = GenericData(NAME, "0.1")
-            cls._custom_generic_data[NAME] = ConditionData(NAME, "0.1")
+            cls._custom_generic_data[NAME] = GenericData(NAME, "0.1")
             cls._condition_specific_data[NAME] = ConditionData(NAME, "0.1")
             cls._instance = object.__new__(cls)
         return cls._instance
@@ -50,19 +52,17 @@ class ReplyRegistry(object):
     def register_container(self, data: GenericData):
         if isinstance(data, ConditionData):
             container = self._condition_specific_data
-            container[data.group_name] = data
         elif isinstance(data, GenericData):
             container = self._custom_generic_data
-            container[data.group_name] = data
-        else:
-            logger.warning(f"错误的注册类型: {data}")
-            return False
-        if data.group_name in container.keys():
-            logger.info(f"自定义回复文件'{data.group_name.upper()}'注册成功")
-            return True
         else:
             logger.warning(f"回复文件'{data.group_name.upper()}'注册失败")
-            return True
+            return
+        container[data.group_name] = data
+        if data.group_name in container:
+            logger.info(f"自定义回复文件'{data.group_name.upper()}'注册成功")
+        else:
+            logger.warning(f"回复文件'{data.group_name.upper()}'注册失败")
+        return data.group_name in container
 
     def register_event(self,
                        event_name: str,
@@ -88,22 +88,50 @@ class ReplyRegistry(object):
         Returns:
             事件注册的是否成功
         """
+        container = self._default_generic_data[NAME]
+        response_type = "DicerGirl默认回复"
+
         is_condition_specific_data = False
+        filename = None
+        cache = None
         if match_field and match_type:
             container = self._condition_specific_data[NAME]
             is_condition_specific_data = True
+            filename = f"{NAME}.yml"
+            cache = const.CONDITION_SPECIFIC_REPLY_FILE_CACHE
             response_type = "自定义条件回复"
         elif is_custom:
             container = self._custom_generic_data[NAME]
-            self._custom_generic_data[NAME].add(GenericResponse(event_name, send_text))
+            filename = f"dg-{NAME}.yml"
+            cache = const.GENERIC_REPLY_FILE_CACHE
             response_type = "自定义通用回复"
-        else:
-            container = self._default_generic_data[NAME]
-            response_type = "DicerGirl默认回复"
+
         if is_condition_specific_data:
-            container.add(ConditionResponse(event_name, send_text, match_field, match_type, enable))
+            response = ConditionResponse(event_name, send_text, match_field, match_type, enable)
         else:
-            container.add(GenericResponse(event_name, send_text, enable))
+            response = GenericResponse(event_name, send_text, enable)
+
+        if isinstance(container, ConditionData):
+            container.add(response)
+        else:
+            container.add(response)
+        try:
+            if filename and cache:
+                for filepath, data in cache.items():
+                    if os.path.basename(filepath) == filename:
+                        save_data = response.to_dict()
+                        if isinstance(data["items"], List):
+                            found = False
+                            for item in data["items"]:
+                                item[event_name] = save_data[event_name]
+                                found = True
+                            if not found:
+                                data["items"].append(save_data)
+                            with open(file=filepath, mode='wb') as drf:
+                                const.REPLY_YAML.dump(data=data, stream=drf)
+        except Exception as e:
+            logger.error(f"数据持久化异常")
+            logger.error(f"Error: {e}")
         if container.get_response(event_name):
             logger.info(f"{response_type}'{event_name}'注册成功")
             return True
@@ -151,7 +179,7 @@ class ReplyRegistry(object):
         return [v2.event_name for v1 in self._custom_generic_data.values() for v2 in v1.items.values()]
 
     @property
-    def message_event_name(self):
+    def message_event_names(self):
         """
         获取消息事件的所有事件名
         """
@@ -162,4 +190,4 @@ class ReplyRegistry(object):
         """
         获取所有事件的事件名
         """
-        return self.generic_event_names + self.message_event_name
+        return self.generic_event_names + self.message_event_names + self.custom_event_names

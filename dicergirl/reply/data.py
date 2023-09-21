@@ -16,7 +16,7 @@ class GenericData:
                  description: str = "",
                  enable: bool = True):
         self.group_name = group_name
-        self.items: Dict[str, GenericResponse] = {}
+        self.items: Dict = {}
         self.version = version
         self.author = author
         self.description = description

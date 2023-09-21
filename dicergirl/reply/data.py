@@ -20,7 +20,7 @@ class GenericData:
         self.version = version
         self.author = author
         self.description = description
-        self.enable = enable
+        self._enable = enable
 
     def add(self, *args):
         for data in args:
@@ -33,7 +33,7 @@ class GenericData:
                 del self.items[arg.event_name]
             elif isinstance(arg, str):
                 if self.items.get(arg) is not None:
-                    del self.items[arg]
+                    self.items.pop(arg)
 
     def enable(self, event_name: str = None):
         self.set_event_status(event_name, True)
@@ -46,7 +46,7 @@ class GenericData:
 
     def set_event_status(self, event_name: str = None, status: bool = None):
         if event_name is None:
-            self.enable = not self.enable if not status else status
+            self._enable = not self._enable if not status else status
         elif self.items.get(event_name):
             self.items[event_name].enable = status if status is not None else not self.items[
                 event_name].enable
@@ -57,7 +57,7 @@ class GenericData:
                 return value
 
     def is_enable(self, event_name: str = None):
-        return self.enable and (not event_name or (self.items.get(event_name) and self.items[event_name].enable))
+        return self._enable and (not event_name or (self.items.get(event_name) and self.items[event_name].enable))
 
 
 class ConditionData(GenericData):

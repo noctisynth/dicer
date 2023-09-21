@@ -128,11 +128,14 @@ class ReplyRegistryManager(ReplyRegistry):
         """
         for container in self._custom_generic_data.values():
             response = container.get_response(event_name)
-            if response and response.enable:
-                result = self._handle_generic_event(response, **kwargs)
-                if result:
-                    return result
-
+            if response:
+                is_enable = container.is_enable(event_name)
+                if response and is_enable:
+                    result = self._handle_generic_event(response, **kwargs)
+                    if result:
+                        return result
+                    else:
+                        break
         response = self._default_generic_data[NAME].get_response(event_name)
         result = self._handle_generic_event(response, **kwargs)
         if not result:

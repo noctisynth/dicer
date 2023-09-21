@@ -1,6 +1,6 @@
 import os
 from enum import unique, Enum
-from typing import List
+from typing import List, Dict
 
 from multilogging import multilogger
 from ruamel.yaml import CommentedMap, CommentedSeq
@@ -44,6 +44,9 @@ class ReplyRegistry:
         register_container: 注册数据到相应的容器中
         register_event: 注册事件
         remove_event: 销毁事件
+        enable_event: 启用事件
+        disable_event: 禁用事件
+        toggle_event: 切换事件状态
         generic_event_names: 获取所有默认事件的事件
         custom_event_names: 获取所有自定义事件的事件名
         message_event_names: 获取所有消息事件的事件名
@@ -65,17 +68,72 @@ class ReplyRegistry:
         registry.register_event("common.sayhi", "你好{user}！", "你好", MatchType.EXACT_MATCH)  # 注册特定条件下的自定义回复
     """
     _instance = None
-    _default_generic_data = {}
-    _custom_generic_data = {}
-    _condition_specific_data = {}
+    _default_generic_data: Dict[str, GenericData] = {}
+    _custom_generic_data: Dict[str, GenericData] = {}
+    _condition_specific_data: Dict[str, ConditionData] = {}
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._default_generic_data[NAME] = GenericData(NAME, "0.1")
-            cls._custom_generic_data[NAME] = GenericData(NAME, "0.1")
+            cls._custom_generic_data[NAME] = GenericData(f"dg-{NAME}", "0.1")
             cls._condition_specific_data[NAME] = ConditionData(NAME, "0.1")
             cls._instance = object.__new__(cls)
         return cls._instance
+
+    def disable_event(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
+        """
+        禁用事件
+
+        Args:
+            event_name (str): 待禁用事件的事件名
+            is_message_event (bool, optional): 是否为消息事件，用于标识特定条件下的回复事件。默认值为 False。
+            group_name (str, optional): 数据组的名称。默认值为 NAME。
+
+        Returns:
+            bool: 当前事件的状态
+        """
+        if is_message_event:
+            container = self._condition_specific_data[NAME]
+        else:
+            container = self._custom_generic_data[f"dg-{group_name}"]
+        container.disable(event_name)
+        return container.is_enable(event_name)
+
+    def enable_event(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
+        """
+        启用事件
+
+        Args:
+            event_name (str): 待启用事件的事件名
+            is_message_event (bool, optional): 是否为消息事件，用于标识特定条件下的回复事件。默认值为 False。
+            group_name (str, optional): 数据组的名称。默认值为 NAME。
+        Returns:
+            bool: 当前事件的状态
+        """
+        if is_message_event:
+            container = self._condition_specific_data[group_name]
+        else:
+            container = self._custom_generic_data[f"dg-{group_name}"]
+        container.enable(event_name)
+        return container.is_enable(event_name)
+
+    def toggle(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
+        """
+        切换事件状态
+
+        Args:
+            event_name (str): 待切换的事件名
+            is_message_event (bool, optional): 是否为消息事件，用于标识特定条件下的回复事件。默认值为 False。
+            group_name (str, optional): 数据组的名称。默认值为 NAME。
+        Returns:
+            bool: 当前事件的状态
+        """
+        if is_message_event:
+            container = self._condition_specific_data[group_name]
+        else:
+            container = self._custom_generic_data[f"dg-{group_name}"]
+        container.toggle(event_name)
+        return container.is_enable(event_name)
 
     def register_container(self, data: GenericData) -> bool:
         """
@@ -129,9 +187,9 @@ class ReplyRegistry:
         if match_field and match_type:
             return self._register_condition_specific_event(event_name, send_text, match_field, match_type, enable)
         elif is_custom:
-            return self._register_custom_generic_event(event_name, send_text)
+            return self._register_custom_generic_event(event_name, send_text, enable)
         else:
-            return self._register_default_generic_event(event_name, send_text)
+            return self._register_default_generic_event(event_name, send_text, enable)
 
     def remove_event(self, event_name: str,
                      group_name: str = NAME,
@@ -148,7 +206,7 @@ class ReplyRegistry:
             bool: 如果成功删除事件，则返回 True；否则返回 False。
         """
         if reply_type is ReplyType.CUSTOM:
-            return self._remove_custom_generic_event(event_name, group_name)
+            return self._remove_custom_generic_event(event_name, f"dg-{group_name}")
         elif reply_type is ReplyType.CONDITION:
             return self._remove_condition_specific_event(event_name, group_name)
         elif reply_type is ReplyType.DEFAULT:
@@ -200,7 +258,7 @@ class ReplyRegistry:
         Returns:
             bool: 如果事件成功注册到_custom_generic_data中，则返回 True；否则返回 False。
         """
-        container = self._custom_generic_data[NAME]
+        container = self._custom_generic_data[f"dg-{NAME}"]
         response_type = "自定义通用回复"
         filename = f"dg-{NAME}.yml"
         cache = const.GENERIC_REPLY_FILE_CACHE
@@ -264,6 +322,7 @@ class ReplyRegistry:
               bool: 如果成功删除事件，则返回 True；否则返回 False。
           """
         container = self._default_generic_data[group_name]
+        container.remove(event_name)
         if not container.get_response(event_name):
             logger.info(f"回复事件'{event_name}'销毁成功")
             return True
@@ -354,6 +413,7 @@ class ReplyRegistry:
                             data["items"].append({event_name: save_data})
                         with open(file=filepath, mode='wb') as drf:
                             const.REPLY_YAML.dump(data=data, stream=drf)
+                    break
         except Exception as e:
             logger.error(f"数据持久化异常")
             logger.error(f"Error: {e}")
@@ -386,14 +446,12 @@ class ReplyRegistry:
                                     tmp_map = CommentedMap()
                                     for name, content in item.items():
                                         if name != event_name:
-                                            logger.info(f"{event_name} != {name}")
                                             tmp_map[name] = content
-                                    logger.info(tmp)
                                     tmp.remove(item)
-                                    logger.info(tmp)
                                     tmp.append(tmp_map)
                         with open(file=filepath, mode='wb') as drf:
                             const.REPLY_YAML.dump(data=data, stream=drf)
+                    break
         except Exception as e:
             logger.error(f"数据擦除异常")
             logger.error(f"Error: {e}")

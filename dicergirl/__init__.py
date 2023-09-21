@@ -1043,12 +1043,16 @@ if initalized:
 
     @registcommand.handle()
     async def registhandler(matcher: Matcher, event: GroupMessageEvent):
+        """ 消息事件注册指令 """
         args = format_str(event.get_message(), begin=(".regist", ".reg"), lower=False).split(" ")
         args = list(filter(None, args))
         cp = CommandParser(
             Commands([
                 Positional("event_name", str),
-                Positional("message", str)
+                Positional("message", str),
+                Optional(("remove", "rm", "delete", "del"), str),
+                Optional("enable", str),
+                Optional("disable ", str),
             ]),
             args=args,
             auto=True
@@ -1066,6 +1070,7 @@ if initalized:
 
     @sncommand.handle()
     async def snhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+        """ 群名片修改指令 """
         card: Cards = modes[get_mode(event)].__cards__
         user_id: int = event.get_user_id()
         got = card.get(event, qid=str(user_id))

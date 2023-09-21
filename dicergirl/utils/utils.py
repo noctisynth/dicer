@@ -18,7 +18,7 @@ import json
 import asyncio
 import httpx
 
-version = "3.3.9"
+version = "3.3.10beta1"
 """ Dicer Girl 版本号 """
 current_dir = Path(__file__).resolve().parent
 """ Dicer Girl 当前目录 """

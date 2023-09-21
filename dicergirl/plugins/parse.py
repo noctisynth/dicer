@@ -31,7 +31,7 @@ async def get_plugins_mixed():
             official = result["official"]
         else:
             official = {}
-        
+
         if "community" in result.keys():
             community = result["community"]
         else:

@@ -36,10 +36,8 @@ class Messages:
 .help 管理  查看骰娘管理指令
 .help 支持  获取开发者支持
 使用`.help [模式名称]`以获取该跑团模式的帮助.
-
-Unvisitor DicerGirl 版本 {version}, 以 Apache-2.0 协议开源.
-Copyright © 2011-2023 Unknown Visitor, org.
-This project is open source under the Apache-2.0 license."""
+此项目以 Apache-2.0 协议开源.
+Copyright 2011-2023 Unknown Visitor, org."""
     commands = """Unvisitor DicerGirl 版本 {version}
 角色卡设定或模式切换后骰娘会自动修改群名片, 在保存新的人物卡时同样会更改群名片.
 所有指令允许大小写混用.
@@ -74,62 +72,62 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
 项目负责人: 1264983312"""
     sudo = """用法：.su [鉴权令牌]
 描述：
-   进行管理员鉴权, 获得骰娘的管理员权限。
+    进行管理员鉴权, 获得骰娘的管理员权限。
 示例:
-   .su d32ab3...
+    .su d32ab3...
 注意：
-   - 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`的控制终端输出, 输出模式为`CRITICAL`.
-   - 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同."""
+    - 鉴权令牌会在执行无参数的`.su`指令后, 在`Nonebot2`的控制终端输出, 输出模式为`CRITICAL`.
+    - 需要注意此权限管理系统与`Nonebot2`的`SUPERUSER`不同."""
     bot = """用法：.bot <指令> [参数]
 描述：
-   执行与管理插件和机器人设置相关的各种任务。
+    执行与管理插件和机器人设置相关的各种任务。
 指令：
-   version (v, bot, 版本)          显示机器人版本
-   exit (bye, leave, 离开)         退出机器人
-   on (run, start, 启动)           启动机器人
-   off (down, shutdown, 关闭)      关闭机器人
-   upgrade (up, 更新)              升级机器人
-   downgrade (降级)                降级机器人
-   name (命名) <名称>              设置或显示机器人名称
-   status (状态)                   显示机器人当前状态
-   plgup (pluginup, 升级) [名称]    升级特定插件
-   install (add, 安装) [名称]      安装插件
-   remove (del, rm, 删除, 卸载) [名称]    删除插件
-   mode (list, 已安装)             列出已安装的插件
-   store (plugins, 商店)           显示商店中可用的插件
-   search (搜索) [名称]            在商店中搜索插件
+    version (v, bot, 版本)          显示机器人版本
+    exit (bye, leave, 离开)         退出机器人
+    on (run, start, 启动)           启动机器人
+    off (down, shutdown, 关闭)      关闭机器人
+    upgrade (up, 更新)              升级机器人
+    downgrade (降级)                降级机器人
+    name (命名) <名称>              设置或显示机器人名称
+    status (状态)                   显示机器人当前状态
+    plgup (pluginup, 升级) [名称]    升级特定插件
+    install (add, 安装) [名称]      安装插件
+    remove (del, rm, 删除, 卸载) [名称]    删除插件
+    mode (list, 已安装)             列出已安装的插件
+    store (plugins, 商店)           显示商店中可用的插件
+    search (搜索) [名称]            在商店中搜索插件
 示例：
-   .bot version
-   .bot install 插件名称
-   .bot remove 插件名称"""
+    .bot version
+    .bot install 插件名称
+    .bot remove 插件名称"""
     mode = """用法：.mode [模式名称]
 描述：
-   切换跑团模式
+    切换跑团模式
 示例：
-   .mode coc  切换到 COC 跑团模式
+    .mode coc  切换到 COC 跑团模式
 注意：
-   - 如果骰娘管理员加入了第三方跑团插件, `mode`参数应该设置为该插件中`__init__.py`的`__name__`参数, 不区分大小写.
-   - 默认的跑团模式为`SCP`, 每一次机器人重启或更新后, 跑团模式都会更改为`SCP`."""
+    - 如果骰娘管理员加入了第三方跑团插件, `mode`参数应该设置为该插件中`__init__.py`的`__name__`参数, 不区分大小写.
+    - 默认的跑团模式为`SCP`, 每一次机器人重启或更新后, 跑团模式都会更改为`SCP`."""
     set = """用法：.set (.st) <指令> [属性名称] [属性值] ...
 描述：
-   设置角色卡信息。
+    设置角色卡信息。
 指令：
-   show (=.show)    显示角色卡信息
-   del (=.del)     删除角色卡
-   clear    清空所有角色卡信息
+    show (=.show)    显示角色卡信息
+    del (=.del)     删除角色卡
+    clear    清空所有角色卡信息
 示例：
-   .set 毁灭人类 99 打爆地球 99
-   .set 幸运 +10
-   .set show
-   .set del 毁灭人类
-   .set clear
+    .set 毁灭人类 99 打爆地球 99
+    .set 幸运 +10
+    .set show
+    .set del 毁灭人类
+    .set clear
 注意：
-   - 请确保在录卡之前执行无参数的`.set(.st)`指令保存人物卡。
-   - 在保存人物卡之前请先确保当前模式与车卡模式相同.
-   - 部分跑团模式(如SCP)中不支持设置属性, 同时设置非自定义技能也是不推荐的, 在设置前, 建议先询问主持人的意见.
-   - 在群聊中输入单独的`.set`指令, 欧若可将自动读取最近一次车卡(即人物卡作成)指令的结果进行保存.
-   - 当属性或技能名称均为中文或均为英文时, 指令是强空格需求的.
-   - 录卡一般常见于类似 COC 跑团和 DND 跑团的跑团模式, 部分模式(如SCP模式)是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡."""
+    - 请确保在录卡之前执行无参数的`.set(.st)`指令保存人物卡。
+    - 在保存人物卡之前请先确保当前模式与车卡模式相同.
+    - 部分跑团模式(如SCP)中不支持设置属性, 同时设置非自定义技能也是不推荐的, 在设置前, 建议先询问主持人的意见.
+    - 在群聊中输入单独的`.set`指令, 欧若可将自动读取最近一次车卡(即人物卡作成)指令的结果进行保存.
+    - 当属性或技能名称均为中文或均为英文时, 指令是强空格需求的.
+    - 录卡一般常见于类似 COC 跑团和 DND 跑团的跑团模式, 部分模式(如SCP模式)是不需要的, 在建卡之前, 请先询问主持人是否需要进行录卡."""
     show = """.show [skill|all|str: attribute] Optional[CQ:at]  人物卡展示
   skill: 查看自身人物卡技能
   all: 查询所有存储的人物卡

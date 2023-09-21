@@ -18,7 +18,6 @@ from .utils.utils import (
 from .utils.plugins import modes
 from .utils.parser import CommandParser, Commands, Only, Optional, Required, Positional
 from .utils.cards import Cards
-from .utils.chat import chat
 
 from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
 
@@ -1081,15 +1080,6 @@ if initalized:
 
         name = got['name'] if got else ""
         await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
-
-    @chatcommand.handle()
-    async def chathandler(matcher: Matcher, event: MessageEvent):
-        """ chatGPT 对话指令 """
-        args = format_str(event.get_message(), begin=".chat")
-        if not args:
-            await matcher.send("空消息是不被允许的.")
-            return
-        await matcher.send(chat(args))
 
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher):

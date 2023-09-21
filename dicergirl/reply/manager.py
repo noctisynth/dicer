@@ -16,16 +16,55 @@ logger = multilogger(name="DicerGirl", payload="ReplyRegistryManager")
 
 @dataclass
 class MethodInfo:
+    """
+     用于存储可调用对象及其参数信息的数据类
+
+     Attributes:
+         callable (Callable): 任意方法
+         parameters (Dict[str, Type]): 参数信息的字典，其中键为参数名称，值为参数类型
+     """
     callable: Callable
     parameters: Dict[str, Type]
 
 
 class ReplyRegistryManager(ReplyRegistry):
+    """
+    ReplyRegistryManager 类用于管理全局方法、全局变量和处理消息事件等功能。
+
+    Attributes:
+        global_method (Dict[str, MethodInfo]): 用于存储全局方法的字典
+        global_variable (Dict[str, Tuple[Type, Any]]): 用于存储全局变量的字典
+
+    Methods:
+        register_method: 注册全局方法
+        remove_method: 删除全局方法
+        register_variable: 注册全局变量
+        remove_variable: 删除全局变量
+        process_generic_event: 处理通用事件
+        process_message_event: 处理消息事件
+        call_method: 调用全局方法
+
+    Private Methods:
+        _handle_generic_event: 处理通用事件的内部方法
+        _handle_placeholders: 处理占位符的内部方法
+        _prepare_arguments: 准备方法参数的内部方法
+        _filter_arguments: 过滤不匹配参数的内部方法
+        _check_argument_types: 检查参数类型的内部方法
+        _handle_condition_event: 处理条件事件的内部方法
+        _execute_method: 执行方法的内部方法
+    """
     _inspect_empty = inspect.signature(ReplyRegistry).empty
     global_method: Dict[str, MethodInfo] = {}
     global_variable: Dict[str, Tuple[Type, Any]] = {}
 
     def register_method(self, method: Callable, method_name: str = None):
+        """
+        注册全局方法
+
+        Args:
+            method (Callable): 待注册的方法
+            method_name (str, optional): 方法的名称。如果未提供，默认使用方法的名称。
+        """
         if method_name is None:
             method_name = method.__name__
         self.global_method[method_name] = MethodInfo(method, {name: parameter.annotation
@@ -34,6 +73,15 @@ class ReplyRegistryManager(ReplyRegistry):
         logger.info(f"注册全局方法: {method}")
 
     def remove_method(self, method_name: str) -> bool:
+        """
+        删除全局方法
+
+        Args:
+            method_name (str): 待移除的方法名
+
+        Returns:
+            bool: 如果成功删除方法返回 True；否则返回 False。
+        """
         if method_name in self.global_method:
             del self.global_method[method_name]
             logger.info(f"销毁全局方法: {method_name}")
@@ -41,11 +89,26 @@ class ReplyRegistryManager(ReplyRegistry):
         return False
 
     def register_variable(self, **kwargs):
+        """
+        注册全局变量
+
+        Args:
+            **kwargs: 待注册的全局变量
+        """
         for key, value in kwargs.items():
             self.global_variable[key] = (type(value), value)
             logger.info(f"注册全局变量: {key}")
 
     def remove_variable(self, variable_name: str) -> bool:
+        """
+        删除全局变量
+
+        Args:
+            variable_name (str): 待删除的全局变量名
+
+        Returns:
+            bool: 如果成功删除变量，则返回 True；否则返回 False。
+        """
         if variable_name in self.global_variable:
             logger.info(f"销毁全局变量: {variable_name}")
             del self.global_variable[variable_name]
@@ -53,6 +116,16 @@ class ReplyRegistryManager(ReplyRegistry):
         return False
 
     def process_generic_event(self, event_name: str, **kwargs):
+        """
+        删除全局变量
+
+        Args:
+            event_name (str): 待处理的事件名
+            **kwargs: 附加参数
+
+        Returns:
+            bool: 如果成功删除变量，则返回 True；否则返回 False。
+        """
         for container in self._custom_generic_data.values():
             response = container.get_response(event_name)
             if response and response.enable:
@@ -68,10 +141,13 @@ class ReplyRegistryManager(ReplyRegistry):
 
     def process_message_event(self, message: str):
         """
-        根据传入的消息匹配，并返回匹配字段的消息文本
+        处理消息事件并返回匹配字段的消息文本
 
-        Parameters:
-            message - 用户发送的文本
+        Args:
+            message (str): 用户发送的文本消息
+
+        Returns:
+            str | None: 匹配字段的消息文本，如果没有匹配则返回 None。
         """
         result = self._handle_condition_event(message)
         if len(result) == 0:
@@ -79,6 +155,16 @@ class ReplyRegistryManager(ReplyRegistry):
         return result
 
     def call_method(self, method_name: str, **kwargs):
+        """
+        调用全局方法。
+
+        Args:
+          method_name (str): 待调用的方法名
+          **kwargs: 方法所需参数
+
+        Returns:
+          Any | None: 方法的执行结果，如果发生错误则返回 None。
+        """
         method_info = self.global_method[method_name]
         if method_info is not None:
             kwargs = self._prepare_arguments(method_name, kwargs)

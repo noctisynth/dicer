@@ -29,9 +29,11 @@ class GenericData:
 
     def remove(self, *args):
         for arg in args:
-            key = arg.event_name if isinstance(arg, GenericResponse) else str(arg)
-            if self.items.get(key) is not None:
-                del self.items[key]
+            if isinstance(arg, GenericResponse):
+                del self.items[arg.event_name]
+            elif isinstance(arg, str):
+                if self.items.get(arg) is not None:
+                    del self.items[arg]
 
     def enable(self, event_name: str = None):
         self.set_event_status(event_name, True)

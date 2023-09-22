@@ -200,19 +200,23 @@ def remove_logger(event: GroupMessageEvent, id: int) -> Dict[str, list]:
 
 def format_msg(message, begin=None, zh_en=False) -> List[str]:
     """ 骰娘指令拆析为`list`的方法 """
-    msg = format_str(message, begin=begin).split(" ")
+    msgs = format_str(message, begin=begin)
     outer = []
-    regex = r'(\d+)|([a-zA-Z\u4e00-\u9fa5]+)' if not zh_en else r"(\d+)|([a-zA-Z]+)|([\u4e00-\u9fa5]+)"
+    regex = r'([+-]?\d+)|([a-zA-Z]+)|("[^"]+")|([\u4e00-\u9fa5]+)'
+    msgs = list(filter(None, re.split(regex, msgs)))
+    logger.debug(msgs)
 
-    for m in msg:
-        m = re.split(regex, m)
-        m = list(filter(None, m))
-        outer += m
+    for msg in msgs:
+        splited_msg = list(filter(None, re.split(regex, msg.strip(" "))))
 
-    msg = outer
-    msg = list(filter(None, msg))
-    logger.debug(msg)
-    return msg
+        for i, msg in enumerate(splited_msg):
+            splited_msg[i] = msg.strip('"')
+
+        outer += splited_msg
+
+    msgs = list(filter(None, outer))
+    logger.debug(msgs)
+    return msgs
 
 def format_str(message: str, begin=None, lower=True) -> str:
     """ 骰娘指令转义及解析 """

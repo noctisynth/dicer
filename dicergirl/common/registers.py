@@ -62,6 +62,7 @@ def regist_general_event():
     manager.register_event("CardSaved", "[{SenderCard}]成功从缓存保存人物卡属性: \n{CardDetail}")
     manager.register_event("CardDeleted", "[{SenderCard}]已删除使用中的人物卡！")
     manager.register_event("BadRollString", "诶, 出错了, 请检查你的掷骰表达式.\n使用`.help roll`获得掷骰指令使用帮助.")
+    manager.register_event("BadMultipleRollString", "[{SenderCard}]多轮掷骰次数过多, 指令拒绝.")
     manager.register_event("MultipleRollStringError", "参数错误, `#`提示符前应当跟随整型数.")
     manager.register_event("BadSex", "{BotName}拒绝将{CharactorName}性别将设置为 {Value}, 这是对物种的侮辱.")
     manager.register_event("AttributeCountError", "参数错误, 这是由于传输的数据数量错误, {BotName}只接受为偶数的参数数量, 这看起来不像是来源于我的错误.\n使用`.help {Command}`查看使用帮助.")

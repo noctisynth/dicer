@@ -298,6 +298,11 @@ def roll(args: str, name: str=None) -> str:
 
         try:
             time = int(args[0].strip())
+            if time > 20:
+                return manager.process_generic_event(
+                        "BadMultipleRollString",
+                        SenderCard=name
+                    )
         except ValueError:
             return manager.process_generic_event(
                 "MultipleRollStringError",

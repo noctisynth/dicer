@@ -26,6 +26,8 @@ LOGGERS_CACHE_FILE = SAVED_DATA_PATH / "loggers.json"
 """ 日志信息存储文件 """
 BOT_MODES_FILE = SAVED_DATA_PATH / "modes.json"
 """ 跑团模式存储文件 """
+BLACKLIST_FILE = SAVED_DATA_PATH / "blacklist.yml"
+""" 黑名单存储文件 """
 DEFAULT_GROUP_NAME = "default"
 """ 默认消息事件组名 """
 REPLY_YAML = YAML()

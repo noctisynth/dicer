@@ -74,5 +74,5 @@ def is_kicked(event: Event) -> bool:
     return event.is_tome()
 
 
-async def on_kicked() -> Type[Matcher]:
+def on_kicked() -> Type[Matcher]:
     return on_request(Rule(is_kicked), priority=2, block=True)

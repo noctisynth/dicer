@@ -1,7 +1,10 @@
+from typing import Type
 from nonebot.consts import STARTSWITH_KEY
 from nonebot.matcher import Matcher
-from nonebot.plugin import on_message
+from nonebot.adapters import Event
+from nonebot.plugin import on_message, on_request
 from nonebot.rule import Rule
+from nonebot.adapters.onebot.v11.event import GroupDecreaseNoticeEvent
 
 from ..common.decorators import translate_punctuation
 
@@ -56,9 +59,20 @@ def startswith(msg, ignorecase=True) -> Rule:
     return Rule(StartswithRule(msg, ignorecase))
 
 
-def on_startswith(commands, priority=0, block=True) -> Matcher:
+def on_startswith(commands, priority=0, block=True) -> Type[Matcher]:
     """ 获得`Nonebot2`指令检查及参数注入方法 """
     if isinstance(commands, str):
         commands = (commands, )
 
     return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+
+
+def is_kicked(event: Event) -> bool:
+    if not isinstance(event, GroupDecreaseNoticeEvent):
+        return False
+
+    return event.is_tome()
+
+
+async def on_kicked() -> Type[Matcher]:
+    return on_request(Rule(is_kicked), priority=2, block=True)

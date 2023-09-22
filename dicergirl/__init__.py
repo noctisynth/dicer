@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime
 from multilogging import multilogger
 
-from .handlers.on import on_startswith
+from .handlers.on import on_startswith, on_kicked
 
 from .reply.manager import manager
 
@@ -18,6 +18,7 @@ from .utils.utils import (
 from .utils.plugins import modes
 from .utils.parser import CommandParser, Commands, Only, Optional, Required, Positional
 from .utils.cards import Cards
+from .utils.blacklist import blacklist
 
 from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
 
@@ -35,7 +36,7 @@ from nonebot.matcher import Matcher
 from nonebot.plugin import on, on_request, PluginMetadata
 from nonebot.adapters import Bot as Bot
 from nonebot.adapters.onebot import V11Bot
-from nonebot.adapters.onebot.v11.event import FriendRequestEvent, GroupRequestEvent
+from nonebot.adapters.onebot.v11.event import FriendRequestEvent, GroupRequestEvent, GroupDecreaseNoticeEvent
 from nonebot.internal.matcher.matcher import Matcher
 
 import logging
@@ -102,6 +103,7 @@ if initalized:
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
     friendaddrequest = on_request(priority=2, block=True)
     groupaddrequest = on_request(priority=2, block=True)
+    kickedevent = on_kicked()
 
     # 定时任务
     scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
@@ -160,6 +162,30 @@ if initalized:
                 event=event
             )
             return
+
+        super_users = get_super_users()
+        for superuser in super_users:
+            bot.send_private_msg(
+                user_id=superuser,
+                message=manager.process_generic_event(
+                    "GroupApproval",
+                    event=event
+                )
+                )
+
+        if not super_users:
+            bot.send_private_msg(
+                user_id=event.self_id,
+                message=manager.process_generic_event(
+                    "GroupApproval",
+                    event=event
+                )
+            )
+
+    @kickedevent.handle()
+    async def onkickhandler(bot: V11Bot, event: GroupDecreaseNoticeEvent):
+        blacklist.add_group_blacklist(str(event.group_id))
+        blacklist.add_group_blacklist(str(event.operator_id))
 
         super_users = get_super_users()
         for superuser in super_users:

@@ -5,7 +5,7 @@ from multilogging import multilogger
 from .reply.manager import manager
 
 from .utils.utils import (
-    version, init, on_startswith,
+    init, on_startswith,
     get_group_id, get_mentions, get_user_card,
     is_super_user, add_super_user, rm_super_user, make_uuid, get_uuid,
     format_msg, format_str,
@@ -27,6 +27,7 @@ from .errors.pluginerror import PluginExistsError, PluginInstallFailedError, Plu
 
 from .common.messages import help_message
 from .common.registers import regist_all
+from .common.const import VERSION
 
 from nonebot.matcher import Matcher
 from nonebot.plugin import on, PluginMetadata
@@ -43,7 +44,7 @@ import nonebot
 import re
 import json
 
-__version__ = version
+__version__ = VERSION
 __plugin_meta__ = PluginMetadata(
     name="DicerGirl",
     description="新一代跨平台开源 TRPG 骰娘框架",
@@ -105,7 +106,7 @@ if initalized:
     async def _() -> None:
         """ `Nonebot2`核心加载完成后的初始化方法 """
         global DEBUG
-        logger.info(f"DicerGirl 版本 {version} 初始化中...")
+        logger.info(f"DicerGirl 版本 {VERSION} 初始化中...")
         if DEBUG:
             logging.getLogger().setLevel(logging.DEBUG)
             logger.remove()
@@ -338,7 +339,7 @@ if initalized:
             rss = memi.rss / 1024 / 1024
             total = psutil.virtual_memory().total / 1024 / 1024
 
-            reply = f"DicerGirl {version}, {'正常运行' if get_status(event) else '指令限制'}\n"
+            reply = f"DicerGirl {VERSION}, {'正常运行' if get_status(event) else '指令限制'}\n"
             reply += f"骰娘尊名: {get_name()}\n"
             reply += f"操作系统: {system}\n"
             reply += f"CPU 核心: {psutil.cpu_count()} 核心\n"
@@ -352,7 +353,7 @@ if initalized:
             await matcher.send("检查版本更新中...")
             newest_version = await get_latest_version("dicergirl")
 
-            if tuple(map(int, version.split("."))) < newest_version:
+            if tuple(map(int, VERSION.split("."))) < newest_version:
                 await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
                 upgrade = await run_shell_command(f"\"{sys.executable}\" -m pip install dicergirl -i https://pypi.org/simple --upgrade")
 
@@ -767,7 +768,7 @@ if initalized:
 
         message = help_message(arg)
         message = re.sub(r"\{name\}", get_name(), message)
-        message = re.sub(r"\{version\}", version, message)
+        message = re.sub(r"\{version\}", VERSION, message)
         message = re.sub(r"\{py_version\}", platform.python_version(), message)
         message = re.sub(r"\{nonebot_version\}", nonebot.__version__, message)
         await matcher.send(message)
@@ -1057,6 +1058,21 @@ if initalized:
             auto=True
         ).results
 
+        if cp["remove"]:
+            if not manager.remove_event(cp["remove"]):
+                 matcher.send("消息事件注册参数不全, 使用`.help regist`获取帮助信息.")
+
+            await matcher.send(f"消息事件 {cp['remove']} 已经成功销毁, 该事件将采用默认回复替代.")
+            return
+
+        if cp["enable"]:
+            ...
+            return
+
+        if cp["disable"]:
+            ...
+            return
+
         event_name = cp["event_name"]
         message = cp["message"]
         if not event_name or not message:
@@ -1084,7 +1100,7 @@ if initalized:
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher):
         """ 骰娘版本及开源声明指令 """
-        await matcher.send(f"Unvisitor DicerGirl 版本 {version} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助.")
+        await matcher.send(f"Unvisitor DicerGirl 版本 {VERSION} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助.")
         return
 else:
     logger.warning("Nonebot2 初始化失败, DicerGirl 无法启动!")

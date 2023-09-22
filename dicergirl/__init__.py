@@ -8,7 +8,7 @@ from .reply.manager import manager
 
 from .utils.utils import (
     init, get_group_id, get_mentions, get_user_card,
-    is_super_user, add_super_user, rm_super_user, make_uuid, get_uuid,
+    is_super_user, add_super_user, rm_super_user, get_super_users, make_uuid, get_uuid,
     format_msg, format_str,
     get_mode, set_mode,
     get_loggers, loggers, add_logger, remove_logger, get_status, boton, botoff, set_name, get_name,
@@ -32,9 +32,10 @@ from .common.const import DICERGIRL_LOGS_PATH, VERSION
 from .utils.settings import DEBUG, debugon, debugoff
 
 from nonebot.matcher import Matcher
-from nonebot.plugin import on, PluginMetadata
+from nonebot.plugin import on, on_request, PluginMetadata
 from nonebot.adapters import Bot as Bot
-from nonebot.adapters.onebot.v11 import Bot as V11Bot
+from nonebot.adapters.onebot import V11Bot
+from nonebot.adapters.onebot.v11.event import FriendRequestEvent, GroupRequestEvent
 from nonebot.internal.matcher.matcher import Matcher
 
 import logging
@@ -99,6 +100,8 @@ if initalized:
     registcommand = on_startswith((".regist", ".reg"), priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
+    friendaddrequest = on_request(priority=2, block=True)
+    groupaddrequest = on_request(priority=2, block=True)
 
     # 定时任务
     scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
@@ -119,6 +122,63 @@ if initalized:
         regist_all()
         init()
         logger.success("DicerGirl 初始化完毕.")
+
+    @friendaddrequest.handle()
+    async def friendaddapproval(bot: V11Bot, event: FriendRequestEvent):
+        if event.get_user_id() in get_super_users():
+            await bot.send_private_msg(
+                "FriendForbbiden",
+                event=event
+            )
+            return
+
+        event.approve()
+        super_users = get_super_users()
+        for superuser in super_users:
+            bot.send_private_msg(
+                user_id=superuser,
+                message=manager.process_generic_event(
+                    "FriendApproval",
+                    event=event
+                )
+                )
+
+        if not super_users:
+            bot.send_private_msg(
+                user_id=event.self_id,
+                message=manager.process_generic_event(
+                    "FriendApproval",
+                    event=event
+                )
+            )
+
+    @groupaddrequest.handle()
+    async def groupaddapproval(bot: V11Bot, event: GroupRequestEvent):
+        if event.get_user_id() in get_super_users():
+            await bot.send_private_msg(
+                "GroupForbbiden",
+                event=event
+            )
+            return
+
+        super_users = get_super_users()
+        for superuser in super_users:
+            bot.send_private_msg(
+                user_id=superuser,
+                message=manager.process_generic_event(
+                    "GroupApproval",
+                    event=event
+                )
+                )
+
+        if not super_users:
+            bot.send_private_msg(
+                user_id=event.self_id,
+                message=manager.process_generic_event(
+                    "GroupApproval",
+                    event=event
+                )
+            )
 
     @testcommand.handle()
     async def testhandler(matcher: Matcher, event: MessageEvent):

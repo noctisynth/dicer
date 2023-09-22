@@ -47,6 +47,10 @@ def regist_main_event():
     manager.register_event("SetPermissionDenied", "仅允许主持人为其它玩家设置数据.")
     manager.register_event("DeletePermissionDenied", "仅允许主持人删除其它玩家数据.")
     manager.register_event("ModeChanged", "已切换跑团模式为 {Mode}.")
+    manager.register_event("FriendApproval", "[{UserID}]请求添加好友.\n处理方式: 同意.")
+    manager.register_event("FriendForbidden", "[{UserID}]请求添加好友.\n处理方式: 拒绝.")
+    manager.register_event("GroupApproval", "[{UserID}]邀请进群.\n处理方式: 同意.")
+    manager.register_event("GroupForbidden", "[{UserID}]邀请进群.\n处理方式: 拒绝.")
 
 def regist_general_event():
     manager.register_event("SetDefault", "[{SenderCard}]设置{CharactorName} {Property} 为: {Value}")

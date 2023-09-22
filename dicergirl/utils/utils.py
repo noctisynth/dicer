@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Callable
+from typing import Dict, List, Callable, Literal
 from loguru._logger import Logger
 from multilogging import multilogger
 
@@ -278,6 +278,14 @@ def is_super_user(event) -> bool:
             su = True
             break
     return su
+
+def get_super_users() -> List[str]:
+    su_read = SUPERUSER_FILE.read_text()
+    if not su_read:
+        return []
+
+    read: Dict[str, Literal[""]] = json.loads(su_read)
+    return list(read.keys())
 
 def botoff(event):
     """ 机器人在`event`所指向的群聊中开启指令限制 """

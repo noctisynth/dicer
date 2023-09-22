@@ -1,6 +1,6 @@
 from nonebot.consts import STARTSWITH_KEY
 from nonebot.matcher import Matcher
-from nonebot.plugin import on_message, on_request
+from nonebot.plugin import on_message
 from nonebot.rule import Rule
 
 from ..common.decorators import translate_punctuation

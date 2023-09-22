@@ -827,6 +827,14 @@ if initalized:
                     name = got['name'] if got else ""
                     await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
+                cards: Cards = modes[mode].__cards__
+                if not cards.get(event):
+                    cha = modes[mode].__charactor__()
+                    if hasattr(cha, "init"):
+                        cha.init()
+
+                    cards.update(event, cha.__dict__, save=True)
+
                 sh = set_handler(event, args, at, mode=mode)
             except Exception as error:
                 logger.exception(error)

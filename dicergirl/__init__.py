@@ -134,10 +134,10 @@ if initalized:
             )
             return
 
-        event.approve()
+        await event.approve(bot)
         super_users = get_super_users()
         for superuser in super_users:
-            bot.send_private_msg(
+            await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
                     "FriendApproval",
@@ -146,7 +146,7 @@ if initalized:
                 )
 
         if not super_users:
-            bot.send_private_msg(
+            await bot.send_private_msg(
                 user_id=event.self_id,
                 message=manager.process_generic_event(
                     "FriendApproval",
@@ -163,9 +163,10 @@ if initalized:
             )
             return
 
+        await event.approve(bot)
         super_users = get_super_users()
         for superuser in super_users:
-            bot.send_private_msg(
+            await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
                     "GroupApproval",
@@ -174,7 +175,7 @@ if initalized:
                 )
 
         if not super_users:
-            bot.send_private_msg(
+            await bot.send_private_msg(
                 user_id=event.self_id,
                 message=manager.process_generic_event(
                     "GroupApproval",
@@ -189,7 +190,7 @@ if initalized:
 
         super_users = get_super_users()
         for superuser in super_users:
-            bot.send_private_msg(
+            await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
                     "GroupApproval",
@@ -198,7 +199,7 @@ if initalized:
                 )
 
         if not super_users:
-            bot.send_private_msg(
+            await bot.send_private_msg(
                 user_id=event.self_id,
                 message=manager.process_generic_event(
                     "GroupApproval",

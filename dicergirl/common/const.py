@@ -1,21 +1,37 @@
 """
 存放常量的文件
 """
-import pathlib
+from pathlib import Path
 from typing import Any, Dict
 
 from ruamel.yaml import YAML
 
-DEFAULT_GROUP_NAME = "default"
-""" 默认组名 """
-REPLY_YAML = YAML()
-""" ruamel.yaml的YAML对象实例化 """
-HOME_PATH = pathlib.Path.home()
+VERSION = "3.3.10beta2"
+""" Dicer Girl 版本号 """
+HOME_PATH = Path.home()
 """ 主目录 """
-DG_FOLDER_PATH = HOME_PATH / ".dicergirl"
+DICERGIRL_DATA_PATH = HOME_PATH / ".dicergirl"
 """ DicerGirl 数据文件夹路径 """
-REPLY_FOLDER_PATH = DG_FOLDER_PATH / "reply"
-""" Dicergirl 自定义回复文件夹路径 """
+CURRENT_DIR = Path(__file__).resolve().parent
+""" Dicer Girl 当前目录 """
+SAVED_DATA_PATH = DICERGIRL_DATA_PATH / "data"
+""" 人物卡数据存储文件夹 """
+DICERGIRL_LOGS_PATH = DICERGIRL_DATA_PATH / "log"
+""" 日志数据存储文件夹 """
+BOT_STATUS_FILE = SAVED_DATA_PATH / "status.json"
+""" 机器人启用状态存储文件 """
+SUPERUSER_FILE = SAVED_DATA_PATH / "super_user.json"
+""" 管理员鉴权文件 """
+LOGGERS_CACHE_FILE = SAVED_DATA_PATH / "loggers.json"
+""" 日志信息存储文件 """
+BOT_MODES_FILE = SAVED_DATA_PATH / "modes.json"
+""" 跑团模式存储文件 """
+DEFAULT_GROUP_NAME = "default"
+""" 默认消息事件组名 """
+REPLY_YAML = YAML()
+""" `ruamel.yaml`的YAML对象实例化 """
+REPLY_FOLDER_PATH = DICERGIRL_DATA_PATH / "reply"
+""" DicerGirl 自定义回复文件夹路径 """
 GENERIC_REPLY_FILE_PATH = REPLY_FOLDER_PATH / "dg-default.yml"
 CONDITION_SPECIFIC_REPLY_FILE_PATH = REPLY_FOLDER_PATH / "default.yml"
 EXAMPLE_CONDITION_SPECIFIC_REPLY_FILE_PATH = REPLY_FOLDER_PATH / "example.yml"

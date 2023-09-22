@@ -10,8 +10,7 @@ from .utils.utils import (
     is_super_user, add_super_user, rm_super_user, make_uuid, get_uuid,
     format_msg, format_str,
     get_mode, set_mode,
-    get_loggers, loggers, add_logger, remove_logger, log_dir,
-    get_status, boton, botoff, set_name, get_name,
+    get_loggers, loggers, add_logger, remove_logger, get_status, boton, botoff, set_name, get_name,
     rolekp, roleob,
     run_shell_command, get_latest_version
 )
@@ -27,7 +26,7 @@ from .errors.pluginerror import PluginExistsError, PluginInstallFailedError, Plu
 
 from .common.messages import help_message
 from .common.registers import regist_all
-from .common.const import VERSION
+from .common.const import DICERGIRL_LOGS_PATH, VERSION
 
 from nonebot.matcher import Matcher
 from nonebot.plugin import on, PluginMetadata
@@ -545,9 +544,9 @@ if initalized:
 
         if commands["add"]:
             if commands["name"]:
-                logname = str(log_dir/(commands["name"]+".trpg.log"))
+                logname = str(DICERGIRL_LOGS_PATH/(commands["name"]+".trpg.log"))
             else:
-                logname = str(log_dir/(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")+".trpg.log"))
+                logname = str(DICERGIRL_LOGS_PATH/(datetime.now().strftime("%Y-%m-%d-%H-%M-%S")+".trpg.log"))
 
             new_logger = multilogger(name="DG Msg Logger", payload="TRPG")
             new_logger.remove()

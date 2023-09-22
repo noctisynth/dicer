@@ -1,4 +1,4 @@
-from dicergirl.utils.utils import version
+from dicergirl.common.const import VERSION
 
 import setuptools
 
@@ -7,7 +7,7 @@ with open("README.md", encoding="utf-8") as f:
 
 setuptools.setup(
     name = "dicergirl",
-    version = version,
+    version = VERSION,
     author = "Night Resurgent <fu050409@163.com>",
     author_email = "fu050409@163.com",
     description = "新一代跨平台开源 TRPG 骰娘框架",

@@ -1,3 +1,4 @@
+from .const import VERSION
 from ..reply.manager import manager
 from ..utils.utils import (
     get_name,
@@ -5,8 +6,7 @@ from ..utils.utils import (
     get_user_id,
     get_user_card,
     get_mode,
-    get_status,
-    version
+    get_status
 )
 
 def regist_all():
@@ -20,7 +20,7 @@ def regist_vars():
     manager.register_method(get_user_card, "SenderCard")
     manager.register_method(get_mode, "Mode")
     manager.register_method(get_status, "Status")
-    manager.register_variable(Version=version)
+    manager.register_variable(Version=VERSION)
 
 def regist_events():
     regist_main_event()

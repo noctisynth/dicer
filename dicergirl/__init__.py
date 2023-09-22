@@ -2,11 +2,12 @@ from pathlib import Path
 from datetime import datetime
 from multilogging import multilogger
 
+from .handlers.on import on_startswith
+
 from .reply.manager import manager
 
 from .utils.utils import (
-    init, on_startswith,
-    get_group_id, get_mentions, get_user_card,
+    init, get_group_id, get_mentions, get_user_card,
     is_super_user, add_super_user, rm_super_user, make_uuid, get_uuid,
     format_msg, format_str,
     get_mode, set_mode,

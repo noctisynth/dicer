@@ -129,8 +129,11 @@ if initalized:
     async def friendaddapproval(bot: V11Bot, event: FriendRequestEvent):
         if event.get_user_id() in get_super_users():
             await bot.send_private_msg(
-                "FriendForbbiden",
-                event=event
+                user_id=event.user_id,
+                message=manager.process_generic_event(
+                    "FriendForbbiden",
+                    event=event
+                )
             )
             return
 
@@ -140,9 +143,9 @@ if initalized:
             await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
-                    "FriendApproval",
-                    event=event
-                )
+                        "FriendApproval",
+                        event=event
+                    )
                 )
 
         if not super_users:
@@ -158,8 +161,11 @@ if initalized:
     async def groupaddapproval(bot: V11Bot, event: GroupRequestEvent):
         if event.get_user_id() in get_super_users():
             await bot.send_private_msg(
-                "GroupForbbiden",
-                event=event
+                user_id=event.user_id,
+                message=manager.process_generic_event(
+                    "GroupForbbiden",
+                    event=event
+                )
             )
             return
 
@@ -169,9 +175,9 @@ if initalized:
             await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
-                    "GroupApproval",
-                    event=event
-                )
+                        "GroupApproval",
+                        event=event
+                    )
                 )
 
         if not super_users:
@@ -193,9 +199,9 @@ if initalized:
             await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
-                    "GroupApproval",
-                    event=event
-                )
+                        "GroupApproval",
+                        event=event
+                    )
                 )
 
         if not super_users:

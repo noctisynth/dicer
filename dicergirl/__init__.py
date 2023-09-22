@@ -80,8 +80,8 @@ if initalized:
     superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
     botcommand = on_startswith(".bot", priority=1, block=True)
     logcommand = on_startswith(".log", priority=1, block=True)
-    messagemonitor = on_startswith("", priority=1, block=False)
-    selflogcommand = on("message_sent", priority=1, block=False)
+    messagemonitor = on("message", priority=1, block=False)
+    dgmessagemonitor = on("message_sent", priority=1, block=False)
     showcommand = on_startswith((".show", ".display"), priority=2, block=True)
     setcommand = on_startswith((".set", ".st"), priority=2, block=True)
     helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
@@ -716,9 +716,6 @@ if initalized:
 
     def trpg_log(event):
         """ 外置的日志记录方法 """
-        if not isinstance(event, GroupMessageEvent):
-            return
-
         if not get_group_id(event) in loggers.keys():
             return
 
@@ -743,7 +740,7 @@ if initalized:
 
             loggers[get_group_id(event)][log][0].info(message)
 
-    @selflogcommand.handle()
+    @dgmessagemonitor.handle()
     @messagemonitor.handle()
     def loggerhandler(event: Event):
         """ 消息记录日志指令 """

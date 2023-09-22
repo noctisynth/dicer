@@ -92,12 +92,26 @@ class ReplyRegistry:
         Returns:
             bool: 当前事件的状态
         """
-        if is_message_event:
-            container = self._condition_specific_data[NAME]
-        else:
-            container = self._custom_generic_data[f"dg-{group_name}"]
-        container.disable(event_name)
-        return container.is_enable(event_name)
+        try:
+            if is_message_event:
+                container = self._condition_specific_data[NAME]
+                filename = f"{group_name}.yml"
+                cache = const.CONDITION_SPECIFIC_REPLY_FILE_CACHE
+            else:
+                container = self._custom_generic_data[f"dg-{group_name}"]
+                filename = f"dg-{group_name}.yml"
+                cache = const.GENERIC_REPLY_FILE_CACHE
+            response = container.disable(event_name)
+            if not response:
+                logger.info(f"没有找到{event_name}对应的Response实例")
+                return None
+            self._add_data_in_file(filename, cache, response, True)
+            return container.is_enable(event_name)
+        except KeyError as e:
+            logger.error(
+                f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
+            logger.error(f"Error: {e}")
+            return None
 
     def enable_event(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
         """
@@ -110,12 +124,26 @@ class ReplyRegistry:
         Returns:
             bool: 当前事件的状态
         """
-        if is_message_event:
-            container = self._condition_specific_data[group_name]
-        else:
-            container = self._custom_generic_data[f"dg-{group_name}"]
-        container.enable(event_name)
-        return container.is_enable(event_name)
+        try:
+            if is_message_event:
+                container = self._condition_specific_data[group_name]
+                filename = f"{group_name}.yml"
+                cache = const.CONDITION_SPECIFIC_REPLY_FILE_CACHE
+            else:
+                container = self._custom_generic_data[f"dg-{group_name}"]
+                filename = f"dg-{group_name}.yml"
+                cache = const.GENERIC_REPLY_FILE_CACHE
+            response = container.enable(event_name)
+            if not response:
+                logger.info(f"没有找到{event_name}对应的Response实例")
+                return None
+            self._add_data_in_file(filename, cache, response, True)
+            return container.is_enable(event_name)
+        except KeyError as e:
+            logger.error(
+                f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
+            logger.error(f"Error: {e}")
+            return None
 
     def toggle(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
         """
@@ -128,12 +156,26 @@ class ReplyRegistry:
         Returns:
             bool: 当前事件的状态
         """
-        if is_message_event:
-            container = self._condition_specific_data[group_name]
-        else:
-            container = self._custom_generic_data[f"dg-{group_name}"]
-        container.toggle(event_name)
-        return container.is_enable(event_name)
+        try:
+            if is_message_event:
+                container = self._condition_specific_data[group_name]
+                filename = f"{group_name}.yml"
+                cache = const.CONDITION_SPECIFIC_REPLY_FILE_CACHE
+            else:
+                container = self._custom_generic_data[f"dg-{group_name}"]
+                filename = f"dg-{group_name}.yml"
+                cache = const.GENERIC_REPLY_FILE_CACHE
+            response = container.toggle(event_name)
+            if not response:
+                logger.info(f"没有找到{event_name}对应的Response实例")
+                return None
+            self._add_data_in_file(filename, cache, response, True)
+            return container.is_enable(event_name)
+        except KeyError as e:
+            logger.error(
+                f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
+            logger.error(f"Error: {e}")
+            return None
 
     def register_container(self, data: GenericData) -> bool:
         """
@@ -266,7 +308,7 @@ class ReplyRegistry:
         response = GenericResponse(event_name, send_text, enable)
         container.add(response)
 
-        self._add_data_in_file(filename, event_name, cache, response)
+        self._add_data_in_file(filename, cache, response)
 
         if container.get_response(event_name):
             logger.info(f"{response_type}'{event_name}'注册成功")
@@ -301,7 +343,7 @@ class ReplyRegistry:
         response = ConditionResponse(event_name, send_text, match_field, match_type, enable)
         container.add(response)
 
-        self._add_data_in_file(filename, event_name, cache, response)
+        self._add_data_in_file(filename, cache, response)
 
         if container.get_response(event_name):
             logger.info(f"{response_type}'{event_name}'注册成功")
@@ -382,15 +424,14 @@ class ReplyRegistry:
             return False
 
     @staticmethod
-    def _add_data_in_file(filename, event_name, cache, response) -> bool:
+    def _add_data_in_file(filename, cache, response: GenericResponse, is_update=False) -> bool:
         """
         将数据添加到文件中。
 
         Args:
             filename (str): 文件名
-            event_name (str): 事件名称
             cache (dict): 缓存数据的字典
-            response (Response): 响应对象
+            response (GenericResponse): 响应对象
 
         Returns:
             bool: 如果成功将数据添加到文件中，则返回 True；否则返回 False。
@@ -399,17 +440,21 @@ class ReplyRegistry:
             Exception: 捕获读写YAML文件时产生的未知异常。
         """
         try:
-
+            event_name = response.event_name
             for filepath, data in cache.items():
                 if os.path.basename(filepath) == filename:
                     save_data = response.to_dict()
-                    if isinstance(data["items"], CommentedSeq):
+                    tmp = data["items"]
+                    if isinstance(tmp, CommentedSeq):
                         found = False
-                        for item in data["items"]:
+                        for item in list(tmp):
                             if isinstance(item, CommentedMap):
-                                item[event_name] = save_data
-                                found = True
-                        if not found:
+                                for name, content in item.items():
+                                    if name == event_name:
+                                        item[name] = save_data
+                                        found = True
+                                        break
+                        if not found and not is_update:
                             data["items"].append({event_name: save_data})
                         with open(file=filepath, mode='wb') as drf:
                             const.REPLY_YAML.dump(data=data, stream=drf)

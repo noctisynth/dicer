@@ -36,20 +36,22 @@ class GenericData:
                     self.items.pop(arg)
 
     def enable(self, event_name: str = None):
-        self.set_event_status(event_name, True)
+        return self.set_event_status(event_name, True)
 
     def disable(self, event_name: str = None):
-        self.set_event_status(event_name, False)
+        return self.set_event_status(event_name, False)
 
     def toggle(self, event_name: str = None):
-        self.set_event_status(event_name)
+        return self.set_event_status(event_name)
 
     def set_event_status(self, event_name: str = None, status: bool = None):
         if event_name is None:
             self._enable = not self._enable if not status else status
-        elif self.items.get(event_name):
-            self.items[event_name].enable = status if status is not None else not self.items[
-                event_name].enable
+        elif event_name in self.items:
+            event = self.items[event_name]
+            event.enable = status if status is not None else not event.enable
+            return event  # Add this line to return the updated event
+        return None
 
     def get_response(self, event_name: str) -> GenericResponse:
         for key, value in self.items.items():

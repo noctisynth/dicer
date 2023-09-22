@@ -28,6 +28,8 @@ from .common.messages import help_message
 from .common.registers import regist_all
 from .common.const import DICERGIRL_LOGS_PATH, VERSION
 
+from .utils.settings import DEBUG, debugon, debugoff
+
 from nonebot.matcher import Matcher
 from nonebot.plugin import on, PluginMetadata
 from nonebot.adapters import Bot as Bot
@@ -54,7 +56,6 @@ __plugin_meta__ = PluginMetadata(
 )
 __author__ = "苏向夜 <fu050409@163.com>"
 
-DEBUG = False
 logger = multilogger(name="Dicer Girl", payload="Nonebot2")
 current_dir = Path(__file__).resolve().parent
 
@@ -168,7 +169,6 @@ if initalized:
     @debugcommand.handle()
     async def debughandler(matcher: Matcher, event: MessageEvent):
         """ 漏洞检测指令 """
-        global DEBUG
         args = format_msg(event.get_message(), begin=".debug")
         if not is_super_user(event):
             await matcher.send(manager.process_generic_event(
@@ -180,7 +180,7 @@ if initalized:
         if args:
             logger.debug(args)
             if args[0] == "off":
-                DEBUG = False
+                debugoff()
                 logging.getLogger().setLevel(logging.INFO)
                 logger.remove()
                 logger.add(
@@ -194,7 +194,7 @@ if initalized:
                 ))
                 return
         else:
-            DEBUG = True
+            debugon()
             logging.getLogger().setLevel(logging.DEBUG)
             logger.remove()
             logger.add(
@@ -209,7 +209,7 @@ if initalized:
             return
 
         if args[0] == "on":
-            DEBUG = True
+            debugon()
             logging.getLogger().setLevel(logging.DEBUG)
             logger.remove()
             logger.add(

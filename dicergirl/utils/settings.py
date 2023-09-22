@@ -1,10 +1,6 @@
-from typing import List, Dict
+from typing import Dict, Literal
 from multilogging import multilogger
 
-package: str = None
-""" 目前 Dicer Girl 挂载的平台 """
-allowed_packages: List[str] = ["nonebot2", "qqguild"]
-""" Dicer Girl 允许挂载的平台 """
 logger = multilogger(name="Dicer Girl", payload="Settings")
 """ `settings.py`日志管理系统 """
 status: Dict[str, bool] = {}
@@ -18,6 +14,17 @@ def change_status(var) -> bool:
     status = var
     return True
 
-def load_status_settings():
+def load_status_settings() -> bool:
     """ 导出当前机器人在各群聊的状态 """
     return status
+
+def is_debug() -> Literal[False]:
+    return DEBUG
+
+def debugon() -> Literal[True]:
+    global DEBUG
+    DEBUG = True
+
+def debugoff() -> Literal[True]:
+    global DEBUG
+    DEBUG = False

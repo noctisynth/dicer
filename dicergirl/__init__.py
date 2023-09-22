@@ -1059,17 +1059,24 @@ if initalized:
 
         if cp["remove"]:
             if not manager.remove_event(cp["remove"]):
-                 matcher.send("消息事件注册参数不全, 使用`.help regist`获取帮助信息.")
+                matcher.send("错误的消息类型, 使用`.help regist`获取帮助信息.")
+                return
 
             await matcher.send(f"消息事件 {cp['remove']} 已经成功销毁, 该事件将采用默认回复替代.")
             return
 
         if cp["enable"]:
-            ...
+            if not manager.enable_event(cp["enable"]):
+                matcher.send("启用消息事件时出现异常, 请检查事件名是否正确!\n使用`.help regist`获得帮助信息.")\
+
+            matcher.send(f"消息事件 {cp['enable']} 已启用.")
             return
 
         if cp["disable"]:
-            ...
+            if not manager.enable_event(cp["disable"]):
+                matcher.send("禁用消息事件时出现异常, 请检查事件名是否正确!\n使用`.help regist`获得帮助信息.")\
+
+            matcher.send(f"消息事件 {cp['disable']} 已启用.")
             return
 
         event_name = cp["event_name"]

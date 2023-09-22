@@ -1,5 +1,5 @@
 @echo off
 python setup.py sdist bdist_wheel
 twine upload dist/*
-del dist/*
+del dist /F /Q
 pause

@@ -106,19 +106,19 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
     if not args:
         if cache_cards.get(event, qid=qid):
             card_data = cache_cards.get(event, qid=qid)
-            cards.update(event, inv_dict=card_data, qid=qid)
-            inv = charactor().load(card_data)
+            cards.update(event, card_data, qid=qid)
+            cha = charactor().load(card_data)
             return manager.process_generic_event(
                 "CardSaved",
                 event=event,
-                CardDetail=inv.output()
+                CardDetail=cha.output()
             )
         else:
             return f"未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
     else:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
-            inv = charactor().load(card_data)
+            cha = charactor().load(card_data)
         else:
             return f"未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
 
@@ -130,11 +130,11 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
                 )
 
         elif len(args) == 2:
-            sd = __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
+            sd = __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid)
             if sd:
                 return sd
 
-            return __set_skill(args, event, [], cards=cards, cha=inv, module=module, qid=qid)[0]
+            return __set_skill(args, event, [], cards=cards, cha=cha, module=module, qid=qid)[0]
         elif len(args) > 2:
             reply = []
             li = []
@@ -155,12 +155,12 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
                         )
 
             for sub_li in li:
-                sd = __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=inv, qid=qid)
+                sd = __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid)
                 if sd:
                     reply.append(sd)
                     continue
 
-                reply = __set_skill(sub_li, event, reply, cards=cards, cha=inv, module=module, qid=qid)
+                reply = __set_skill(sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid)
 
             rep = ""
             for r in reply:
@@ -189,33 +189,33 @@ def show_handler(event: GroupMessageEvent, args, at, mode=None):
     if not args:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
-            inv = charactor().load(card_data)
+            cha = charactor().load(card_data)
             data = manager.process_generic_event(
                 "CardInUse",
                 event=event,
-                CardDetail=inv.output()
+                CardDetail=cha.output()
             )
             r.append(data)
         if cache_cards.get(event, qid=qid):
             card_data = cache_cards.get(event, qid=qid)
-            inv = charactor().load(card_data)
+            cha = charactor().load(card_data)
             data = manager.process_generic_event(
                 "CardInCache",
                 event=event,
-                CardDetail=inv.output()
+                CardDetail=cha.output()
             )
             r.append(data)
     elif args[0] in ["detail", "de", "details"]:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
-            inv = charactor().load(card_data)
-            r.append(inv.skills_output())
+            cha = charactor().load(card_data)
+            r.append(cha.skills_output())
     elif args[0] == "all":
         cd = cards.data[get_group_id(event)]
         for data in cd:
-            inv = charactor().load(cd[data])
-            d = inv.output() + "\n"
-            d += inv.skills_output()
+            cha = charactor().load(cd[data])
+            d = cha.output() + "\n"
+            d += cha.skills_output()
             r.append(d)
     else:
         if cards.get(event, qid=qid):

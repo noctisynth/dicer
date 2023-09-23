@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Dict, List, Callable, Literal
 from loguru._logger import Logger
 from multilogging import multilogger
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, PrivateMessageEvent
 
 from ..common.decorators import translate_punctuation
 from ..common.const import (
@@ -28,14 +29,6 @@ loggers: Dict[str, Dict[int, List[Logger | str]]] = {}
 saved_loggers: Dict[str, dict]
 """ 存储的日志 """
 
-try:
-    from nonebot.adapters.onebot.v11 import GroupMessageEvent, PrivateMessageEvent
-except ModuleNotFoundError:
-    logger.warning("未找到依赖`Nonebot2`, 请检查你的配置.")
-    class MessageEvent:
-        pass
-    class GroupMessageEvent:
-        pass
 
 def init() -> None:
     """ 骰娘初始化 """
@@ -207,10 +200,15 @@ def get_handlers(main) -> List[Callable]:
 def get_group_id(event) -> str:
     """ 获取`event`指向的群聊`ID` """
     try:
-        if not isinstance(event, PrivateMessageEvent):
+        if isinstance(event, PrivateMessageEvent):
+            return "private"
+        elif isinstance(event, GroupMessageEvent):
             return str(event.group_id)
         else:
-            return "private"
+            if hasattr(event, "post_type"):
+                if event.post_type == "message_sent":
+                    return "botmessage"
+            return "0"
     except Exception as error:
         logger.exception(error)
         return "0"
@@ -308,7 +306,7 @@ def get_status(event):
     status = load_status_settings()
     group_id = get_group_id(event)
 
-    if group_id == "private":
+    if group_id in ("private", "botmessage"):
         return True
 
     if group_id not in status.keys():

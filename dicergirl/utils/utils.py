@@ -20,7 +20,7 @@ import json
 import asyncio
 import httpx
 
-logger = multilogger(name="Dicer Girl", payload="utils")
+logger = multilogger(name="DicerGirl", payload="utils")
 """ `utils.py`日志系统 """
 su_uuid: str
 """ 超级管理员鉴权令牌 """

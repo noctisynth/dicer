@@ -54,6 +54,7 @@ Copyright 2011-2023 Unknown Visitor, org."""
 .kp  进入主持人席位
 .ob  进入旁观者席位
 .log  日志管理
+.reg (.regist)  消息事件注册
 使用`.help [指令名]`获取该指令的详细信息"""
     admin = """Unvisitor DicerGirl 版本 {version}
 骰娘管理指令, 如果你是骰主或开发者, 请注意 DicerGirl 的管理员与 Nonebot2 不同.
@@ -222,6 +223,8 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
 注意：
     - 使用 'add' 指令而不带参数以创建一个未命名的日志。"""
     regist = """用法：.regist (.reg) [事件名] [消息内容] [指令]
+描述：
+    用户自定义回复文本。
 指令：
     remove (rm, delete, del) [事件名]   注销自定义消息事件
     enable [事件名]      启用被禁用的消息事件

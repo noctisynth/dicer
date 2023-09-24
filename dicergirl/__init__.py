@@ -445,7 +445,7 @@ if initalized:
 
         if commands["upgrade"]:
             await matcher.send("检查版本更新中...")
-            regex = r"(\d+).(\d+).(\d+)[ab]?(\d+)?"
+            regex = r"(\d+).(\d+).(\d+).*?(\d+?)"
             newest_version = await get_latest_version("dicergirl")
             new_tuple = tuple(re.findall(regex, newest_version)[0])
             old_tuple = tuple(re.findall(regex, VERSION)[0])

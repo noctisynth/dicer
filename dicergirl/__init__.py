@@ -25,7 +25,7 @@ from .handlers.general import show_handler, set_handler, del_handler, roll, shoo
 
 from .plugins.parse import get_plugins
 from .plugins.operation import install, remove, upgrade as plgupgrade
-from .errors.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
+from .common.errors.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
 
 from .common.messages import help_message
 from .common.registers import regist_all

@@ -572,7 +572,12 @@ if initalized:
 
         if commands["plgup"]:
             await matcher.send(f"检查插件 {commands['plgup']} 更新中...")
-            if await get_latest_version(f"dicergirl-plugin-{commands['plgup']}") == modes[commands['plgup']].__version__:
+            if commands['plgup'] not in modes.keys():
+                plg_version = None
+            else:
+                plg_version = modes[commands['plgup']].__version__
+
+            if await get_latest_version(f"dicergirl-plugin-{commands['plgup']}") == plg_version:
                 await matcher.send(f"插件 {commands['plgup']} 已经是最新版本了.\n`.bot remove {commands['plgup']}`并`.bot install {commands['plgup']}`可以重新安装插件.\n如果遇到问题, 使用`.help 支持`获得开发者联系方式.")
                 return
 

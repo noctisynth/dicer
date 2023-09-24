@@ -338,10 +338,13 @@ async def get_latest_version(package_name):
     """ 获取当前 Pypi 上`dicergirl`的最新版本号 """
     async with httpx.AsyncClient() as client:
         url = f"https://pypi.org/pypi/{package_name}/json"
-        response = await client.get(url)
+        try:
+            response = await client.get(url)
+        except httpx.ReadTimeout:
+            return "0.0.0"
 
         if response.status_code == 404:
-            return "0.0.0.0"
+            return "0.0.0"
 
         package_info = response.json()
         return package_info["info"]["version"]

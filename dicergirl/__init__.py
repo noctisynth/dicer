@@ -461,7 +461,7 @@ if initalized:
                     await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
                     return
 
-                await matcher.send(f"{get_name()}骰娘已更新为版本 {'.'.join(map(str, newest_version))}.")
+                await matcher.send(f"{get_name()}骰娘已更新为版本 {newest_version}.")
                 return
 
             await matcher.send(f"我已经是最新版本的{get_name()}了!")

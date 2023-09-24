@@ -47,5 +47,3 @@ def require_update(old_version: str, new_version: str):
                 return False
             elif old_pre_version == new_pre_version:
                 return False
-
-    return old_tuple < new_tuple

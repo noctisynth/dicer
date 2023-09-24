@@ -1,7 +1,7 @@
 import sys
-from dicergirl.utils.utils import run_shell_command
-from dicergirl.errors.pluginerror import PluginNotFoundError, PluginExistsError, PluginInstallFailedError, PluginUninstallFailedError
-from dicergirl.utils.plugins import modes
+from ..utils.utils import run_shell_command
+from ..common.errors.pluginerror import PluginNotFoundError, PluginExistsError, PluginInstallFailedError, PluginUninstallFailedError
+from ..utils.plugins import modes
 from multilogging import multilogger
 from .parse import get_plugins_mixed
 

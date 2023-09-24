@@ -1,5 +1,5 @@
 from typing import Dict, List, Any
-from dicergirl.errors.parseerror import NoneTypeCommandError, CommandRequired, TooManyAliasCommandError
+from ..common.errors.parseerror import NoneTypeCommandError, CommandRequired, TooManyAliasCommandError
 
 class Optional:
     """ 可选指令 """

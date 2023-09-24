@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 from ruamel.yaml import YAML
 
-VERSION = "3.4.0alpha10"
+VERSION = "3.4.0alpha11"
 """ Dicer Girl 版本号 """
 HOME_PATH = Path.home()
 """ 主目录 """

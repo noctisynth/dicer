@@ -565,17 +565,19 @@ if initalized:
             return
 
         if commands["plgup"]:
+            await matcher.send(f"检查插件 {commands['plgup']} 更新中...")
+            if await get_latest_version(f"dicergirl-plugin-{commands['plgup']}") == modes[commands['plgup']].__version__:
+                await matcher.send(f"插件 {commands['plgup']} 已经是最新版本了.\n`.bot remove {commands['plgup']}`并`.bot install {commands['plgup']}`可以重新安装插件.\n如果遇到问题, 使用`.help 支持`获得开发者联系方式.")
+                return
+
             up = await plgupgrade(commands["plgup"])
 
             if up is PluginNotFoundError:
                 await matcher.send(f"包 {commands['plgup']} 似乎不存在?")
-                return
             elif up is PluginInstallFailedError:
                 await matcher.send(f"包 {commands['plgup']} 更新失败了.")
-                return
             elif up == True:
                 await matcher.send(f"插件 {commands['plgup']} 更新完毕.")
-                return
 
             return
 

@@ -6,8 +6,9 @@ def require_update(old_version: str, new_version: str):
 
     old_tuple = re.match(regex, old_version)
     new_tuple = re.match(regex, new_version)
-    old_tuple_main = tuple(map(int, filter(None, old_tuple.group(1, 3))))
-    new_tuple_main = tuple(map(int, filter(None, new_tuple.group(1, 3))))
+
+    old_tuple_main = tuple(map(int, filter(None, old_tuple.group(1, 2, 3))))
+    new_tuple_main = tuple(map(int, filter(None, new_tuple.group(1, 2, 3))))
 
     new_length = len(list(filter(None, new_tuple.groups())))
     old_length = len(list(filter(None, old_tuple.groups())))

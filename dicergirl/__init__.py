@@ -19,6 +19,7 @@ from .utils.plugins import modes
 from .utils.parser import CommandParser, Commands, Only, Optional, Required, Positional
 from .utils.cards import Cards
 from .utils.blacklist import blacklist
+from .utils.update import require_update
 
 from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
 
@@ -445,12 +446,9 @@ if initalized:
 
         if commands["upgrade"]:
             await matcher.send("检查版本更新中...")
-            regex = r"(\d+).(\d+).(\d+).*?(\d+?)"
             newest_version = await get_latest_version("dicergirl")
-            new_tuple = tuple(re.findall(regex, newest_version)[0])
-            old_tuple = tuple(re.findall(regex, VERSION)[0])
 
-            if old_tuple < new_tuple:
+            if require_update(VERSION, newest_version):
                 if {"a", "b"} & set(newest_version) and commands["first"] in ("force", "强制"):
                     await matcher.send(f"发现新版本 dicergirl {newest_version}, 然而该版本为{'公测' if 'b' in newest_version else '内测'}版本.\n使用`.bot upgrade force`强制更新到该版本.")
                     return

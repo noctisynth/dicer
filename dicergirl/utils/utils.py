@@ -344,7 +344,7 @@ async def get_latest_version(package_name):
             return "0.0.0.0"
 
         package_info = response.json()
-        return tuple(map(int, package_info["info"]["version"].split(".")))
+        return package_info["info"]["version"]
 
 async def run_shell_command(command):
     """ 异步执行 shell 指令的原始方法 """

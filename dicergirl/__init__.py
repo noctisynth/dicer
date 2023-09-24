@@ -386,7 +386,8 @@ if initalized:
                 Optional(("remove", "del", "rm", "删除", "卸载"), str),
                 Only(("mode", "list", "已安装")),
                 Only(("store", "plugins", "商店")),
-                Optional(("search", "搜索"), str)
+                Optional(("search", "搜索"), str),
+                Positional("first", str)
             ]),
             args=args,
             auto=True
@@ -444,9 +445,16 @@ if initalized:
 
         if commands["upgrade"]:
             await matcher.send("检查版本更新中...")
+            regex = r"(\d+).(\d+).(\d+)[ab]?(\d+)?"
             newest_version = await get_latest_version("dicergirl")
+            new_tuple = tuple(re.findall(regex, newest_version)[0])
+            old_tuple = tuple(re.findall(regex, VERSION)[0])
 
-            if tuple(map(int, VERSION.split("."))) < newest_version:
+            if old_tuple < new_tuple:
+                if {"a", "b"} & set(newest_version) and commands["first"] in ("force", "强制"):
+                    await matcher.send(f"发现新版本 dicergirl {newest_version}, 然而该版本为{'公测' if 'b' in newest_version else '内测'}版本.\n使用`.bot upgrade force`强制更新到该版本.")
+                    return
+
                 await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
                 upgrade = await run_shell_command(f"\"{sys.executable}\" -m pip install dicergirl -i https://pypi.org/simple --upgrade")
 

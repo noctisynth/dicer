@@ -1,4 +1,5 @@
-from nonebot.adapters.onebot.v11 import GroupMessageEvent
+from nonebot.adapters.onebot.v11 import MessageEvent
+
 from ..utils.dicer import Dicer
 from ..utils.docimasy import expr
 from ..utils.utils import get_group_id
@@ -27,7 +28,7 @@ def __set_plus_format(args: list):
 
     return args
 
-def __set_default(args: list, event: GroupMessageEvent, cards=None, module=None, attrs_dict=None, cha=None, qid=None) -> bool:
+def __set_default(args: list, event: MessageEvent, cards=None, module=None, attrs_dict=None, cha=None, qid=None) -> bool:
     """ 技能或属性设置 """
     for attr, alias in attrs_dict.items():
         if args[0] in alias:
@@ -64,7 +65,7 @@ def __set_default(args: list, event: GroupMessageEvent, cards=None, module=None,
                 Value=cha.__dict__[alias[0]]
                 )
 
-def __set_skill(args, event: GroupMessageEvent, reply: list, cards=None, cha=None, module=None, qid=None):
+def __set_skill(args, event: MessageEvent, reply: list, cards=None, cha=None, module=None, qid=None):
     """ 设置技能 """
     try:
         if not args[1].startswith(("-", "+")):
@@ -91,7 +92,7 @@ def __set_skill(args, event: GroupMessageEvent, reply: list, cards=None, cha=Non
     finally:
         return reply
 
-def set_handler(event: GroupMessageEvent, args, at, mode=None):
+def set_handler(event: MessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.set`指令后端方法 """
     module = modes[mode]
     cards: Cards = module.__cards__
@@ -175,7 +176,7 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
                     Command="set"
                     )
 
-def show_handler(event: GroupMessageEvent, args, at, mode=None):
+def show_handler(event: MessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.show`指令后端方法 """
     module = modes[mode]
     cards: Cards = module.__cards__
@@ -236,7 +237,7 @@ def show_handler(event: GroupMessageEvent, args, at, mode=None):
 
     return r
 
-def del_handler(event: GroupMessageEvent, args, at, mode=None):
+def del_handler(event: MessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.del`指令后端方法 """
     module = modes[mode]
     cache_cards = module.__cache__
@@ -332,7 +333,7 @@ def roll(args: str, name: str=None) -> str:
             SenderCard=name
         )
 
-def shoot(event: GroupMessageEvent):
+def shoot(event: MessageEvent):
     dice = Dicer("1d20").roll()
     result = dice.outcome
 

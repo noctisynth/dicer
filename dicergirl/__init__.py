@@ -35,10 +35,11 @@ from .common.const import DICERGIRL_LOGS_PATH, VERSION
 from .utils.settings import DEBUG, debugon, debugoff
 
 from nonebot.matcher import Matcher
-from nonebot.plugin import on, on_request, PluginMetadata
+from nonebot.plugin import on, on_request, on_notice, PluginMetadata
 from nonebot.adapters import Bot as Bot
 from nonebot.adapters.onebot import V11Bot
 from nonebot.adapters.onebot.v11.event import FriendRequestEvent, GroupRequestEvent, GroupDecreaseNoticeEvent
+from nonebot.adapters.onebot.v11.exception import ActionFailed
 from nonebot.internal.matcher.matcher import Matcher
 
 import logging
@@ -105,7 +106,7 @@ if initalized:
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
     friendaddrequest = on_request(priority=2, block=True)
     groupaddrequest = on_request(priority=2, block=True)
-    kickedevent = on_kicked()
+    kickedevent = on_notice(priority=2, block=False)
 
     # 定时任务
     scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
@@ -129,7 +130,11 @@ if initalized:
 
     @friendaddrequest.handle()
     async def friendaddapproval(bot: V11Bot, event: FriendRequestEvent):
-        if event.get_user_id() in get_super_users():
+        if event.get_user_id() in blacklist.get_blacklist():
+            try:
+                await event.reject()
+            except ActionFailed:
+                pass
             await bot.send_private_msg(
                 user_id=event.user_id,
                 message=manager.process_generic_event(
@@ -161,11 +166,15 @@ if initalized:
 
     @groupaddrequest.handle()
     async def groupaddapproval(bot: V11Bot, event: GroupRequestEvent):
-        if event.get_user_id() in get_super_users():
+        if event.get_user_id() in blacklist.get_blacklist() or event.group_id in blacklist.get_group_blacklist():
+            try:
+                await event.reject()
+            except ActionFailed:
+                pass
             await bot.send_private_msg(
                 user_id=event.user_id,
                 message=manager.process_generic_event(
-                    "GroupForbbiden",
+                    "GroupForbidden",
                     event=event
                 )
             )
@@ -196,13 +205,22 @@ if initalized:
         blacklist.add_group_blacklist(str(event.group_id))
         blacklist.add_group_blacklist(str(event.operator_id))
 
+        try:
+            bot.call_api(
+                "delete_friend",
+                user_id = event.operator_id
+            )
+        except ActionFailed:
+            pass
+
         super_users = get_super_users()
         for superuser in super_users:
             await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
-                        "GroupApproval",
-                        event=event
+                        "BlacklistAdded",
+                        event=event,
+                        UserID=event.operator_id
                     )
                 )
 
@@ -210,8 +228,9 @@ if initalized:
             await bot.send_private_msg(
                 user_id=event.self_id,
                 message=manager.process_generic_event(
-                    "GroupApproval",
-                    event=event
+                    "BlacklistAdded",
+                    event=event,
+                    UserID=event.operator_id
                 )
             )
 

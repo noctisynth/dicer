@@ -206,7 +206,7 @@ if initalized:
         blacklist.add_group_blacklist(str(event.operator_id))
 
         try:
-            bot.call_api(
+            await bot.call_api(
                 "delete_friend",
                 user_id = event.operator_id
             )

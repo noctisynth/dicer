@@ -187,6 +187,7 @@ class CommandParser:
                 except ValueError:
                     raise TypeError(f"Value type of {positional_command.key} is mismatch, {positional_command.key} required but {type(iter_args[index])} was given.")
                 results[str(positional_command)] = value
+                nothing = False
 
         self.results = results
         self.nothing = nothing

@@ -891,9 +891,18 @@ if initalized:
             return
 
         args = format_str(event.get_message(), begin=(".mode", ".m"))
-        if args:
-            if args.lower() in modes:
-                set_mode(event, args.lower())
+        cp = CommandParser(
+            Commands([
+                Positional("mode"),
+            ]),
+            args=args,
+            auto=True
+        )
+
+        if not cp.nothing:
+            cp = cp.results
+            if cp["mode"] in modes:
+                set_mode(event, cp["mode"])
 
                 for user in await bot.get_group_member_list(group_id=event.group_id):
                     if not hasattr(modes[args], "__cards__"):
@@ -915,7 +924,7 @@ if initalized:
                 await matcher.send(manager.process_generic_event(
                     "ModeChanged",
                     event=event,
-                    Mode=args.upper()
+                    Mode=cp["mode"].upper()
                 ))
                 return True
             else:

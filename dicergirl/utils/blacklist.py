@@ -23,11 +23,13 @@ class BlackList:
             return False
 
     def dump(self) -> str:
+        BLACKLIST_FILE.write_text("")
         return yaml.dump(
             {
                 "user": self.blacklist,
                 "group": self.group_blacklist
-            }
+            },
+            BLACKLIST_FILE.open("w")
         )
 
     def get_blacklist(self) -> List[str]:

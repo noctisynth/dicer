@@ -132,13 +132,13 @@ if initalized:
     async def friendaddapproval(bot: V11Bot, event: FriendRequestEvent):
         if event.get_user_id() in blacklist.get_blacklist():
             try:
-                await event.reject()
+                await event.reject(bot)
             except ActionFailed:
                 pass
             await bot.send_private_msg(
                 user_id=event.user_id,
                 message=manager.process_generic_event(
-                    "FriendForbbiden",
+                    "FriendForbidden",
                     event=event
                 )
             )
@@ -203,7 +203,7 @@ if initalized:
     @kickedevent.handle()
     async def onkickhandler(bot: V11Bot, event: GroupDecreaseNoticeEvent):
         blacklist.add_group_blacklist(str(event.group_id))
-        blacklist.add_group_blacklist(str(event.operator_id))
+        blacklist.add_blacklist(str(event.operator_id))
 
         try:
             await bot.call_api(

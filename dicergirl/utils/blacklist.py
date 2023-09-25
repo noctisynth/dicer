@@ -9,7 +9,7 @@ class BlackList:
     def __init__(self) -> None:
         if not BLACKLIST_FILE.exists():
             BLACKLIST_FILE.parent.mkdir(parents=True, exist_ok=True)
-            yaml.dump({"user": [], "group": []}, BLACKLIST_FILE.open("w"))
+            yaml.dump({"user": None, "group": None}, BLACKLIST_FILE.open("w"))
 
         if not self.load():
             raise OSError

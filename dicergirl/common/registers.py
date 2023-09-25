@@ -51,6 +51,7 @@ def regist_main_event():
     manager.register_event("FriendForbidden", "[{UserID}]请求添加好友.\n处理方式: 拒绝.")
     manager.register_event("GroupApproval", "[{UserID}]邀请进群.\n处理方式: 同意.")
     manager.register_event("GroupForbidden", "[{UserID}]邀请进群.\n处理方式: 拒绝.")
+    manager.register_event("BlacklistAdded", "用户[{UserID}]执行非法操作, 已列入黑名单.")
 
 def regist_general_event():
     manager.register_event("SetDefault", "[{SenderCard}]设置{CharactorName} {Property} 为: {Value}")

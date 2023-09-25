@@ -1,13 +1,23 @@
-class Character:
+from ..common.const import EMPTY_CHAR, EMPTY_DICT
+
+class BaseCharactor:
+    def __init__(self) -> None:
+        self.name = EMPTY_CHAR
+        self.sex = "女"
+        self.age = 18
+        self.hp = 0
+        self.hp_max = 0
+        self.tools = EMPTY_DICT
+        self.skills = EMPTY_DICT
+
+    def load(self, data: dict):
+        self.__dict__.update(data)
+        return self
+
+class Character(BaseCharactor):
     """ 人物卡模板 """
     def __init__(self) -> None:
-        self.name = "无名角色"
-        self.age = 20
-        self.sex = "女"
-        self.hp = 10
-        self.hp_max = 10
-        self.skills = {}
-        self.tools = {}
+        super().__init__()
 
     def __repr__(self):
         data = "姓名: %s\n" % self.name
@@ -31,7 +41,3 @@ class Character:
 
     def __count(self):
         return 0
-
-    def load(self, data: dict):
-        self.__dict__.update(data)
-        return self

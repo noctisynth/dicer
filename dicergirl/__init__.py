@@ -18,6 +18,7 @@ from .utils.utils import (
 from .utils.plugins import modes
 from .utils.parser import CommandParser, Commands, Only, Optional, Required, Positional
 from .utils.cards import Cards
+from .utils.charactors import Character
 from .utils.blacklist import blacklist
 from .utils.update import require_update
 
@@ -842,9 +843,8 @@ if initalized:
 
                 cards: Cards = modes[mode].__cards__
                 if not cards.get(event):
-                    cha = modes[mode].__charactor__()
-                    if hasattr(cha, "init"):
-                        cha.init()
+                    cha: Character = modes[mode].__charactor__()
+                    cha.init()
 
                     cards.update(event, cha.__dict__, save=True)
 

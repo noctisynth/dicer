@@ -6,6 +6,12 @@ from typing import Any, Dict
 
 from ruamel.yaml import YAML
 
+EMPTY_CHAR = ""
+EMPTY_ARRAY = []
+EMPTY_DICT = {}
+NONE = None
+
+
 VERSION = "3.4.0beta4"
 """ Dicer Girl 版本号 """
 HOME_PATH = Path.home()
@@ -66,8 +72,6 @@ description: "默认文件"
 # 自定义规则列表
 items: []
 """
-
-
 EXAMPLE_CONDITION_SPECIFIC_TEMPLATE = """\
 # 是否启用
 enable: true

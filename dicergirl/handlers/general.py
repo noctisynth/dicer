@@ -4,6 +4,8 @@ from ..utils.docimasy import expr
 from ..utils.utils import get_group_id
 from ..utils.plugins import modes
 from ..reply.manager import manager
+from ..utils.cards import Cards
+from ..utils.charactors import Character
 
 def __set_plus_format(args: list):
     """ `.set 技能 +x`语法解析 """
@@ -92,11 +94,11 @@ def __set_skill(args, event: GroupMessageEvent, reply: list, cards=None, cha=Non
 def set_handler(event: GroupMessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.set`指令后端方法 """
     module = modes[mode]
-    cards = module.__cards__
-    cache_cards = module.__cache__
-    charactor = module.__charactor__
-    attrs_dict = module.__baseattrs__
-    args = __set_plus_format(args)
+    cards: Cards = module.__cards__
+    cache_cards: Cards = module.__cache__
+    charactor: Character = module.__charactor__
+    attrs_dict: dict = module.__baseattrs__
+    args: list = __set_plus_format(args)
 
     if len(at) == 1:
         qid = at[0]
@@ -108,6 +110,7 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
             card_data = cache_cards.get(event, qid=qid)
             cards.update(event, card_data, qid=qid)
             cha = charactor().load(card_data)
+            cache_cards.delete(event)
             return manager.process_generic_event(
                 "CardSaved",
                 event=event,
@@ -128,7 +131,6 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
                 event=event,
                 Command="set"
                 )
-
         elif len(args) == 2:
             sd = __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid)
             if sd:
@@ -176,9 +178,9 @@ def set_handler(event: GroupMessageEvent, args, at, mode=None):
 def show_handler(event: GroupMessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.show`指令后端方法 """
     module = modes[mode]
-    cards = module.__cards__
-    cache_cards = module.__cache__
-    charactor = module.__charactor__
+    cards: Cards = module.__cards__
+    cache_cards: Cards = module.__cache__
+    charactor: Character = module.__charactor__
 
     if len(at) == 1:
         qid = at[0]

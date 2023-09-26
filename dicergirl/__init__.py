@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime
 from multilogging import multilogger
 
-from .handlers.on import on_startswith, on_kicked
+from .handlers.on import on_startswith
 
 from .reply.manager import manager
 
@@ -208,6 +208,10 @@ if initalized:
 
     @kickedevent.handle()
     async def onkickhandler(bot: V11Bot, event: GroupDecreaseNoticeEvent):
+        if not event.is_tome():
+            logger.info(f"用户[{event.user_id}]被移出群聊.")
+            return
+
         blacklist.add_group_blacklist(str(event.group_id))
         blacklist.add_blacklist(str(event.operator_id))
 
@@ -916,7 +920,7 @@ if initalized:
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_str(event.get_message(), begin=(".mode", ".m"))
+        args = format_msg(event.get_message(), begin=(".mode", ".m"))
         cp = CommandParser(
             Commands([
                 Positional("mode", str),
@@ -931,10 +935,10 @@ if initalized:
                 set_mode(event, cp["mode"])
 
                 for user in await bot.get_group_member_list(group_id=event.group_id):
-                    if not hasattr(modes[args], "__cards__"):
+                    if not hasattr(modes[cp["mode"]], "__cards__"):
                         break
 
-                    card: Cards = modes[args].__cards__
+                    card: Cards = modes[cp["mode"]].__cards__
                     user_id: int = user['user_id']
                     got = card.get(event, qid=str(user_id))
 

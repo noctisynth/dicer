@@ -2,7 +2,7 @@ from typing import Type
 from nonebot.consts import STARTSWITH_KEY
 from nonebot.matcher import Matcher
 from nonebot.adapters import Event
-from nonebot.plugin import on_message, on_request
+from nonebot.plugin import on_message
 from nonebot.rule import Rule
 from nonebot.adapters.onebot.v11.event import GroupDecreaseNoticeEvent
 
@@ -65,14 +65,3 @@ def on_startswith(commands, priority=0, block=True) -> Type[Matcher]:
         commands = (commands, )
 
     return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
-
-
-def is_kicked(event: Event) -> bool:
-    if not isinstance(event, GroupDecreaseNoticeEvent):
-        return False
-
-    return event.is_tome()
-
-
-def on_kicked() -> Type[Matcher]:
-    return on_request(Rule(is_kicked), priority=2, block=True)

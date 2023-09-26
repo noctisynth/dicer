@@ -19,6 +19,9 @@ class Character(BaseCharactor):
     def __init__(self) -> None:
         super().__init__()
 
+    def init(self):
+        raise NotImplementedError
+
     def __repr__(self):
         data = "姓名: %s\n" % self.name
         data += "性别: %s 年龄: %d\n" % (self.sex, self.age)

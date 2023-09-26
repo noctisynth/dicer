@@ -134,7 +134,8 @@ if initalized:
             try:
                 await event.reject(bot)
             except ActionFailed:
-                pass
+                return
+
             await bot.send_private_msg(
                 user_id=event.user_id,
                 message=manager.process_generic_event(
@@ -144,7 +145,11 @@ if initalized:
             )
             return
 
-        await event.approve(bot)
+        try:
+            await event.approve(bot)
+        except ActionFailed:
+            return
+
         super_users = get_super_users()
         for superuser in super_users:
             await bot.send_private_msg(
@@ -170,7 +175,8 @@ if initalized:
             try:
                 await event.reject()
             except ActionFailed:
-                pass
+                return
+
             await bot.send_private_msg(
                 user_id=event.user_id,
                 message=manager.process_generic_event(
@@ -211,7 +217,7 @@ if initalized:
                 user_id = event.operator_id
             )
         except ActionFailed:
-            pass
+            return
 
         super_users = get_super_users()
         for superuser in super_users:
@@ -863,7 +869,8 @@ if initalized:
                 cards: Cards = modes[mode].__cards__
                 if not cards.get(event):
                     cha: Character = modes[mode].__charactor__()
-                    cha.init()
+                    if hasattr(cha, "init"):
+                        cha.init()
 
                     cards.update(event, cha.__dict__, save=True)
 
@@ -912,7 +919,7 @@ if initalized:
         args = format_str(event.get_message(), begin=(".mode", ".m"))
         cp = CommandParser(
             Commands([
-                Positional("mode"),
+                Positional("mode", str),
             ]),
             args=args,
             auto=True

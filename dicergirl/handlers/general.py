@@ -125,63 +125,36 @@ def set_handler(event: MessageEvent, args, at, mode=None):
                 event=event,
                 Command="set"
                 )
-        elif len(args) == 2:
-            if __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid):
-                attr_saved += 1
+
+        reply = []
+        li = []
+        sub_li = []
+        for arg in args:
+            index = args.index(arg)
+            if index % 2 == 0:
+                sub_li.append(arg)
+            elif index % 2 == 1:
+                sub_li.append(arg)
+                li.append(sub_li)
+                sub_li = []
+            else:
                 return manager.process_generic_event(
-                    "OnSet",
+                    "AttributeCountError",
                     event=event,
-                    AttrSetNumber=attr_saved,
-                    SkillSetNumber=skill_saved
+                    Command="set"
                 )
 
-            if __set_skill(args, event, [], cards=cards, cha=cha, module=module, qid=qid):
+        for sub_li in li:
+            if __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid):
+                attr_saved += 1
+                continue
+
+            if __set_skill(sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid):
                 skill_saved += 1
-                return manager.process_generic_event(
-                    "OnSet",
-                    event=event,
-                    AttrSetNumber=attr_saved,
-                    SkillSetNumber=skill_saved
-                )
             else:
                 skill_saved_failed += 1
-                return manager.process_generic_event(
-                    "OnSetWithFailure",
-                    event=event,
-                    AttrSetNumber=attr_saved,
-                    SkillSetNumber=skill_saved,
-                    SkillSetFailed=skill_saved_failed,
-                    FailedDetail="" # TODO
-                )
-        elif len(args) > 2:
-            reply = []
-            li = []
-            sub_li = []
-            for arg in args:
-                index = args.index(arg)
-                if index % 2 == 0:
-                    sub_li.append(arg)
-                elif index % 2 == 1:
-                    sub_li.append(arg)
-                    li.append(sub_li)
-                    sub_li = []
-                else:
-                    return manager.process_generic_event(
-                        "AttributeCountError",
-                        event=event,
-                        Command="set"
-                    )
 
-            for sub_li in li:
-                if __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid):
-                    attr_saved += 1
-                    continue
-
-                if __set_skill(sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid):
-                    skill_saved += 1
-                else:
-                    skill_saved_failed += 1
-
+        if not skill_saved_failed:
             return manager.process_generic_event(
                 "OnSet",
                 event=event,
@@ -191,10 +164,13 @@ def set_handler(event: MessageEvent, args, at, mode=None):
             )
         else:
             return manager.process_generic_event(
-                    "AttributeCountError",
-                    event=event,
-                    Command="set"
-                    )
+                "OnSetWithFailure",
+                event=event,
+                AttrSetNumber=attr_saved,
+                SkillSetNumber=skill_saved,
+                SkillSetFailed=skill_saved_failed,
+                FailedDetail="" # TODO
+            )
 
 def show_handler(event: MessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.show`指令后端方法 """

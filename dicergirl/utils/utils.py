@@ -96,9 +96,9 @@ def get_mode(event) -> str:
     """ 获得当前群聊的跑团模式 """
     lm = load_modes()
     if not get_group_id(event) in lm.keys():
-        lm[get_group_id(event)] = "scp"
+        lm[get_group_id(event)] = "coc"
         json.dump(lm, open(BOT_MODES_FILE, "w"))
-        return "scp"
+        return "coc"
 
     return lm[get_group_id(event)]
 

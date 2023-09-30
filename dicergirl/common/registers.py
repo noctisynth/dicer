@@ -54,10 +54,12 @@ def regist_main_event():
     manager.register_event("BlacklistAdded", "用户[{UserID}]执行非法操作, 已列入黑名单.")
 
 def regist_general_event():
-    manager.register_event("SetDefault", "[{SenderCard}]设置{CharactorName} {Property} 为: {Value}")
-    manager.register_event("SetDefaultFailed", "基础数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
-    manager.register_event("SetSkill", "[{SenderCard}]设置{CharactorName}技能 {Property} 为: {Value}")
-    manager.register_event("SetSkillFailed", "技能数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
+    # manager.register_event("SetDefault", "[{SenderCard}]设置{CharactorName} {Property} 为: {Value}")
+    # manager.register_event("SetDefaultFailed", "基础数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
+    # manager.register_event("SetSkill", "[{SenderCard}]设置{CharactorName}技能 {Property} 为: {Value}")
+    # manager.register_event("SetSkillFailed", "技能数据 {Property} 要求正整数数据, 但你传入了 {Value}.")
+    manager.register_event("OnSet", "[{SenderCard}]录卡完成, 成功设置基础属性{AttrSetNumber}个, 技能{SkillSetNumber}个.")
+    manager.register_event("OnSetWithFailure", "[{SenderCard}]录卡完成, 成功设置基础属性{AttrSetNumber}个, 技能{SkillSetNumber}个, 有{SkillSetFailed}个技能设置失败.\n{FailedDetail}")
     manager.register_event("CardInUse", "[{SenderCard}]使用中人物卡: \n{CardDetail}")
     manager.register_event("CardInCache", "[{SenderCard}]已暂存人物卡: \n{CardDetail}")
     manager.register_event("CardSaved", "[{SenderCard}]成功从缓存保存人物卡属性: \n{CardDetail}")
@@ -71,3 +73,4 @@ def regist_general_event():
     manager.register_event("UnknownError", "诶, 貌似发生了未知的错误?")
     manager.register_event("SkillDeleted", "[{SenderCard}]已删除技能 {SkillName}, 唔, 真是可惜.")
     manager.register_event("ShootDocimasy", "[{SenderCard}]进行射击检定:\n{DiceDescription}\n检定命中了 {OnShoot}.")
+    manager.register_event("CacheNotFound", "未找到缓存数据, 请先使用无参数的`.{ModuleName}`指令进行车卡生成角色卡, 或使用`.st`指令进行录卡.")

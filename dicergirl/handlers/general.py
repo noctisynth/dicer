@@ -4,9 +4,19 @@ from ..utils.dicer import Dicer
 from ..utils.docimasy import expr
 from ..utils.utils import get_group_id
 from ..utils.plugins import modes
-from ..reply.manager import manager
 from ..utils.cards import Cards
 from ..utils.charactors import Character
+from ..reply.manager import manager
+
+class StatusCode:
+    def __init__(self, status_code=1) -> None:
+        self.status_code = status_code
+
+    def __bool__(self):
+        if self.status_code > 0:
+            return True
+        else:
+            return False
 
 def __set_plus_format(args: list):
     """ `.set 技能 +x`语法解析 """
@@ -28,18 +38,13 @@ def __set_plus_format(args: list):
 
     return args
 
-def __set_default(args: list, event: MessageEvent, cards=None, module=None, attrs_dict=None, cha=None, qid=None) -> bool:
+def __set_default(args: list, event: MessageEvent, cards: Cards=None, module=None, attrs_dict=None, cha: Character=None, qid: str=None) -> bool:
     """ 技能或属性设置 """
     for attr, alias in attrs_dict.items():
         if args[0] in alias:
             if attr in ["名字", "性别"]:
                 if attr == "性别" and not args[1] in ["男", "女"]:
-                    return manager.process_generic_event(
-                        "BadSex",
-                        event=event,
-                        CharactorName=module.__cname__,
-                        Value=args[1]
-                    )
+                    return StatusCode(-1)
                 cha.__dict__[alias[0]] = args[1]
             else:
                 try:
@@ -50,22 +55,11 @@ def __set_default(args: list, event: MessageEvent, cards=None, module=None, attr
                     elif args[1].startswith("-"):
                         cha.__dict__[alias[0]] -= int(args[1][1:])
                 except ValueError:
-                    return manager.process_generic_event(
-                        "SetDefaultFailed",
-                        event=event,
-                        Property=args[0],
-                        Value=args[1]
-                        )
+                    return StatusCode(0)
             cards.update(event, cha.__dict__, qid=qid)
-            return manager.process_generic_event(
-                "SetDefault",
-                event=event,
-                CharactorName=module.__cname__,
-                Property=attr,
-                Value=cha.__dict__[alias[0]]
-                )
+            return StatusCode(1)
 
-def __set_skill(args, event: MessageEvent, reply: list, cards=None, cha=None, module=None, qid=None):
+def __set_skill(args, event: MessageEvent, reply: list, cards: Cards=None, cha: Character=None, module=None, qid: str=None):
     """ 设置技能 """
     try:
         if not args[1].startswith(("-", "+")):
@@ -75,31 +69,22 @@ def __set_skill(args, event: MessageEvent, reply: list, cards=None, cha=None, mo
         elif args[1].startswith("-"):
             cha.skills[args[0]] -= int(args[1][1:])
         cards.update(event, cha.__dict__, qid=qid)
-        reply.append(manager.process_generic_event(
-            "SetSkill",
-            event=event,
-            CharactorName=module.__cname__,
-            Property=args[0],
-            Value=cha.skills[args[0]]
-        ))
+        return StatusCode(1)
     except ValueError:
-        reply.append(manager.process_generic_event(
-            "SetSkillFailed",
-            event=event,
-            Property=args[0],
-            Value=args[1]
-        ))
-    finally:
-        return reply
+        return StatusCode(0)
 
 def set_handler(event: MessageEvent, args, at, mode=None):
     """ 兼容所有模式的`.set`指令后端方法 """
     module = modes[mode]
     cards: Cards = module.__cards__
     cache_cards: Cards = module.__cache__
-    charactor: Character = module.__charactor__
+    charactor: Character = module.__charactor__()
     attrs_dict: dict = module.__baseattrs__
     args: list = __set_plus_format(args)
+
+    attr_saved = 0
+    skill_saved = 0
+    skill_saved_failed = 0
 
     if len(at) == 1:
         qid = at[0]
@@ -110,7 +95,7 @@ def set_handler(event: MessageEvent, args, at, mode=None):
         if cache_cards.get(event, qid=qid):
             card_data = cache_cards.get(event, qid=qid)
             cards.update(event, card_data, qid=qid)
-            cha = charactor().load(card_data)
+            cha = charactor.load(card_data)
             cache_cards.delete(event)
             return manager.process_generic_event(
                 "CardSaved",
@@ -118,13 +103,21 @@ def set_handler(event: MessageEvent, args, at, mode=None):
                 CardDetail=cha.output()
             )
         else:
-            return f"未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
+            return manager.process_generic_event(
+                "CacheNotFound",
+                event=event,
+                ModuleName=module.__name__
+            )
     else:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
-            cha = charactor().load(card_data)
+            cha = charactor.load(card_data)
         else:
-            return f"未找到缓存数据, 请先使用无参数的`.{module.__name__}`指令进行车卡生成角色卡."
+            return manager.process_generic_event(
+                "CacheNotFound",
+                event=event,
+                ModuleName=module.__name__
+            )
 
         if len(args) % 2 != 0:
             return manager.process_generic_event(
@@ -133,11 +126,33 @@ def set_handler(event: MessageEvent, args, at, mode=None):
                 Command="set"
                 )
         elif len(args) == 2:
-            sd = __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid)
-            if sd:
-                return sd
+            if __set_default(args, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid):
+                attr_saved += 1
+                return manager.process_generic_event(
+                    "OnSet",
+                    event=event,
+                    AttrSetNumber=attr_saved,
+                    SkillSetNumber=skill_saved
+                )
 
-            return __set_skill(args, event, [], cards=cards, cha=cha, module=module, qid=qid)[0]
+            if __set_skill(args, event, [], cards=cards, cha=cha, module=module, qid=qid):
+                skill_saved += 1
+                return manager.process_generic_event(
+                    "OnSet",
+                    event=event,
+                    AttrSetNumber=attr_saved,
+                    SkillSetNumber=skill_saved
+                )
+            else:
+                skill_saved_failed += 1
+                return manager.process_generic_event(
+                    "OnSetWithFailure",
+                    event=event,
+                    AttrSetNumber=attr_saved,
+                    SkillSetNumber=skill_saved,
+                    SkillSetFailed=skill_saved_failed,
+                    FailedDetail="" # TODO
+                )
         elif len(args) > 2:
             reply = []
             li = []
@@ -155,20 +170,25 @@ def set_handler(event: MessageEvent, args, at, mode=None):
                         "AttributeCountError",
                         event=event,
                         Command="set"
-                        )
+                    )
 
             for sub_li in li:
-                sd = __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid)
-                if sd:
-                    reply.append(sd)
+                if __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid):
+                    attr_saved += 1
                     continue
 
-                reply = __set_skill(sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid)
+                if __set_skill(sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid):
+                    skill_saved += 1
+                else:
+                    skill_saved_failed += 1
 
-            rep = ""
-            for r in reply:
-                rep += r + "\n"
-            return rep.rstrip("\n")
+            return manager.process_generic_event(
+                "OnSet",
+                event=event,
+                AttrSetNumber=attr_saved,
+                SkillSetNumber=skill_saved,
+                SkillSetFailed=skill_saved_failed
+            )
         else:
             return manager.process_generic_event(
                     "AttributeCountError",
@@ -181,7 +201,7 @@ def show_handler(event: MessageEvent, args, at, mode=None):
     module = modes[mode]
     cards: Cards = module.__cards__
     cache_cards: Cards = module.__cache__
-    charactor: Character = module.__charactor__
+    charactor: Character = module.__charactor__()
 
     if len(at) == 1:
         qid = at[0]
@@ -192,7 +212,7 @@ def show_handler(event: MessageEvent, args, at, mode=None):
     if not args:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
-            cha = charactor().load(card_data)
+            cha = charactor.load(card_data)
             data = manager.process_generic_event(
                 "CardInUse",
                 event=event,
@@ -201,7 +221,7 @@ def show_handler(event: MessageEvent, args, at, mode=None):
             r.append(data)
         if cache_cards.get(event, qid=qid):
             card_data = cache_cards.get(event, qid=qid)
-            cha = charactor().load(card_data)
+            cha = charactor.load(card_data)
             data = manager.process_generic_event(
                 "CardInCache",
                 event=event,
@@ -211,19 +231,19 @@ def show_handler(event: MessageEvent, args, at, mode=None):
     elif args[0] in ["detail", "de", "details"]:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
-            cha = charactor().load(card_data)
+            cha = charactor.load(card_data)
             r.append(cha.skills_output())
     elif args[0] == "all":
         cd = cards.data[get_group_id(event)]
         for data in cd:
-            cha = charactor().load(cd[data])
+            cha = charactor.load(cd[data])
             d = cha.output() + "\n"
             d += cha.skills_output()
             r.append(d)
     else:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
-            cha = charactor().load(card_data)
+            cha = charactor.load(card_data)
             if hasattr(cha, "out_"+args[0]):
                 try:
                     r.append(getattr(cha, "out_"+args[0])())

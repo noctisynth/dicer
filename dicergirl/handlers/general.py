@@ -9,8 +9,11 @@ from ..utils.charactors import Character
 from ..reply.manager import manager
 
 class StatusCode:
-    def __init__(self, status_code=1) -> None:
+    def __init__(self, status_code: int=1) -> None:
         self.status_code = status_code
+
+    def __eq__(self, __value: object) -> bool:
+        return __value == self.status_code
 
     def __bool__(self):
         if self.status_code > 0:
@@ -38,12 +41,20 @@ def __set_plus_format(args: list):
 
     return args
 
-def __set_default(args: list, event: MessageEvent, cards: Cards=None, module=None, attrs_dict=None, cha: Character=None, qid: str=None) -> bool:
-    """ 技能或属性设置 """
+def __set_default(args: list, event: MessageEvent, reply: list, cards: Cards=None, module=None, attrs_dict: dict=None, cha: Character=None, qid: str=None) -> bool:
+    """ 设置属性 """
     for attr, alias in attrs_dict.items():
         if args[0] in alias:
             if attr in ["名字", "性别"]:
                 if attr == "性别" and not args[1] in ["男", "女"]:
+                    reply.append(
+                        manager.process_generic_event(
+                            "BadSex",
+                            event=event,
+                            CharactorName="角色",
+                            Value=args[1]
+                        )
+                    )
                     return StatusCode(-1)
                 cha.__dict__[alias[0]] = args[1]
             else:
@@ -55,11 +66,19 @@ def __set_default(args: list, event: MessageEvent, cards: Cards=None, module=Non
                     elif args[1].startswith("-"):
                         cha.__dict__[alias[0]] -= int(args[1][1:])
                 except ValueError:
+                    reply.append(
+                        manager.process_generic_event(
+                            "ValueError",
+                            event=event,
+                            SkillName=args[0],
+                            Value=args[1]
+                        )
+                    )
                     return StatusCode(0)
             cards.update(event, cha.__dict__, qid=qid)
             return StatusCode(1)
 
-def __set_skill(args, event: MessageEvent, reply: list, cards: Cards=None, cha: Character=None, module=None, qid: str=None):
+def __set_skill(args, event: MessageEvent, reply: list, cards: Cards=None, cha: Character=None, module=None, qid: str=None) -> bool:
     """ 设置技能 """
     try:
         if not args[1].startswith(("-", "+")):
@@ -71,9 +90,17 @@ def __set_skill(args, event: MessageEvent, reply: list, cards: Cards=None, cha: 
         cards.update(event, cha.__dict__, qid=qid)
         return StatusCode(1)
     except ValueError:
+        reply.append(
+            manager.process_generic_event(
+                "ValueError",
+                event=event,
+                SkillName=args[0],
+                Value=args[1]
+            )
+        )
         return StatusCode(0)
 
-def set_handler(event: MessageEvent, args, at, mode=None):
+def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> str:
     """ 兼容所有模式的`.set`指令后端方法 """
     module = modes[mode]
     cards: Cards = module.__cards__
@@ -84,7 +111,7 @@ def set_handler(event: MessageEvent, args, at, mode=None):
 
     attr_saved = 0
     skill_saved = 0
-    skill_saved_failed = 0
+    saved_failed = 0
 
     if len(at) == 1:
         qid = at[0]
@@ -127,6 +154,7 @@ def set_handler(event: MessageEvent, args, at, mode=None):
                 )
 
         reply = []
+
         li = []
         sub_li = []
         for arg in args:
@@ -145,31 +173,40 @@ def set_handler(event: MessageEvent, args, at, mode=None):
                 )
 
         for sub_li in li:
-            if __set_default(sub_li, event, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid):
+            set_default_code = __set_default(sub_li, event, reply, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid)
+            if set_default_code:
                 attr_saved += 1
+                continue
+            elif set_default_code == -1:
+                saved_failed += 1
                 continue
 
             if __set_skill(sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid):
                 skill_saved += 1
             else:
-                skill_saved_failed += 1
+                saved_failed += 1
 
-        if not skill_saved_failed:
+        if not saved_failed:
             return manager.process_generic_event(
                 "OnSet",
                 event=event,
                 AttrSetNumber=attr_saved,
                 SkillSetNumber=skill_saved,
-                SkillSetFailed=skill_saved_failed
+                SkillSetFailed=saved_failed
             )
         else:
+            details = ""
+            for detail in reply:
+                details += detail + "\n"
+            details.strip("\n")
+
             return manager.process_generic_event(
                 "OnSetWithFailure",
                 event=event,
                 AttrSetNumber=attr_saved,
                 SkillSetNumber=skill_saved,
-                SkillSetFailed=skill_saved_failed,
-                FailedDetail="" # TODO
+                SkillSetFailed=saved_failed,
+                FailedDetail=details
             )
 
 def show_handler(event: MessageEvent, args, at, mode=None):

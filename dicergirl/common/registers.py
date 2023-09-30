@@ -70,6 +70,7 @@ def regist_general_event():
     manager.register_event("MultipleRollStringError", "参数错误, `#`提示符前应当跟随整型数.")
     manager.register_event("BadSex", "{BotName}拒绝将{CharactorName}性别将设置为 {Value}, 这是对物种的侮辱.")
     manager.register_event("AttributeCountError", "参数错误, 这是由于传输的数据数量错误, {BotName}只接受为偶数的参数数量, 这看起来不像是来源于我的错误.\n使用`.help {Command}`查看使用帮助.")
+    manager.register_event("ValueError", "数据错误, {SkillName}需要整型数但你传入了{Value}.")
     manager.register_event("UnknownError", "诶, 貌似发生了未知的错误?")
     manager.register_event("SkillDeleted", "[{SenderCard}]已删除技能 {SkillName}, 唔, 真是可惜.")
     manager.register_event("ShootDocimasy", "[{SenderCard}]进行射击检定:\n{DiceDescription}\n检定命中了 {OnShoot}.")

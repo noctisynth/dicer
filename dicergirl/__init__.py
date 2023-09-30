@@ -86,7 +86,7 @@ if initalized:
     messagemonitor = on("message", priority=1, block=False)
     dgmessagemonitor = on("message_sent", priority=1, block=False)
     showcommand = on_startswith((".show", ".display"), priority=2, block=True)
-    setcommand = on_startswith((".set", ".st"), priority=2, block=True)
+    setcommand = on_startswith((".set", ".st", ".s"), priority=2, block=True)
     helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
     modecommand = on_startswith((".mode", ".m"), priority=2, block=True)
     shootcommand = on_startswith((".sht", ".shoot"), priority=2, block=True)
@@ -100,7 +100,6 @@ if initalized:
     delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
     rolekpcommand = on_startswith(".kp", priority=2, block=True)
     roleobcommand = on_startswith(".ob", priority=2, block=True)
-    sncommand = on_startswith(".sn", priority=2, block=True)
     registcommand = on_startswith((".regist", ".reg"), priority=2, block=True)
     chatcommand = on_startswith(".chat", priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
@@ -829,13 +828,15 @@ if initalized:
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=(".set", ".st"))
+        args = format_msg(event.get_message(), begin=(".set", ".st", ".s"))
         at = get_mentions(event)
         commands = CommandParser(
             Commands([
                 Only("show"),
                 Only("del"),
-                Only("clear")
+                Only("clear"),
+                Only("init"),
+                Optional(("name", "n"), str)
             ]),
             args,
             auto=True
@@ -846,6 +847,40 @@ if initalized:
                 "SetPermissionDenied"
             ))
             return
+        if len(at) == 1:
+            qid = at[0]
+        else:
+            qid = ""
+
+        mode = get_mode(event)
+
+        if commands["name"]:
+            cards: Cards = modes[mode].__cards__
+            if not cards.get(event):
+                cha: Character = modes[mode].__charactor__()
+                if hasattr(cha, "init"):
+                    cha.init()
+
+                cards.update(event, cha.__dict__, save=True)
+
+            cha: Character = modes[mode].__charactor__()
+            cha.load(cards.get(event, qid=qid))
+            setattr(cha, "name", commands["name"])
+            await bot.set_group_card(group_id=event.group_id, user_id=event.user_id, card=commands["name"])
+            await matcher.send(f"命名角色为 {commands['name']}")
+            return
+
+        if commands["init"]:
+            cards: Cards = modes[mode].__cards__
+            if not cards.get(event):
+                cha: Character = modes[mode].__charactor__()
+                if hasattr(cha, "init"):
+                    cha.init()
+
+                cards.update(event, cha.__dict__, save=True)
+
+            await matcher.send("角色卡已初始化.")
+            return
 
         if commands["show"]:
             args.remove("show")
@@ -855,7 +890,6 @@ if initalized:
             args.remove("del")
             return await delhandler(matcher, event, args=args)
 
-        mode = get_mode(event)
         if mode in modes:
             try:
                 if not args:
@@ -1239,20 +1273,6 @@ if initalized:
         message = html.unescape(message)
         manager.register_event(event_name, message.replace("\\n", "\n"), is_custom=True)
         await matcher.send(f"消息事件 {event_name} 已被更改为 {message}.")
-
-    @sncommand.handle()
-    async def snhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
-        """ 群名片修改指令 """
-        card: Cards = modes[get_mode(event)].__cards__
-        user_id: int = event.get_user_id()
-        got = card.get(event, qid=str(user_id))
-
-        if isinstance(got, dict):
-            if "name" not in got.keys():
-                got = ""
-
-        name = got['name'] if got else ""
-        await bot.set_group_card(group_id=event.group_id, user_id=user_id, card=name)
 
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher):

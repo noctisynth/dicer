@@ -270,11 +270,11 @@ def show_handler(event: MessageEvent, args, at, mode=None):
 
     return r
 
-def del_handler(event: MessageEvent, args, at, mode=None):
+def del_handler(event: MessageEvent, args: list, at: list, mode: str=None):
     """ 兼容所有模式的`.del`指令后端方法 """
     module = modes[mode]
-    cache_cards = module.__cache__
-    cards = module.__cards__
+    cache_cards: Cards = module.__cache__
+    cards: Cards = module.__cards__
 
     if len(at) == 1:
         qid = at[0]

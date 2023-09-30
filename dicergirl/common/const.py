@@ -16,6 +16,7 @@ VERSION = "3.4.2"
 """ Dicer Girl 版本号 """
 HOME_PATH = Path.home()
 """ 主目录 """
+PLUGINS_PATH = Path(__file__).resolve().parent.parent / "plugins"
 DICERGIRL_DATA_PATH = HOME_PATH / ".dicergirl"
 """ DicerGirl 数据文件夹路径 """
 CURRENT_DIR = Path(__file__).resolve().parent

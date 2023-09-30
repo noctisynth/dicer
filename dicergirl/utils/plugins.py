@@ -1,5 +1,6 @@
 from pathlib import Path
 from multilogging import multilogger
+from ..common.const import PLUGINS_PATH
 
 import sys
 import importlib
@@ -15,9 +16,9 @@ def modules():
 
     modes_dict = {}
     library_dict = {}
-    sys.path.append(Path(__file__).resolve().parent.parent.__str__())
+    sys.path.append(PLUGINS_PATH.__str__())
 
-    for folder in Path(__file__).resolve().parent.parent.iterdir():
+    for folder in PLUGINS_PATH.iterdir():
         if Path(folder).is_dir() and (Path(folder) / "__init__.py").exists():
             try:
                 module = importlib.import_module(folder.name)

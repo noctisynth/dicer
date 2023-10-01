@@ -399,6 +399,7 @@ if initalized:
                     "AuthenticateFailed",
                     event=event
                 ))
+            else:
                 add_super_user(event)
                 await matcher.send(manager.process_generic_event(
                     "AuthenticateSuccess",

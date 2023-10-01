@@ -24,13 +24,15 @@ class Cards:
 
     def init(self):
         logger.info(f"{self.mode.upper()} 存储文件未建立, 建立它.")
+        if not self.cache_path.parent.exists():
+            self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+
         with self.cache_path.open(mode="w", encoding="utf-8") as f:
             yaml.dump({"mode": self.mode, "cards": {}}, f)
 
     def save(self):
-        logger.info(f"保存 {self.mode.upper()} 人物卡数据.")
-        if not self.cache_path.parent.exists():
-            self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+        if not self.cache_path.exists():
+            self.init()
 
         with self.cache_path.open(mode="w", encoding="utf-8") as f:
             yaml.dump({"mode": self.mode, "cards": self.data}, f, allow_unicode=True)

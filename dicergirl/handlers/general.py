@@ -260,9 +260,9 @@ def show_handler(event: MessageEvent, args, at, mode=None):
                     reply.append("查询时出现异常, 可能你想要查询的内容不存在?")
             else:
                 exp = 0
-                for key, skill in cha.skills.items():
+                for skill in cha.skills.keys():
                     if args[0] == skill:
-                        exp = cha.skills[key]
+                        exp = cha.skills[skill]
                         break
 
                 reply.append(f"{args[0]}: {exp}")

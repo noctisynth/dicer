@@ -435,7 +435,7 @@ if initalized:
         )
 
         if commands.nothing or commands.results["version"]:
-            return await versionhandler(matcher=matcher)
+            return await versionhandler(matcher=matcher, event=event)
         else:
             commands = commands.results
 

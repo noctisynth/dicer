@@ -12,7 +12,7 @@ EMPTY_DICT = {}
 NONE = None
 
 
-VERSION = "3.4.4"
+VERSION = "3.4.5"
 """ Dicer Girl 版本号 """
 HOME_PATH = Path.home()
 """ 主目录 """

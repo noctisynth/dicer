@@ -1197,6 +1197,9 @@ if initalized:
     @rolekpcommand.handle()
     async def rolekphandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ KP 身份组认证 """
+        if get_mentions(event) and not event.to_me:
+            return
+
         args = format_msg(event.get_message(), begin=(".kp"))
         cp = CommandParser(
             Commands([
@@ -1226,6 +1229,9 @@ if initalized:
     @roleobcommand.handle()
     async def roleobhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ OB 身份组认证 """
+        if get_mentions(event) and not event.to_me:
+            return
+
         import json
         roleob(event)
 
@@ -1239,6 +1245,9 @@ if initalized:
     @registcommand.handle()
     async def registhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 消息事件注册指令 """
+        if get_mentions(event) and not event.to_me:
+            return
+
         args = format_str(event.get_message(), begin=(".regist", ".reg"), lower=False).split(" ")
         args = list(filter(None, args))
         cp = CommandParser(
@@ -1286,8 +1295,11 @@ if initalized:
         await matcher.send(f"消息事件 {event_name} 已被更改为 {message}.")
 
     @versioncommand.handle()
-    async def versionhandler(matcher: Matcher):
+    async def versionhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 骰娘版本及开源声明指令 """
+        if get_mentions(event) and not event.to_me:
+            return
+
         await matcher.send(f"Unvisitor DicerGirl 版本 {VERSION} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助.")
         return
 else:

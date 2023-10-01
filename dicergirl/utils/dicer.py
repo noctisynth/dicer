@@ -219,7 +219,7 @@ class Dicer:
             if match in ("+", "-", "*", "/", "(", ")"):
                 self.calc_list.append(match)
                 self.db += match
-            elif re.match(r"\d*[dD]\d+", match):
+            elif re.match(r"\d*[dD]\d*", match):
                 self.calc_list.append(Dice(match, explode=explode))
                 self.db += match.upper()
             elif re.match(r"\d*[bB]\d+", match):
@@ -323,7 +323,7 @@ if __name__ == "__main__":
     }
     for roll_string in roll_strings.keys():
         try:
-            dice = Dicer().parse(roll_string).roll()
+            dice = Dicer(roll_string).roll()
             if dice.outcome != roll_strings[roll_string]:
                 print(dice.description())
                 raise ValueError(f"对于 {roll_string} dice.toal={dice.outcome} 但期待 {roll_strings[roll_string]}")
@@ -331,7 +331,7 @@ if __name__ == "__main__":
             logger.exception(error)
 
     try:
-        roll_string = "1d100+(10/10)+p2"
+        roll_string = "d"
         dice = Dicer(roll_string).roll()
         print(dice.description())
     except ValueError as error:

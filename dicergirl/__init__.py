@@ -1,6 +1,24 @@
+import logging
+import sys
+import platform
+import psutil
+import html
+import nonebot
+import re
+import json
+
+
 from pathlib import Path
 from datetime import datetime
 from multilogging import multilogger
+
+from nonebot.matcher import Matcher
+from nonebot.plugin import on, on_request, on_notice, PluginMetadata
+from nonebot.adapters import Bot as Bot
+from nonebot.adapters.onebot import V11Bot
+from nonebot.adapters.onebot.v11.event import FriendRequestEvent, GroupRequestEvent, GroupDecreaseNoticeEvent
+from nonebot.adapters.onebot.v11.exception import ActionFailed
+from nonebot.internal.matcher.matcher import Matcher
 
 from .handlers.on import on_startswith
 
@@ -34,23 +52,6 @@ from .common.const import DICERGIRL_LOGS_PATH, VERSION
 
 from .utils.settings import DEBUG, debugon, debugoff
 
-from nonebot.matcher import Matcher
-from nonebot.plugin import on, on_request, on_notice, PluginMetadata
-from nonebot.adapters import Bot as Bot
-from nonebot.adapters.onebot import V11Bot
-from nonebot.adapters.onebot.v11.event import FriendRequestEvent, GroupRequestEvent, GroupDecreaseNoticeEvent
-from nonebot.adapters.onebot.v11.exception import ActionFailed
-from nonebot.internal.matcher.matcher import Matcher
-
-import logging
-import sys
-import platform
-import psutil
-import html
-import nonebot
-import re
-import json
-
 __version__ = VERSION
 __plugin_meta__ = PluginMetadata(
     name="DicerGirl",
@@ -77,17 +78,33 @@ if initalized:
     else:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
 
-    # 指令装饰器实例化
+    # 开发者指令
     testcommand = on_startswith(".test", priority=2, block=True)
     debugcommand = on_startswith(".debug", priority=2, block=True)
-    superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
-    botcommand = on_startswith(".bot", priority=1, block=True)
-    logcommand = on_startswith(".log", priority=1, block=True)
+
+    # 消息监视及日志指令
     messagemonitor = on("message", priority=1, block=False)
     dgmessagemonitor = on("message_sent", priority=1, block=False)
-    showcommand = on_startswith((".show", ".display"), priority=2, block=True)
-    setcommand = on_startswith((".set", ".st", ".s"), priority=2, block=True)
+    logcommand = on_startswith(".log", priority=1, block=True)
+
+    # 请求及事件处理
+    friendaddrequest = on_request(priority=2, block=True)
+    groupaddrequest = on_request(priority=2, block=True)
+    kickedevent = on_notice(priority=2, block=False)
+
+    # 机器人管理指令
+    superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
+    botcommand = on_startswith(".bot", priority=1, block=True)
+    dismisscommand = on_startswith((".dismiss", ".exit", ""), priority=2, block=True)
+    registcommand = on_startswith((".regist", ".reg"), priority=2, block=True)
+    versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
+
+    # 基本指令
     helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
+    rollcommand = on_startswith((".r", ".roll"), priority=3, block=True)
+    delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
+    showcommand = on_startswith((".show", ".display"), priority=1, block=True)
+    setcommand = on_startswith((".set", ".st", ".s"), priority=2, block=True)
     modecommand = on_startswith((".mode", ".m"), priority=2, block=True)
     shootcommand = on_startswith((".sht", ".shoot"), priority=2, block=True)
     attackcommand = on_startswith((".at", ".attack"), priority=2, block=True)
@@ -96,16 +113,8 @@ if initalized:
     racommand = on_startswith(".ra", priority=2, block=True)
     rhcommand = on_startswith(".rh", priority=2, block=True)
     rhacommand = on_startswith(".rha", priority=1, block=True)
-    rollcommand = on_startswith((".r", ".roll"), priority=3, block=True)
-    delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
     rolekpcommand = on_startswith(".kp", priority=2, block=True)
     roleobcommand = on_startswith(".ob", priority=2, block=True)
-    registcommand = on_startswith((".regist", ".reg"), priority=2, block=True)
-    chatcommand = on_startswith(".chat", priority=2, block=True)
-    versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
-    friendaddrequest = on_request(priority=2, block=True)
-    groupaddrequest = on_request(priority=2, block=True)
-    kickedevent = on_notice(priority=2, block=False)
 
     # 定时任务
     scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler

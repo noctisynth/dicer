@@ -1,8 +1,10 @@
 import sys
-from ..utils.utils import run_shell_command
-from ..common.errors.pluginerror import PluginNotFoundError, PluginExistsError, PluginInstallFailedError, PluginUninstallFailedError
-from ..utils.plugins import modes
+
 from multilogging import multilogger
+
+from ..utils.utils import run_shell_command
+from ..common.exceptions.pluginerror import PluginNotFoundError, PluginExistsError, PluginInstallFailedError, PluginUninstallFailedError
+from ..utils.plugins import modes
 from .parse import get_plugins_mixed
 
 logger = multilogger(name="DicerGirl", payload="Plugins")

@@ -44,7 +44,7 @@ from .handlers.general import show_handler, set_handler, del_handler, roll, shoo
 
 from .plugins.parse import get_plugins
 from .plugins.operation import install, remove, upgrade as plgupgrade
-from .common.errors.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
+from .common.exceptions.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
 
 from .common.messages import help_message
 from .common.registers import regist_all
@@ -63,7 +63,7 @@ __plugin_meta__ = PluginMetadata(
 )
 __author__ = "苏向夜 <fu050409@163.com>"
 
-logger = multilogger(name="Dicer Girl", payload="Nonebot2")
+logger = multilogger(name="DicerGirl", payload="Nonebot2")
 current_dir = Path(__file__).resolve().parent
 
 try:

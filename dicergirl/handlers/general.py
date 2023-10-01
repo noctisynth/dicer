@@ -221,54 +221,56 @@ def show_handler(event: MessageEvent, args, at, mode=None):
     else:
         qid = ""
 
-    r = []
+    reply = []
     if not args:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
             cha = charactor.load(card_data)
-            data = manager.process_generic_event(
-                "CardInUse",
-                event=event,
-                CardDetail=cha.output()
+            reply.append(
+                manager.process_generic_event(
+                    "CardInUse",
+                    event=event,
+                    CardDetail=cha.output()
+                )
             )
-            r.append(data)
+
         if cache_cards.get(event, qid=qid):
             card_data = cache_cards.get(event, qid=qid)
             cha = charactor.load(card_data)
-            data = manager.process_generic_event(
-                "CardInCache",
-                event=event,
-                CardDetail=cha.output()
+            reply.append(
+                manager.process_generic_event(
+                    "CardInCache",
+                    event=event,
+                    CardDetail=cha.output()
+                )
             )
-            r.append(data)
     elif args[0] in ["detail", "de", "details"]:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
             cha = charactor.load(card_data)
-            r.append(cha.skills_output())
-    elif args[0] == "all":
-        cd = cards.data[get_group_id(event)]
-        for data in cd:
-            cha = charactor.load(cd[data])
-            d = cha.output() + "\n"
-            d += cha.skills_output()
-            r.append(d)
+            reply.append(cha.skills_output())
     else:
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
             cha = charactor.load(card_data)
             if hasattr(cha, "out_"+args[0]):
                 try:
-                    r.append(getattr(cha, "out_"+args[0])())
+                    reply.append(getattr(cha, "out_"+args[0])())
                 except:
-                    r.append("查询时出现异常, 可能你想要查询的内容不存在?")
+                    reply.append("查询时出现异常, 可能你想要查询的内容不存在?")
             else:
-                r.append("错误的查询方式.")
+                exp = 0
+                for key, skill in cha.skills.items():
+                    if args[0] == skill:
+                        exp = cha.skills[key]
+                        break
 
-    if not r:
-        r.append("未查询到保存或暂存信息.")
+                reply.append(f"{args[0]}: {exp}")
 
-    return r
+    if not reply:
+        reply.append("未查询到保存或暂存信息.")
+
+    return reply
 
 def del_handler(event: MessageEvent, args: list, at: list, mode: str=None):
     """ 兼容所有模式的`.del`指令后端方法 """

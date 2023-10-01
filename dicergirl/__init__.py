@@ -79,42 +79,44 @@ if initalized:
         from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
 
     # 开发者指令
-    testcommand = on_startswith(".test", priority=2, block=True)
-    debugcommand = on_startswith(".debug", priority=2, block=True)
+    testcommand = on_startswith(".test", priority=1, block=True)
+    debugcommand = on_startswith(".debug", priority=1, block=True)
 
     # 消息监视及日志指令
-    messagemonitor = on("message", priority=1, block=False)
-    dgmessagemonitor = on("message_sent", priority=1, block=False)
-    logcommand = on_startswith(".log", priority=1, block=True)
+    messagemonitor = on("message", priority=2, block=False)
+    dgmessagemonitor = on("message_sent", priority=2, block=False)
+    logcommand = on_startswith(".log", priority=2, block=True)
 
     # 请求及事件处理
-    friendaddrequest = on_request(priority=2, block=True)
-    groupaddrequest = on_request(priority=2, block=True)
+    addrequest = on_request(priority=2, block=True)
     kickedevent = on_notice(priority=2, block=False)
 
     # 机器人管理指令
     superusercommand = on_startswith((".su", ".sudo"), priority=2, block=True)
-    botcommand = on_startswith(".bot", priority=1, block=True)
-    dismisscommand = on_startswith((".dismiss", ".exit", ""), priority=2, block=True)
+    botcommand = on_startswith(".bot", priority=2, block=True)
+    dismisscommand = on_startswith((".dismiss", ".exit", ".leave", ".bye"), priority=2, block=True)
     registcommand = on_startswith((".regist", ".reg"), priority=2, block=True)
     versioncommand = on_startswith((".version", ".v"), priority=2, block=True)
 
     # 基本指令
-    helpcommand = on_startswith((".help", ".h"), priority=2, block=True)
-    rollcommand = on_startswith((".r", ".roll"), priority=3, block=True)
-    delcommand = on_startswith((".del", ".delete"), priority=2, block=True)
-    showcommand = on_startswith((".show", ".display"), priority=1, block=True)
-    setcommand = on_startswith((".set", ".st", ".s"), priority=2, block=True)
-    modecommand = on_startswith((".mode", ".m"), priority=2, block=True)
-    shootcommand = on_startswith((".sht", ".shoot"), priority=2, block=True)
-    attackcommand = on_startswith((".at", ".attack"), priority=2, block=True)
-    damcommand = on_startswith((".dam", ".damage"), priority=2, block=True)
-    encommand = on_startswith((".en", ".encourage"), priority=2, block=True)
-    racommand = on_startswith(".ra", priority=2, block=True)
-    rhcommand = on_startswith(".rh", priority=2, block=True)
-    rhacommand = on_startswith(".rha", priority=1, block=True)
-    rolekpcommand = on_startswith(".kp", priority=2, block=True)
-    roleobcommand = on_startswith(".ob", priority=2, block=True)
+    helpcommand = on_startswith((".help", ".h"), priority=3, block=True)
+    rollcommand = on_startswith((".r", ".roll"), priority=4, block=True)
+    racommand = on_startswith(".ra", priority=3, block=True)
+    rhcommand = on_startswith(".rh", priority=3, block=True)
+    rhacommand = on_startswith(".rha", priority=3, block=True)
+    delcommand = on_startswith((".del", ".delete"), priority=3, block=True)
+    showcommand = on_startswith((".show", ".display"), priority=3, block=True)
+    setcommand = on_startswith((".set", ".st", ".s"), priority=4, block=True)
+    modecommand = on_startswith((".mode", ".m"), priority=3, block=True)
+    shootcommand = on_startswith((".sht", ".shoot"), priority=3, block=True)
+    attackcommand = on_startswith((".at", ".attack"), priority=3, block=True)
+    damcommand = on_startswith((".dam", ".damage"), priority=3, block=True)
+    encommand = on_startswith((".en", ".encourage"), priority=3, block=True)
+
+    # 身份组指令
+    rolecommand = on_startswith(".role", priority=3, block=True)
+    rolekpcommand = on_startswith(".kp", priority=3, block=True)
+    roleobcommand = on_startswith(".ob", priority=3, block=True)
 
     # 定时任务
     scheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
@@ -136,7 +138,7 @@ if initalized:
         init()
         logger.success("DicerGirl 初始化完毕.")
 
-    @friendaddrequest.handle()
+    @addrequest.handle()
     async def friendaddapproval(bot: V11Bot, event: FriendRequestEvent):
         if event.get_user_id() in blacklist.get_blacklist():
             try:
@@ -177,7 +179,7 @@ if initalized:
                 )
             )
 
-    @groupaddrequest.handle()
+    @addrequest.handle()
     async def groupaddapproval(bot: V11Bot, event: GroupRequestEvent):
         if event.get_user_id() in blacklist.get_blacklist() or event.group_id in blacklist.get_group_blacklist():
             try:

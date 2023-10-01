@@ -8,7 +8,7 @@ ZERO = 0
 EMPTY_STRING = ""
 EMPTY_LIST = []
 
-logger = multilogger(name="Dicer Girl", payload="Dicer")
+logger = multilogger(name="DicerGirl", payload="Dicer")
 
 class BaseDice:
     def __init__(self, roll_string: str=EMPTY_STRING) -> None:
@@ -22,6 +22,7 @@ class BaseDice:
 
     def roll(self) -> int:
         raise NotImplementedError
+
 
 class DigitDice(BaseDice):
     def __init__(self, roll_string: str=EMPTY_STRING) -> None:
@@ -42,6 +43,7 @@ class DigitDice(BaseDice):
         self.display = [self.a]
         return self.outcome
 
+
 class Dice(BaseDice):
     def __init__(self, roll_string: str="", explode=False) -> None:
         super().__init__(roll_string=roll_string)
@@ -59,7 +61,11 @@ class Dice(BaseDice):
         else:
             self.a = 1
 
-        self.b = int(split[1])
+        if split[1]:
+            self.b = int(split[1])
+        else:
+            self.b = 100
+
         self.db = f"{self.a}D{self.b}"
         self.dices += [f"D{self.b}"] * self.a
         return self
@@ -101,6 +107,7 @@ class Dice(BaseDice):
         self.outcome = sum(self.results)
         return self.outcome
 
+
 class AwardDice(BaseDice):
     def __init__(self, roll_string: str="") -> None:
         super().__init__(roll_string=roll_string)
@@ -139,6 +146,7 @@ class AwardDice(BaseDice):
 
         self.outcome = sum(self.results)
         return self.outcome
+
 
 class PunishDice(BaseDice):
     def __init__(self, roll_string: str="") -> None:
@@ -179,11 +187,12 @@ class PunishDice(BaseDice):
         self.outcome = sum(self.results)
         return self.outcome
 
+
 class Dicer:
     """掷骰类
     参数:
         roll_string: 标准掷骰表达式
-        explode: SCP 用, 爆炸骰方法
+        explode: 是否启用爆炸骰
     示例:
         ```python
         dice = Dice("1d10")

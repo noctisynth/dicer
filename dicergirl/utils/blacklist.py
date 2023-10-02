@@ -33,7 +33,7 @@ class BlackList:
         )
 
     def get_blacklist(self) -> List[str]:
-        return self.blacklist
+        return self.blacklist if self.blacklist else []
 
     def add_blacklist(self, qid: str) -> str:
         self.blacklist.append(qid)
@@ -44,7 +44,7 @@ class BlackList:
         return self.dump()
 
     def get_group_blacklist(self) -> List[str]:
-        return self.group_blacklist
+        return self.group_blacklist if self.group_blacklist else []
 
     def add_group_blacklist(self, gid: str) -> str:
         self.group_blacklist.append(gid)

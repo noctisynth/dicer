@@ -1,14 +1,17 @@
+import abc
+import re
+import random
+
 from multilogging import multilogger
 from typing import List
 
-import re
-import random
 
 ZERO = 0
 EMPTY_STRING = ""
 EMPTY_LIST = []
 
 logger = multilogger(name="DicerGirl", payload="Dicer")
+
 
 class BaseDice:
     def __init__(self, roll_string: str=EMPTY_STRING) -> None:
@@ -17,14 +20,21 @@ class BaseDice:
         self.outcome = ZERO
         self.display = EMPTY_LIST
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.db.upper()
 
+    @abc.abstractmethod
+    def parse(self) -> "BaseDice":
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def roll(self) -> int:
+        """ 对骰子进行投掷并给出结果 """
         raise NotImplementedError
 
 
 class DigitDice(BaseDice):
+    """ 数字骰 """
     def __init__(self, roll_string: str=EMPTY_STRING) -> None:
         super().__init__(roll_string=roll_string)
         if not roll_string.isdigit():
@@ -45,7 +55,8 @@ class DigitDice(BaseDice):
 
 
 class Dice(BaseDice):
-    def __init__(self, roll_string: str="", explode=False) -> None:
+    """ 多面骰 """
+    def __init__(self, roll_string: str="", explode: bool=False) -> None:
         super().__init__(roll_string=roll_string)
         self.dices = EMPTY_LIST
         self.great = False
@@ -109,6 +120,7 @@ class Dice(BaseDice):
 
 
 class AwardDice(BaseDice):
+    """ 奖励骰 """
     def __init__(self, roll_string: str="") -> None:
         super().__init__(roll_string=roll_string)
         self.parse()
@@ -149,6 +161,7 @@ class AwardDice(BaseDice):
 
 
 class PunishDice(BaseDice):
+    """ 惩罚骰 """
     def __init__(self, roll_string: str="") -> None:
         super().__init__(roll_string=roll_string)
         self.parse()
@@ -200,7 +213,7 @@ class Dicer:
         print(dice.outcome) # 输出`1d10`投掷结果
         ```
     """
-    def __init__(self, roll_string: str=EMPTY_STRING, explode=False) -> None:
+    def __init__(self, roll_string: str=EMPTY_STRING, explode: bool=False) -> None:
         self.roll_string: str = roll_string
         self.explode: bool = explode
         self.calc_list: List[str | Dice | DigitDice | AwardDice | PunishDice] = []
@@ -210,10 +223,11 @@ class Dicer:
         self.great: bool = False
         self.dices: List[str] = []
 
-    def parse(self, roll_string: str=EMPTY_STRING, explode=False):
+    def parse(self, roll_string: str=EMPTY_STRING, explode: bool=False):
+        self.roll_string = roll_string if roll_string else self.roll_string
         self.calc_list = []
         self.db = EMPTY_STRING
-        matches: List[str] = re.findall(r'\d*[a-zA-Z]\w*|\d+|[-+*/]', roll_string)
+        matches: List[str] = re.findall(r'\d*[a-zA-Z]\w*|\d+|[-+*/]', self.roll_string)
 
         for match in matches:
             if match in ("+", "-", "*", "/", "(", ")"):
@@ -323,7 +337,7 @@ if __name__ == "__main__":
     }
     for roll_string in roll_strings.keys():
         try:
-            dice = Dicer(roll_string).roll()
+            dice = Dicer().parse(roll_string).roll().roll()
             if dice.outcome != roll_strings[roll_string]:
                 print(dice.description())
                 raise ValueError(f"对于 {roll_string} dice.toal={dice.outcome} 但期待 {roll_strings[roll_string]}")

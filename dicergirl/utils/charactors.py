@@ -1,6 +1,10 @@
+import abc
+
 from ..common.const import EMPTY_CHAR, EMPTY_DICT
 
-class BaseCharactor:
+
+class Character:
+    """ 人物卡模板 """
     def __init__(self) -> None:
         self.name = EMPTY_CHAR
         self.sex = "女"
@@ -10,15 +14,7 @@ class BaseCharactor:
         self.tools = EMPTY_DICT
         self.skills = EMPTY_DICT
 
-    def load(self, data: dict):
-        self.__dict__.update(data)
-        return self
-
-class Character(BaseCharactor):
-    """ 人物卡模板 """
-    def __init__(self) -> None:
-        super().__init__()
-
+    @abc.abstractmethod
     def init(self):
         raise NotImplementedError
 
@@ -43,4 +39,8 @@ class Character(BaseCharactor):
         return (self.__count(), self.__count() + self.luc)
 
     def __count(self):
-        return 0
+        raise NotImplementedError
+
+    def load(self, data: dict):
+        self.__dict__.update(data)
+        return self

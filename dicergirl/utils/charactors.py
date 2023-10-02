@@ -1,18 +1,19 @@
 import abc
 
-from ..common.const import EMPTY_CHAR, EMPTY_DICT
-
+from ..common.const import EMPTY_DICT
+from typing import Literal
 
 class Character:
     """ 人物卡模板 """
+    name: str
+    sex: Literal["男", "女"]
+    age: int
+    hp: int
+    hp_max: int
+
     def __init__(self) -> None:
-        self.name = EMPTY_CHAR
-        self.sex = "女"
-        self.age = 18
-        self.hp = 0
-        self.hp_max = 0
-        self.tools = EMPTY_DICT
         self.skills = EMPTY_DICT
+        self.tools = EMPTY_DICT
 
     @abc.abstractmethod
     def init(self):

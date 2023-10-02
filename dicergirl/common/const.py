@@ -6,12 +6,13 @@ from typing import Any, Dict
 from ruamel.yaml import YAML
 
 
-EMPTY_CHAR = ""
-EMPTY_ARRAY = []
+EMPTY_CHAR = EMPTY_STRING = ""
+EMPTY_ARRAY = EMPTY_LIST = []
 EMPTY_DICT = {}
-NONE = None
+NONE = NULL = None
+ZERO = 0
 
-VERSION = "3.4.11"
+VERSION = "3.4.12"
 """ Dicer Girl 版本号 """
 HOME_PATH = Path.home()
 """ 主目录 """

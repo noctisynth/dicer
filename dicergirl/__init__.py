@@ -867,6 +867,7 @@ if initalized:
                 Only("del"),
                 Only("clear"),
                 Only("init"),
+                Optional(("mode", "temp"), str),
                 Optional(("name", "n"), str)
             ]),
             args,
@@ -910,7 +911,12 @@ if initalized:
 
                 cards.update(event, cha.__dict__, save=True)
 
-            await matcher.send("角色卡已初始化.")
+            await matcher.send(
+                manager.process_generic_event(
+                    "CardInit",
+                    event=event
+                )
+            )
             return
 
         if commands["show"]:
@@ -920,6 +926,13 @@ if initalized:
         if commands["del"]:
             args.remove("del")
             return await delhandler(matcher, event, args=args)
+
+        if commands["mode"]:
+            if "mode" in args:
+                args.remove("mode")
+            else:
+                args.remove("temp")
+            return await modehandler(bot=bot, matcher=matcher, event=event, args=[commands["mode"]])
 
         if mode in modes:
             try:
@@ -955,7 +968,7 @@ if initalized:
                 "UnknownMode",
                 event=event
             ))
-            return True
+            return
 
         await matcher.send(sh)
         return
@@ -980,12 +993,12 @@ if initalized:
         await matcher.send(message)
 
     @modecommand.handle()
-    async def modehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
+    async def modehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent, args: list=[]):
         """ 跑团模式切换指令 """
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=(".mode", ".m"))
+        args = format_msg(event.get_message(), begin=(".mode", ".m")) if not args else args
         cp = CommandParser(
             Commands([
                 Positional("mode", str),
@@ -1025,7 +1038,8 @@ if initalized:
             else:
                 await matcher.send(manager.process_generic_event(
                     "UnknownMode",
-                    event=event
+                    event=event,
+                    Mode=cp["mode"].upper()
                 ))
                 return True
         else:
@@ -1266,7 +1280,12 @@ if initalized:
 
         rolekp(event)
         await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="KP")
-        await matcher.send("身份组设置为主持人 (KP).")
+        await matcher.send(
+            manager.process_generic_event(
+                "RoleKP",
+                event=event
+            )
+        )
 
     @roleobcommand.handle()
     async def roleobhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -1282,7 +1301,12 @@ if initalized:
             await matcher.send("取消旁观者 (OB) 身份.")
         else:
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
-            await matcher.send("身份组设置为旁观者 (OB).")
+            await matcher.send(
+                manager.process_generic_event(
+                    "RoleOB",
+                    event=event
+                )
+            )
 
     @registcommand.handle()
     async def registhandler(matcher: Matcher, event: GroupMessageEvent):

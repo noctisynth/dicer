@@ -27,7 +27,7 @@ from .handlers.on import on_startswith
 from .reply.manager import manager
 
 from .utils.utils import (
-    init, get_group_id, get_mentions, get_user_card,
+    init, get_group_id, get_mentions, get_user_card, get_friend_qids,
     is_super_user, add_super_user, rm_super_user, get_super_users, make_uuid, get_uuid,
     format_msg, format_str,
     get_mode, set_mode,
@@ -100,7 +100,7 @@ if initalized:
     rollcommand = on_startswith((".r", ".roll"), priority=4, block=True)
     racommand = on_startswith(".ra", priority=3, block=True)
     rhcommand = on_startswith(".rh", priority=3, block=True)
-    rhacommand = on_startswith(".rha", priority=3, block=True)
+    rahcommand = on_startswith(".rah", priority=3, block=True)
     delcommand = on_startswith((".del", ".delete"), priority=3, block=True)
     showcommand = on_startswith((".show", ".display"), priority=3, block=True)
     setcommand = on_startswith((".set", ".st", ".s"), priority=4, block=True)
@@ -137,7 +137,7 @@ if initalized:
 
     @addrequest.handle()
     async def friendaddapproval(bot: V11Bot, event: FriendRequestEvent):
-        if event.user_id == bot.self_id:
+        if event.user_id in await get_friend_qids(bot):
             return
 
         if event.get_user_id() in blacklist.get_blacklist():
@@ -284,7 +284,7 @@ if initalized:
                 Only("invite"),
                 Only("at"),
                 Only("userid"),
-                Only("markdown")
+                Optional("run", str)
             ]),
             args=args,
             auto=True
@@ -331,6 +331,14 @@ if initalized:
                     event=event
                 )
             )
+
+        if cp["run"]:
+            try:
+                result = eval(cp["run"])
+            except Exception as e:
+                result = f"出现异常：{e}"
+
+            return await matcher.send(result)
 
     @debugcommand.handle()
     async def debughandler(matcher: Matcher, event: MessageEvent):
@@ -1193,13 +1201,13 @@ if initalized:
         await matcher.send("暗骰: 命运的骰子在滚动.")
         await bot.send_private_msg(user_id=event.get_user_id(), message=roll(args))
 
-    @rhacommand.handle()
+    @rahcommand.handle()
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
         """ 暗骰技能检定指令 """
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=".ra")
+        args = format_msg(event.get_message(), begin=".rah")
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):

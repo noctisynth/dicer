@@ -240,6 +240,14 @@ def get_user_nickname(event) -> str:
     except:
         return "未知用户"
 
+async def get_friend_qids(bot) -> List[str]:
+    result = []
+    friends = await bot.get_friend_list()
+    for friend in friends:
+        result.append(friend["user_id"])
+
+    return result
+
 def add_super_user(message) -> bool:
     """ 新增超级管理员 """
     with open(SUPERUSER_FILE, "w+") as _su:

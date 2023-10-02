@@ -183,9 +183,11 @@ if initalized:
     async def groupaddapproval(bot: V11Bot, event: GroupRequestEvent):
         if event.get_user_id() in blacklist.get_blacklist() or event.group_id in blacklist.get_group_blacklist():
             try:
-                await event.reject()
+                await event.reject(bot)
             except ActionFailed:
-                return
+                await bot.set_group_leave(
+                    group_id=event.group_id
+                )
 
             await bot.send_private_msg(
                 user_id=event.user_id,
@@ -196,7 +198,11 @@ if initalized:
             )
             return
 
-        await event.approve(bot)
+        try:
+            await event.approve(bot)
+        except ActionFailed:
+            return
+
         super_users = get_super_users()
         for superuser in super_users:
             await bot.send_private_msg(
@@ -222,8 +228,14 @@ if initalized:
             logger.info(f"用户[{event.user_id}]被移出群聊.")
             return
 
-        blacklist.add_group_blacklist(str(event.group_id))
-        blacklist.add_blacklist(str(event.operator_id))
+        if not event.group_id and event.operator_id:
+            return
+
+        if event.group_id:
+            blacklist.add_group_blacklist(str(event.group_id))
+
+        if event.operator_id:
+            blacklist.add_blacklist(str(event.operator_id))
 
         try:
             await bot.call_api(
@@ -407,12 +419,12 @@ if initalized:
                 ))
 
     @botcommand.handle()
-    async def bothandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
+    async def bothandler(bot: V11Bot, matcher: Matcher, event: MessageEvent, args: list=[]):
         """ 机器人管理指令 """
         if get_mentions(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=".bot", zh_en=True)
+        args = format_msg(event.get_message(), begin=".bot", zh_en=True) if not args else args
         commands = CommandParser(
             Commands([
                 Only(("version", "v", "bot", "版本")),
@@ -634,6 +646,10 @@ if initalized:
             return
 
         await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
+
+    @dismisscommand.handle()
+    async def dismisshandler(bot: V11Bot, matcher: Matcher, event: Event):
+        await bothandler(bot=bot, matcher=matcher, event=event, args=["exit"])
 
     @logcommand.handle()
     async def loghandler(bot: V11Bot, matcher: Matcher, event: Event):
@@ -1150,10 +1166,32 @@ if initalized:
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=".rha")
-        mode = get_mode()
-        await matcher.send("暗骰: 命运的骰子在滚动.")
-        await bot.send_private_msg(user_id=event.get_user_id(), message=eval(f"{mode}_(args, event)"))
+        args = format_msg(event.get_message(), begin=".ra")
+        mode = get_mode(event)
+        if mode in modes:
+            if not hasattr(modes[mode], "__commands__"):
+                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
+                return
+
+            if not "ra" in modes[mode].__commands__.keys():
+                await matcher.send(f"跑团模式 {mode.upper()} 不支持技能检定指令.")
+                return
+
+            await matcher.send("暗骰: 命运的骰子在滚动.")
+
+            handler = modes[mode].__commands__["ra"]
+            replies = handler(event, args)
+            if isinstance(replies, list):
+                for reply in replies:
+                    await bot.send_private_msg(user_id=event.get_user_id(), message=reply)
+                return
+
+            await bot.send_private_msg(user_id=event.get_user_id(), message=replies)
+        else:
+            await matcher.send(manager.process_generic_event(
+                "UnknownMode",
+                event=event
+            ))
 
     @rollcommand.handle()
     async def rollhandler(matcher: Matcher, event: MessageEvent):

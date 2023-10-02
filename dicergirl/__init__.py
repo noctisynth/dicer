@@ -147,9 +147,9 @@ if initalized:
                 return
 
             await bot.send_private_msg(
-                user_id=event.user_id,
+                user_id=event.user_id, # TODO
                 message=manager.process_generic_event(
-                    "FriendForbidden",
+                    "main.friend.reject",
                     event=event
                 )
             )
@@ -165,19 +165,18 @@ if initalized:
             await bot.send_private_msg(
                 user_id=superuser,
                 message=manager.process_generic_event(
-                        "FriendApproval",
+                        "main.friend.approve",
                         event=event
                     )
                 )
 
-        if not super_users:
-            await bot.send_private_msg(
-                user_id=event.self_id,
-                message=manager.process_generic_event(
-                    "FriendApproval",
-                    event=event
-                )
+        await bot.send_private_msg(
+            user_id=event.self_id,
+            message=manager.process_generic_event(
+                "mian.friend.new",
+                event=event
             )
+        )
 
     @addrequest.handle()
     async def groupaddapproval(bot: V11Bot, event: GroupRequestEvent):

@@ -49,14 +49,15 @@ def regist_main_event():
     manager.register_event("SetPermissionDenied", "仅允许主持人为其它玩家设置数据.")
     manager.register_event("DeletePermissionDenied", "仅允许主持人删除其它玩家数据.")
     manager.register_event("ModeChanged", "已切换跑团模式为[{Mode}].")
-    manager.register_event("FriendApproval", "[{UserID}]请求添加好友.\n处理方式: 同意.")
-    manager.register_event("FriendForbidden", "[{UserID}]请求添加好友.\n处理方式: 拒绝.")
     manager.register_event("GroupApproval", "[{UserID}]邀请进入群[{GroupID}].\n处理方式: 同意.")
     manager.register_event("GroupForbidden", "[{UserID}]邀请进入群[{GroupID}].\n处理方式: 拒绝.")
     manager.register_event("BlacklistAdded", "用户[{UserID}]执行非法操作, 已列入黑名单.")
     manager.register_event("CardInit", "[{SenderCard}]角色卡已参照模板[{Mode}]初始化, 异世的诗篇或许就要开始了.")
     manager.register_event("RoleOB", "[{SenderNickName}]身份组设置为旁观者 (OB).")
     manager.register_event("RoleKP", "[{SenderNickName}]身份组设置为主持人 (KP).")
+    manager.register_event("main.friend.approve", "[{UserID}]请求添加好友.\n处理方式: 同意.")
+    manager.register_event("main.friend.reject", "[{UserID}]请求添加好友.\n处理方式: 拒绝.")
+    manager.register_event("mian.friend.new", "[{SenderNickName}]欢迎使用 DicerGirl {Version}, 我是{BotName}. 使用`.help`查看帮助信息, 使用`.bot exit`移除群骰娘, 严禁踢出骰娘. 加入公测群[770386358]可以获得更多支持.")
 
 def regist_general_event():
     manager.register_event("OnSet", "[{SenderCard}]录卡完成, 成功设置基础属性{AttrSetNumber}个, 技能{SkillSetNumber}个.")

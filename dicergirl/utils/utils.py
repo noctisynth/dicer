@@ -216,10 +216,7 @@ def get_group_id(event) -> str:
 def get_user_id(event) -> str:
     """ 获取`event`指向的用户`ID` """
     try:
-        if not isinstance(event, PrivateMessageEvent):
-            return str(event.user_id)
-        else:
-            return "private"
+        return str(event.user_id)
     except Exception as error:
         logger.exception(error)
         return "0"

@@ -16,6 +16,7 @@ from nonebot.matcher import Matcher
 from nonebot.plugin import on, on_request, on_notice, PluginMetadata
 from nonebot.adapters import Bot as Bot
 from nonebot.adapters.onebot import V11Bot
+from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
 from nonebot.adapters.onebot.v11.event import FriendRequestEvent, GroupRequestEvent, GroupDecreaseNoticeEvent
 from nonebot.adapters.onebot.v11.exception import ActionFailed
 from nonebot.internal.matcher.matcher import Matcher
@@ -73,11 +74,6 @@ except ValueError:
     initalized = False
 
 if initalized:
-    if driver._adapters.get("OneBot V12"):
-        from nonebot.adapters.onebot.v12 import MessageEvent, GroupMessageEvent, Event, MessageSegment
-    else:
-        from nonebot.adapters.onebot.v11 import MessageEvent, GroupMessageEvent, Event, MessageSegment
-
     # 开发者指令
     testcommand = on_startswith(".test", priority=1, block=True)
     debugcommand = on_startswith(".debug", priority=1, block=True)
@@ -266,13 +262,15 @@ if initalized:
             )
 
     @testcommand.handle()
-    async def testhandler(matcher: Matcher, event: MessageEvent):
+    async def testhandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
         """ 测试指令 """
         args = format_msg(event.get_message(), begin=".test")
         cp = CommandParser(
             Commands([
                 Only("all"),
                 Only("split"),
+                Only("invite"),
+                Only("at"),
                 Only("markdown")
             ]),
             args=args,
@@ -297,20 +295,21 @@ if initalized:
             reply += f"消息json数据: {event.json()}\n"
             reply += f"消息发送者json信息: {json.loads(event.json())['sender']}\n"
             reply += f"发送者昵称: {json.loads(event.json())['sender']['nickname']}"
-            await matcher.send(reply)
+            return await matcher.send(reply)
+        else:
+            cp = cp.results
+
+        if cp["invite"]:
+            await matcher.send("http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=hvaf8JGmEXA3N9r4SGgpghDti31aW1bR&authKey=%2Bux%2BedOIguriMYBMGe40coeOT7mx%2B99%2FVMbK0MvE2w1AsVQLLK%2B0hBO6vVB%2Bmlws&noverify=0&group_code=770386358")
+            await bot.send_private_msg(
+                user_id=event.user_id,
+                message="""[CQ:json,data={"app":"com.tencent.qun.invite"&#44;"config":{"autosize":0&#44;"ctime":1696238280&#44;"round":1&#44;"token":"c05ba4b99859234b1f2b225b74740808"&#44;"type":"normal"}&#44;"meta":{"news":{"desc":"邀请你加入群聊“DicerGirl 公测群 | 未知访客”，进入可查看详情。"&#44;"jumpUrl":"mqqapi://group/invite_join?src_type=internal&amp;version=1&amp;groupcode=770386358&amp;msgseq=1696238280521100&amp;groupname=DicerGirl+%e5%85%ac%e6%b5%8b%e7%be%a4+%7c+%e6%9c%aa%e7%9f%a5%e8%ae%bf%e5%ae%a2&amp;senderuin=1264983312&amp;receiveruin=1557089913"&#44;"preview":"https://p.qlogo.cn/gh/770386358/770386358/?t=1696238280"&#44;"tag":"邀请加群"&#44;"tagIcon":"https://downv6.qq.com/innovate/group_ark_icon.png"&#44;"title":"邀请你加入群聊"}}&#44;"prompt":"邀请加群"&#44;"ver":"1.0.0.31"&#44;"view":"news"}]""",
+                auto_escape=False
+            )
             return
 
-        logger.debug("收到消息:" + str(event.get_message()))
-
-        if not msg:
-            msg = "[]"
-
-        if msg[-1] == "markdown":
-            mp = ""
-            await matcher.send(group_id=event.group_id, message=mp)
-            return
-
-        await matcher.send(None)
+        if cp["at"]:
+            return await matcher.send(MessageSegment.at(user_id=event.user_id))
 
     @debugcommand.handle()
     async def debughandler(matcher: Matcher, event: MessageEvent):

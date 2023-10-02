@@ -235,6 +235,14 @@ def get_user_card(event) -> str:
     except:
         return "未知用户"
 
+def get_user_nickname(event) -> str:
+    """ 获取用户昵称 """
+    try:
+        raw_json = json.loads(event.json())['sender']
+        return raw_json['nickname']
+    except:
+        return "未知用户"
+
 def add_super_user(message) -> bool:
     """ 新增超级管理员 """
     with open(SUPERUSER_FILE, "w+") as _su:

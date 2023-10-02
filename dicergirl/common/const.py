@@ -3,16 +3,15 @@
 """
 from pathlib import Path
 from typing import Any, Dict
-
 from ruamel.yaml import YAML
+
 
 EMPTY_CHAR = ""
 EMPTY_ARRAY = []
 EMPTY_DICT = {}
 NONE = None
 
-
-VERSION = "3.4.10"
+VERSION = "3.4.11"
 """ Dicer Girl 版本号 """
 HOME_PATH = Path.home()
 """ 主目录 """

@@ -57,7 +57,8 @@ def regist_main_event():
     manager.register_event("RoleKP", "[{SenderNickName}]身份组设置为主持人 (KP).")
     manager.register_event("main.friend.approve", "[{UserID}]请求添加好友.\n处理方式: 同意.")
     manager.register_event("main.friend.reject", "[{UserID}]请求添加好友.\n处理方式: 拒绝.")
-    manager.register_event("mian.friend.new", "[{SenderNickName}]欢迎使用 DicerGirl {Version}, 我是{BotName}. 使用`.help`查看帮助信息, 使用`.bot exit`移除群骰娘, 严禁踢出骰娘. 加入公测群[770386358]可以获得更多支持.")
+    manager.register_event("main.test.userid", "[{UserID}]")
+    manager.register_event("main.friend.new", "欢迎使用 DicerGirl {Version}, 我是{BotName}. 使用`.help`查看帮助信息, 使用`.bot exit`移除群骰娘, 严禁踢出骰娘. 加入公测群[770386358]可以获得更多支持.")
 
 def regist_general_event():
     manager.register_event("OnSet", "[{SenderCard}]录卡完成, 成功设置基础属性{AttrSetNumber}个, 技能{SkillSetNumber}个.")

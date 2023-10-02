@@ -6,6 +6,7 @@ import html
 import nonebot
 import re
 import json
+import asyncio
 
 
 from pathlib import Path
@@ -136,6 +137,9 @@ if initalized:
 
     @addrequest.handle()
     async def friendaddapproval(bot: V11Bot, event: FriendRequestEvent):
+        if event.user_id == bot.self_id:
+            return
+
         if event.get_user_id() in blacklist.get_blacklist():
             try:
                 await event.reject(bot)
@@ -158,24 +162,32 @@ if initalized:
 
         super_users = get_super_users()
         for superuser in super_users:
-            await bot.send_private_msg(
-                user_id=superuser,
-                message=manager.process_generic_event(
-                        "main.friend.approve",
-                        event=event
+            try:
+                await bot.send_private_msg(
+                    user_id=superuser,
+                    message=manager.process_generic_event(
+                            "main.friend.approve",
+                            event=event
+                        )
                     )
-                )
+            except ActionFailed:
+                pass
+
+        await asyncio.sleep(5.5)
 
         await bot.send_private_msg(
-            user_id=event.self_id,
+            user_id=event.user_id,
             message=manager.process_generic_event(
-                "mian.friend.new",
+                "main.friend.new",
                 event=event
             )
         )
 
     @addrequest.handle()
     async def groupaddapproval(bot: V11Bot, event: GroupRequestEvent):
+        if event.sub_type == "add":
+            return
+
         if event.get_user_id() in blacklist.get_blacklist() or event.group_id in blacklist.get_group_blacklist():
             try:
                 await event.reject(bot)
@@ -271,6 +283,7 @@ if initalized:
                 Only("split"),
                 Only("invite"),
                 Only("at"),
+                Only("userid"),
                 Only("markdown")
             ]),
             args=args,
@@ -310,6 +323,14 @@ if initalized:
 
         if cp["at"]:
             return await matcher.send(MessageSegment.at(user_id=event.user_id))
+
+        if cp["userid"]:
+            return await matcher.send(
+                manager.process_generic_event(
+                    "main.test.userid",
+                    event=event
+                )
+            )
 
     @debugcommand.handle()
     async def debughandler(matcher: Matcher, event: MessageEvent):

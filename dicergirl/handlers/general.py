@@ -354,12 +354,20 @@ def roll(args: str, name: str=None) -> str:
     else:
         args = args.strip()
 
+    args = args.split()
+    if len(args) > 1:
+        reason = args[1]
+    else:
+        reason = None
+
+    args = args[0]
+
     try:
         d = Dicer(args)
-        r = expr(d, None, name=name)
+        r = expr(d, None, name=name, reason=reason)
 
         for _ in range(time-1):
-            r += expr(d, None, name=name)
+            r += expr(d, None, name=name, reason=reason)
 
         return r.detail
     except ValueError:

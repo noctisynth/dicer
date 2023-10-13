@@ -886,7 +886,7 @@ if initalized:
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=(".set", ".st", ".s"))
+        args = format_msg(event.get_message(), begin=(".set", ".st", ".s"), zh_en=True)
         at = get_mentions(event)
         commands = CommandParser(
             Commands([

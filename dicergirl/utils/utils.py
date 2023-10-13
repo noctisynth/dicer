@@ -133,11 +133,11 @@ def remove_logger(event: GroupMessageEvent, id: int) -> Dict[str, list]:
     json.dump(saved_loggers, open(LOGGERS_CACHE_FILE, "w"))
     return saved_loggers
 
-def format_msg(message, begin=None, zh_en=False) -> List[str]:
+def format_msg(message, begin=None, zh_en=True) -> List[str]:
     """ 骰娘指令拆析为`list`的方法 """
     msgs = format_str(message, begin=begin)
     outer = []
-    regex = r'([+-]?\d+)|([a-zA-Z]+)|("[^"]+")|([\u4e00-\u9fa5]+)'
+    regex = r'([+-]?\d+)|("[^"]+")|([a-zA-Z\u4e00-\u9fa5]+)' if not zh_en else r'([+-]?\d+)|([a-zA-Z]+)|("[^"]+")|([\u4e00-\u9fa5]+)'
     msgs = list(filter(None, re.split(regex, msgs)))
     logger.debug(msgs)
 

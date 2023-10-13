@@ -1,13 +1,15 @@
-import sys
-
-from multilogging import multilogger
-
-from ..utils.utils import run_shell_command
+from ..utils.version import run_shell_command
 from ..common.exceptions.pluginerror import PluginNotFoundError, PluginExistsError, PluginInstallFailedError, PluginUninstallFailedError
 from ..utils.plugins import modes
 from .parse import get_plugins_mixed
+from multilogging import multilogger
 
-logger = multilogger(name="DicerGirl", payload="Plugins")
+import sys
+
+
+logger = multilogger(name="DicerGirl", payload="plugins.operation")
+""" `plugins.operation`日志 """
+
 
 async def install(name):
     plugins = await get_plugins_mixed()

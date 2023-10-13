@@ -11,7 +11,9 @@ from dicergirl.reply.data import GenericData, ConditionData
 from dicergirl.reply.parsers.parser import parser
 from dicergirl.reply.registry import ReplyRegistry
 
-logger = multilogger(name="DicerGirl", payload="ReplyRegistryManager")
+
+logger = multilogger(name="DicerGirl", payload="reply.manager")
+""" `reply.manager`日志 """
 
 
 @dataclass

@@ -196,7 +196,7 @@ class ReplyRegistry:
             return False
         container[data.group_name] = data
         if data.group_name in container:
-            logger.info(f"自定义回复文件'{data.group_name.upper()}'注册成功")
+            logger.debug(f"自定义回复文件'{data.group_name.upper()}'注册成功")
             return True
         else:
             logger.warning(f"回复文件'{data.group_name.upper()}'注册失败")
@@ -279,7 +279,7 @@ class ReplyRegistry:
         container.add(response)
 
         if container.get_response(event_name):
-            logger.info(f"{response_type}'{event_name}'注册成功")
+            logger.debug(f"{response_type}'{event_name}'注册成功")
             return True
         else:
             logger.warning(f"{response_type}'{event_name}'注册失败")
@@ -311,7 +311,7 @@ class ReplyRegistry:
         self._add_data_in_file(filename, cache, response)
 
         if container.get_response(event_name):
-            logger.info(f"{response_type}'{event_name}'注册成功")
+            logger.debug(f"{response_type}'{event_name}'注册成功")
             return True
         else:
             logger.warning(f"{response_type}'{event_name}'注册失败")
@@ -346,7 +346,7 @@ class ReplyRegistry:
         self._add_data_in_file(filename, cache, response)
 
         if container.get_response(event_name):
-            logger.info(f"{response_type}'{event_name}'注册成功")
+            logger.debug(f"{response_type}'{event_name}'注册成功")
             return True
         else:
             logger.warning(f"{response_type}'{event_name}'注册失败")
@@ -366,7 +366,7 @@ class ReplyRegistry:
         container = self._default_generic_data[group_name]
         container.remove(event_name)
         if not container.get_response(event_name):
-            logger.info(f"回复事件'{event_name}'销毁成功")
+            logger.debug(f"回复事件'{event_name}'销毁成功")
             return True
         else:
             logger.warning(f"回复事件'{event_name}'销毁失败")
@@ -390,7 +390,7 @@ class ReplyRegistry:
         container.remove(event_name)
         self.erase_data_in_file(filename, event_name, cache)
         if not container.get_response(event_name):
-            logger.info(f"回复事件'{event_name}'销毁成功")
+            logger.debug(f"回复事件'{event_name}'销毁成功")
             return True
         else:
             logger.warning(f"回复事件'{event_name}'销毁失败")
@@ -417,7 +417,7 @@ class ReplyRegistry:
         self.erase_data_in_file(filename, event_name, cache)
 
         if not container.get_response(event_name):
-            logger.info(f"回复事件'{event_name}'销毁成功")
+            logger.debug(f"回复事件'{event_name}'销毁成功")
             return True
         else:
             logger.warning(f"回复事件'{event_name}'销毁失败")

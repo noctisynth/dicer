@@ -1,2 +1,2 @@
+@echo off
 code .
-exit

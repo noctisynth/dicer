@@ -2,7 +2,6 @@ from nonebot.adapters.onebot.v11 import MessageEvent
 
 from ..utils.dicer import Dicer
 from ..utils.docimasy import expr
-from ..utils.utils import get_group_id
 from ..utils.plugins import modes
 from ..utils.cards import Cards
 from ..utils.charactors import Character

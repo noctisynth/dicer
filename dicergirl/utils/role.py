@@ -1,0 +1,6 @@
+def rolekp(event):
+    ...
+
+
+def roleob(event):
+    ...

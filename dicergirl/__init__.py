@@ -1,14 +1,3 @@
-import logging
-import sys
-import platform
-import psutil
-import html
-import nonebot
-import re
-import json
-import asyncio
-
-
 from pathlib import Path
 from datetime import datetime
 from multilogging import multilogger
@@ -23,36 +12,44 @@ from nonebot.adapters.onebot.v11.exception import ActionFailed
 from nonebot.internal.matcher.matcher import Matcher
 
 from .handlers.on import on_startswith
+from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
 
 from .reply.manager import manager
 
-from .utils.utils import (
-    init, get_group_id, get_mentions, get_user_card, get_friend_qids,
-    is_super_user, add_super_user, rm_super_user, get_super_users, make_uuid, get_uuid,
-    format_msg, format_str,
-    get_mode, set_mode,
-    get_loggers, loggers, add_logger, remove_logger, get_status, boton, botoff, set_name, get_name,
-    rolekp, roleob,
-    run_shell_command, get_latest_version
-)
+from .utils.operator import botoff, boton, get_name, get_status, init, set_name
+from .utils.handlers import get_friend_qids, get_group_id, get_mentions, get_user_card
+from .utils.formatters import format_msg, format_str
+from .utils.loggers import add_logger, get_loggers, remove_logger, loggers
+from .utils.admin import add_super_user, get_super_users, get_uuid, is_super_user, make_uuid, rm_super_user
+from .utils.modes import get_mode, set_mode
+from .utils.role import rolekp, roleob
+from .utils.version import run_shell_command, get_latest_version
 from .utils.plugins import modes
 from .utils.parser import CommandParser, Commands, Only, Optional, Required, Positional
 from .utils.cards import Cards
 from .utils.charactors import Character
 from .utils.blacklist import blacklist
 from .utils.update import require_update
-
-from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
+from .utils.settings import DEBUG, debugon, debugoff
 
 from .plugins.parse import get_plugins
 from .plugins.operation import install, remove, upgrade as plgupgrade
-from .common.exceptions.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
 
+from .common.exceptions.pluginerror import PluginExistsError, PluginInstallFailedError, PluginNotFoundError, PluginUninstallFailedError
 from .common.messages import help_message
 from .common.registers import regist_all
 from .common.const import DICERGIRL_LOGS_PATH, VERSION
 
-from .utils.settings import DEBUG, debugon, debugoff
+import logging
+import sys
+import platform
+import psutil
+import html
+import nonebot
+import re
+import json
+import asyncio
+
 
 __version__ = VERSION
 __plugin_meta__ = PluginMetadata(
@@ -65,8 +62,9 @@ __plugin_meta__ = PluginMetadata(
 )
 __author__ = "苏向夜 <fu050409@163.com>"
 
-logger = multilogger(name="DicerGirl", payload="Nonebot2")
+logger = multilogger(name="DicerGirl", payload="main")
 current_dir = Path(__file__).resolve().parent
+
 
 try:
     driver = nonebot.get_driver()
@@ -1227,6 +1225,29 @@ if initalized:
             for msg in del_handler(event, args, at, mode=mode):
                 await matcher.send(msg)
 
+    @rolecommand.handle()
+    async def rolehandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+        """ 身份组认证 """
+        if not get_status(event) and not event.to_me:
+            return
+
+        args = format_msg(event.get_message(), begin=(".role"))
+        cp = CommandParser(
+            Commands([
+                Only("kp"),
+                Only("ob"),
+                Only("exit"),
+            ]),
+            args=args,
+            auto=True
+        ).results
+
+        if cp["kp"]:
+            return await rolekphandler(bot, matcher, event)
+
+        if cp["ob"]:
+            return await roleobhandler(bot, matcher, event)
+
     @rolekpcommand.handle()
     async def rolekphandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
         """ KP 身份组认证 """
@@ -1252,8 +1273,8 @@ if initalized:
                 scheduler.start()
             except:
                 pass
-            await matcher.send(f"定时任务: {cp['time']}: {cp['minute'] if len(str(cp['minute'])) > 1 else '0'+str(cp['minute'])}")
-            return
+
+            return await matcher.send(f"定时任务: {cp['time']}: {cp['minute'] if len(str(cp['minute'])) > 1 else '0'+str(cp['minute'])}")
 
         rolekp(event)
         await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="KP")

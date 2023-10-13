@@ -1,18 +1,15 @@
-from .const import VERSION
+from ..utils.operator import get_name
+from ..utils.handlers import get_group_id, get_user_card, get_user_id, get_user_nickname
+from ..utils.modes import get_mode
+from ..utils.operator import get_status
 from ..reply.manager import manager
-from ..utils.utils import (
-    get_name,
-    get_group_id,
-    get_user_id,
-    get_user_card,
-    get_user_nickname,
-    get_mode,
-    get_status
-)
+from .const import VERSION
+
 
 def regist_all():
     regist_events()
     regist_vars()
+
 
 def regist_vars():
     manager.register_method(get_name, "BotName")
@@ -24,9 +21,11 @@ def regist_vars():
     manager.register_method(get_user_nickname, "SenderNickName")
     manager.register_variable(Version=VERSION)
 
+
 def regist_events():
     regist_main_event()
     regist_general_event()
+
 
 def regist_main_event():
     manager.register_event("PermissionDenied", "[{SenderCard}]权限不足, {BotName}拒绝执行该指令.\n请先执行`.su`开启权限鉴定.")
@@ -59,6 +58,7 @@ def regist_main_event():
     manager.register_event("main.friend.reject", "[{UserID}]请求添加好友.\n处理方式: 拒绝.")
     manager.register_event("main.test.userid", "[{UserID}]")
     manager.register_event("main.friend.new", "欢迎使用 DicerGirl {Version}, 我是{BotName}. 使用`.help`查看帮助信息, 使用`.bot exit`移除群骰娘, 严禁踢出骰娘. 加入公测群[770386358]可以获得更多支持.")
+
 
 def regist_general_event():
     manager.register_event("OnSet", "[{SenderCard}]录卡完成, 成功设置基础属性{AttrSetNumber}个, 技能{SkillSetNumber}个.")

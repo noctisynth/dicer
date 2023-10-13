@@ -70,7 +70,7 @@ class ReplyRegistryManager(ReplyRegistry):
         self.global_method[method_name] = MethodInfo(method, {name: parameter.annotation
                                                               for name, parameter in
                                                               inspect.signature(method).parameters.items()})
-        logger.info(f"注册全局方法: {method}")
+        logger.debug(f"注册全局方法: {method}")
 
     def remove_method(self, method_name: str) -> bool:
         """
@@ -84,7 +84,7 @@ class ReplyRegistryManager(ReplyRegistry):
         """
         if method_name in self.global_method:
             del self.global_method[method_name]
-            logger.info(f"销毁全局方法: {method_name}")
+            logger.debug(f"销毁全局方法: {method_name}")
             return True
         return False
 
@@ -97,7 +97,7 @@ class ReplyRegistryManager(ReplyRegistry):
         """
         for key, value in kwargs.items():
             self.global_variable[key] = (type(value), value)
-            logger.info(f"注册全局变量: {key}")
+            logger.debug(f"注册全局变量: {key}")
 
     def remove_variable(self, variable_name: str) -> bool:
         """
@@ -110,7 +110,7 @@ class ReplyRegistryManager(ReplyRegistry):
             bool: 如果成功删除变量，则返回 True；否则返回 False。
         """
         if variable_name in self.global_variable:
-            logger.info(f"销毁全局变量: {variable_name}")
+            logger.debug(f"销毁全局变量: {variable_name}")
             del self.global_variable[variable_name]
             return True
         return False

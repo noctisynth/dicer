@@ -146,14 +146,13 @@ if initalized:
             except ActionFailed:
                 return
 
-            await bot.send_private_msg(
+            return await bot.send_private_msg(
                 user_id=event.user_id, # TODO
                 message=manager.process_generic_event(
                     "main.friend.reject",
                     event=event
                 )
             )
-            return
 
         try:
             await event.approve(bot)
@@ -175,7 +174,7 @@ if initalized:
 
         await asyncio.sleep(5.5)
 
-        await bot.send_private_msg(
+        return await bot.send_private_msg(
             user_id=event.user_id,
             message=manager.process_generic_event(
                 "main.friend.new",
@@ -196,14 +195,13 @@ if initalized:
                     group_id=event.group_id
                 )
 
-            await bot.send_private_msg(
+            return await bot.send_private_msg(
                 user_id=event.user_id,
                 message=manager.process_generic_event(
                     "GroupForbidden",
                     event=event
                 )
             )
-            return
 
         try:
             await event.approve(bot)
@@ -291,11 +289,10 @@ if initalized:
         )
 
         if not is_super_user(event):
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "PermissionDenied",
                 event=event
             ))
-            return
 
         reply = ""
         if cp.nothing or cp.results["all"]:
@@ -314,12 +311,11 @@ if initalized:
 
         if cp["invite"]:
             await matcher.send("http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=hvaf8JGmEXA3N9r4SGgpghDti31aW1bR&authKey=%2Bux%2BedOIguriMYBMGe40coeOT7mx%2B99%2FVMbK0MvE2w1AsVQLLK%2B0hBO6vVB%2Bmlws&noverify=0&group_code=770386358")
-            await bot.send_private_msg(
+            return await bot.send_private_msg(
                 user_id=event.user_id,
                 message="""[CQ:json,data={"app":"com.tencent.qun.invite"&#44;"config":{"autosize":0&#44;"ctime":1696238280&#44;"round":1&#44;"token":"c05ba4b99859234b1f2b225b74740808"&#44;"type":"normal"}&#44;"meta":{"news":{"desc":"邀请你加入群聊“DicerGirl 公测群 | 未知访客”，进入可查看详情。"&#44;"jumpUrl":"mqqapi://group/invite_join?src_type=internal&amp;version=1&amp;groupcode=770386358&amp;msgseq=1696238280521100&amp;groupname=DicerGirl+%e5%85%ac%e6%b5%8b%e7%be%a4+%7c+%e6%9c%aa%e7%9f%a5%e8%ae%bf%e5%ae%a2&amp;senderuin=1264983312&amp;receiveruin=1557089913"&#44;"preview":"https://p.qlogo.cn/gh/770386358/770386358/?t=1696238280"&#44;"tag":"邀请加群"&#44;"tagIcon":"https://downv6.qq.com/innovate/group_ark_icon.png"&#44;"title":"邀请你加入群聊"}}&#44;"prompt":"邀请加群"&#44;"ver":"1.0.0.31"&#44;"view":"news"}]""",
                 auto_escape=False
             )
-            return
 
         if cp["at"]:
             return await matcher.send(MessageSegment.at(user_id=event.user_id))
@@ -362,11 +358,10 @@ if initalized:
                     level = "INFO"
                 )
                 logger.info("输出等级设置为 INFO.")
-                await matcher.send(manager.process_generic_event(
+                return await matcher.send(manager.process_generic_event(
                     "DebugOff",
                     event=event
                 ))
-                return
         else:
             debugon()
             logging.getLogger().setLevel(logging.DEBUG)
@@ -376,11 +371,10 @@ if initalized:
                 level = "INFO"
             )
             logger.info("输出等级设置为 DEBUG.")
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "DebugOn",
                 event=event
             ))
-            return
 
         if args[0] == "on":
             debugon()
@@ -391,12 +385,12 @@ if initalized:
                 level = "INFO"
             )
             logger.info("输出等级设置为 DEBUG.")
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "DebugOn",
                 event=event
             ))
         else:
-            await matcher.send("错误, 我无法解析你的指令.")
+            return await matcher.send("错误, 我无法解析你的指令.")
 
     @superusercommand.handle()
     async def superuser_handler(matcher: Matcher, event: MessageEvent):
@@ -407,24 +401,21 @@ if initalized:
         if len(arg) >= 1:
             if arg[0].lower() == "exit":
                 if not rm_super_user(event):
-                    await matcher.send(manager.process_generic_event(
+                    return await matcher.send(manager.process_generic_event(
                         "NotManagerYet",
                         event=event
                     ))
-                    return
 
-                await matcher.send(manager.process_generic_event(
+                return await matcher.send(manager.process_generic_event(
                     "ManagerExit",
                     event=event
                 ))
-                return
 
         if is_super_user(event):
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "AlreadyManager",
                 event=event
             ))
-            return
 
         if not args:
             logger.critical(f"超级令牌: {make_uuid()}")
@@ -485,24 +476,21 @@ if initalized:
                 "GroupLeaveSet",
                 event=event
             ))
-            await bot.set_group_leave(group_id=event.group_id)
-            return
+            return await bot.set_group_leave(group_id=event.group_id)
 
         if commands["on"]:
             boton(event)
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "BotOn",
                 event=event
             ))
-            return
 
         if commands["off"]:
             botoff(event)
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "BotOff",
                 event=event
             ))
-            return
 
         if commands["status"]:
             try:
@@ -521,8 +509,7 @@ if initalized:
             reply += f"Python 版本: {platform.python_version()}\n"
             reply += "系统内存占用: %.2fMB/%.2fMB\n" % (rss, total)
             reply += f"漏洞检测模式: {'on' if DEBUG else 'off'}"
-            await matcher.send(reply)
-            return
+            return await matcher.send(reply)
 
         if commands["upgrade"]:
             await matcher.send("检查版本更新中...")
@@ -530,27 +517,22 @@ if initalized:
 
             if require_update(VERSION, newest_version):
                 if {"a", "b"} & set(newest_version) and commands["first"] in ("force", "强制"):
-                    await matcher.send(f"发现新版本 dicergirl {newest_version}, 然而该版本为{'公测' if 'b' in newest_version else '内测'}版本.\n使用`.bot upgrade force`强制更新到该版本.")
-                    return
+                    return await matcher.send(f"发现新版本 dicergirl {newest_version}, 然而该版本为{'公测' if 'b' in newest_version else '内测'}版本.\n使用`.bot upgrade force`强制更新到该版本.")
 
                 await matcher.send(f"发现新版本 dicergirl {newest_version}, 开始更新...")
                 upgrade = await run_shell_command(f"\"{sys.executable}\" -m pip install dicergirl -i https://pypi.org/simple --upgrade")
 
                 if upgrade["returncode"] != 0:
                     logger.error(upgrade['stderr'])
-                    await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
-                    return
+                    return await matcher.send("更新失败! 请查看终端输出以获取错误信息, 或者你可以再次尝试.")
 
-                await matcher.send(f"{get_name()}骰娘已更新为版本 {newest_version}.")
-                return
+                return await matcher.send(f"{get_name()}骰娘已更新为版本 {newest_version}.")
 
-            await matcher.send(f"我已经是最新版本的{get_name()}了!")
-            return
+            return await matcher.send(f"我已经是最新版本的{get_name()}了!")
 
         if commands["downgrade"]:
             if not is_super_user(event):
-                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
-                return
+                return await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
 
             await matcher.send("警告! 执行降级之后可能导致无法再次自动升级!")
             await run_shell_command(f"\"{sys.executable}\" -m pip install dicergirl=={commands['downgrade']} -i https://pypi.org/simple")
@@ -559,8 +541,7 @@ if initalized:
 
         if commands["name"]:
             if not is_super_user(event):
-                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
-                return
+                return await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
 
             sn = set_name(commands["name"])
 
@@ -592,8 +573,7 @@ if initalized:
 
             reply.strip("\n")
             reply += f"当前的跑团模式为 {get_mode(event).upper()}."
-            await matcher.send(reply)
-            return
+            return await matcher.send(reply)
 
         if commands["store"]:
             official, community = await get_plugins()
@@ -611,44 +591,36 @@ if initalized:
                 reply += f"  {i}. {detail['name']}[安装: .bot install {name}]\n"
 
             reply.rstrip("\n")
-            await matcher.send(reply)
-            return
+            return await matcher.send(reply)
 
         if commands["install"]:
             if commands["install"] in modes.keys():
-                await matcher.send(f"模块 {commands['install']} 已经安装了!")
-                return
+                return await matcher.send(f"模块 {commands['install']} 已经安装了!")
 
             ins = await install(commands["install"])
 
             if ins is PluginNotFoundError:
-                await matcher.send(f"包 {commands['install']} 不存在.")
-                return
+                return await matcher.send(f"包 {commands['install']} 不存在.")
             elif ins is PluginInstallFailedError:
-                await matcher.send(f"包 {commands['install']} 安装失败.")
-                return
+                return await matcher.send(f"包 {commands['install']} 安装失败.")
             elif ins == True:
-                await matcher.send(f"模块 {commands['install']} 安装完毕.")
-                return
+                return await matcher.send(f"模块 {commands['install']} 安装完毕.")
 
             return
 
         if commands["remove"]:
             if not is_super_user(event):
-                await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
-                return
+                return await matcher.send("你没有管理员权限, 请先执行`.su`开启权限鉴定.")
 
             uns = await remove(commands["remove"])
 
             if uns is PluginUninstallFailedError:
-                await matcher.send(manager.process_generic_event(
+                return await matcher.send(manager.process_generic_event(
                     "UninstallFailed",
                     event=event
                 ))
-                return
 
-            await matcher.send(f"模块 {commands['remove']} 卸载完毕.")
-            return
+            return await matcher.send(f"模块 {commands['remove']} 卸载完毕.")
 
         if commands["plgup"]:
             await matcher.send(f"检查插件 {commands['plgup']} 更新中...")
@@ -658,21 +630,18 @@ if initalized:
                 plg_version = modes[commands['plgup']].__version__
 
             if await get_latest_version(f"dicergirl-plugin-{commands['plgup']}") == plg_version:
-                await matcher.send(f"插件 {commands['plgup']} 已经是最新版本了.\n`.bot remove {commands['plgup']}`并`.bot install {commands['plgup']}`可以重新安装插件.\n如果遇到问题, 使用`.help 支持`获得开发者联系方式.")
-                return
+                return await matcher.send(f"插件 {commands['plgup']} 已经是最新版本了.\n`.bot remove {commands['plgup']}`并`.bot install {commands['plgup']}`可以重新安装插件.\n如果遇到问题, 使用`.help 支持`获得开发者联系方式.")
 
             up = await plgupgrade(commands["plgup"])
 
             if up is PluginNotFoundError:
-                await matcher.send(f"包 {commands['plgup']} 似乎不存在?")
+                return await matcher.send(f"包 {commands['plgup']} 似乎不存在?")
             elif up is PluginInstallFailedError:
-                await matcher.send(f"包 {commands['plgup']} 更新失败了.")
+                return await matcher.send(f"包 {commands['plgup']} 更新失败了.")
             elif up == True:
-                await matcher.send(f"插件 {commands['plgup']} 更新完毕.")
+                return await matcher.send(f"插件 {commands['plgup']} 更新完毕.")
 
-            return
-
-        await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
+        return await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @dismisscommand.handle()
     async def dismisshandler(bot: V11Bot, matcher: Matcher, event: Event):
@@ -702,8 +671,7 @@ if initalized:
         if commands["show"]:
             gl = get_loggers(event)
             if len(gl) == 0:
-                await matcher.send("暂无存储的日志.")
-                return
+                return await matcher.send("暂无存储的日志.")
 
             if not get_group_id(event) in loggers.keys():
                 running = []
@@ -716,17 +684,15 @@ if initalized:
                 reply += f"序列 {index} : {l} : {'记录中' if index in running else '已关闭'}\n"
             reply.strip("\n")
 
-            await matcher.send(reply)
-            return
+            return await matcher.send(reply)
 
         if commands["download"] or commands["download"] == 0:
             gl = get_loggers(event)
             if commands["download"] > len(gl)-1:
-                await matcher.send(f"目标日志序列 {commands['download']} 不存在.")
-                return
+                return await matcher.send(f"目标日志序列 {commands['download']} 不存在.")
 
             path = Path(gl[commands["download"]])
-            await bot.call_api(
+            return await bot.call_api(
                 "upload_group_file",
                 **{
                     "group_id": get_group_id(event),
@@ -734,7 +700,6 @@ if initalized:
                     "name": path.name
                 }
             )
-            return
 
         if commands["add"]:
             if commands["name"]:
@@ -754,8 +719,7 @@ if initalized:
             if not add_logger(event, logname):
                 raise IOError("无法新增日志.")
 
-            await matcher.send(f"新增日志序列: {index}\n日志文件: {logname}")
-            return
+            return await matcher.send(f"新增日志序列: {index}\n日志文件: {logname}")
 
         if commands["stop"] or commands["stop"] == 0:
             if not get_group_id(event) in loggers.keys():
@@ -797,8 +761,7 @@ if initalized:
                 return
 
             if commands["remove"] > len(gl)-1:
-                await matcher.send(f"目标日志序列 {commands['remove']} 不存在.")
-                return
+                return await matcher.send(f"目标日志序列 {commands['remove']} 不存在.")
 
             index = len(gl)
             if get_group_id(event) in loggers.keys():
@@ -809,12 +772,11 @@ if initalized:
 
             Path(gl[commands["remove"]]).unlink()
             remove_logger(event, commands["remove"])
-            await matcher.send(f"日志序列 {commands['remove']} 已删除.")
-            return
+            return await matcher.send(f"日志序列 {commands['remove']} 已删除.")
 
-        await matcher.send("骰娘日志管理系统, 使用`.help log`指令详细信息.")
+        return await matcher.send("骰娘日志管理系统, 使用`.help log`指令详细信息.")
 
-    def trpg_log(event):
+    def trpg_log(event) -> None:
         """ 外置的日志记录方法 """
         if not get_group_id(event) in loggers.keys():
             return
@@ -844,7 +806,7 @@ if initalized:
     @messagemonitor.handle()
     def loggerhandler(event: Event):
         """ 消息记录日志指令 """
-        trpg_log(event)
+        return trpg_log(event)
 
     @showcommand.handle()
     async def showhandler(matcher: Matcher, event: GroupMessageEvent, args: list=None):
@@ -870,14 +832,14 @@ if initalized:
                     event=event
                 )]
         else:
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "UnknownMode",
                 event=event
             ))
-            return True
 
         for msg in sh:
             await matcher.send(str(msg))
+
         return
 
     @setcommand.handle()
@@ -926,8 +888,7 @@ if initalized:
             cha.load(cards.get(event, qid=qid))
             setattr(cha, "name", commands["name"])
             await bot.set_group_card(group_id=event.group_id, user_id=event.user_id, card=commands["name"])
-            await matcher.send(f"命名角色为 {commands['name']}")
-            return
+            return await matcher.send(f"命名角色为 {commands['name']}")
 
         if commands["init"]:
             cards: Cards = modes[mode].__cards__
@@ -938,13 +899,12 @@ if initalized:
 
                 cards.update(event, cha.__dict__, save=True)
 
-            await matcher.send(
+            return await matcher.send(
                 manager.process_generic_event(
                     "CardInit",
                     event=event
                 )
             )
-            return
 
         if commands["show"]:
             args.remove("show")
@@ -991,14 +951,12 @@ if initalized:
                     event=event
                 )]
         else:
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "UnknownMode",
                 event=event
             ))
-            return
 
-        await matcher.send(sh)
-        return
+        return await matcher.send(sh)
 
     @helpcommand.handle()
     async def helphandler(matcher: Matcher, event: MessageEvent):
@@ -1017,7 +975,7 @@ if initalized:
         message = re.sub(r"\{version\}", VERSION, message)
         message = re.sub(r"\{py_version\}", platform.python_version(), message)
         message = re.sub(r"\{nonebot_version\}", nonebot.__version__, message)
-        await matcher.send(message)
+        return await matcher.send(message)
 
     @modecommand.handle()
     async def modehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent, args: list=[]):
@@ -1095,17 +1053,15 @@ if initalized:
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
 
             if not "at" in modes[mode].__commands__.keys():
-                await matcher.send(f"跑团模式 {mode.upper()} 不支持伤害检定指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 不支持伤害检定指令.")
 
             handler = modes[mode].__commands__["at"]
-            await matcher.send(handler(event, args))
+            return await matcher.send(handler(event, args))
         else:
-            await matcher.send(manager.process_generic_event(
+            return await matcher.send(manager.process_generic_event(
                 "UnknownMode",
                 event=event
             ))
@@ -1120,12 +1076,10 @@ if initalized:
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
 
             if not "at" in modes[mode].__commands__.keys():
-                await matcher.send(f"跑团模式 {mode.upper()} 不支持承伤检定指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 不支持承伤检定指令.")
 
             handler = modes[mode].__commands__["dam"]
             await matcher.send(handler(event, args))
@@ -1145,12 +1099,10 @@ if initalized:
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
 
             if not "at" in modes[mode].__commands__.keys():
-                await matcher.send(f"跑团模式 {mode.upper()} 不支持激励指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 不支持激励指令.")
 
             handler = modes[mode].__commands__["en"]
             await matcher.send(handler(event, args))
@@ -1170,18 +1122,17 @@ if initalized:
         mode = get_mode(event)
         if mode in modes:
             if not hasattr(modes[mode], "__commands__"):
-                await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 未设置标准指令.")
 
             if not "ra" in modes[mode].__commands__.keys():
-                await matcher.send(f"跑团模式 {mode.upper()} 不支持技能检定指令.")
-                return
+                return await matcher.send(f"跑团模式 {mode.upper()} 不支持技能检定指令.")
 
             handler = modes[mode].__commands__["ra"]
             replies = handler(event, args)
             if isinstance(replies, list):
                 for reply in replies:
                     await matcher.send(reply)
+
                 return
 
             await matcher.send(replies)
@@ -1199,7 +1150,7 @@ if initalized:
 
         args = format_str(event.get_message(), begin=".rh")
         await matcher.send("暗骰: 命运的骰子在滚动.")
-        await bot.send_private_msg(user_id=event.get_user_id(), message=roll(args))
+        return await bot.send_private_msg(user_id=event.get_user_id(), message=roll(args))
 
     @rahcommand.handle()
     async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
@@ -1243,8 +1194,7 @@ if initalized:
         args = format_str(event.get_message(), begin=(".r", ".roll"))
         name = get_user_card(event)
         if not args:
-            await matcher.send(roll("1d100", name=name))
-            return
+            return await matcher.send(roll("1d100", name=name))
 
         try:
             await matcher.send(roll(args, name=name))
@@ -1307,7 +1257,7 @@ if initalized:
 
         rolekp(event)
         await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="KP")
-        await matcher.send(
+        return await matcher.send(
             manager.process_generic_event(
                 "RoleKP",
                 event=event
@@ -1325,10 +1275,10 @@ if initalized:
 
         if json.loads(event.json())['sender']['card'] == "ob":
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id())
-            await matcher.send("取消旁观者 (OB) 身份.")
+            return await matcher.send("取消旁观者 (OB) 身份.")
         else:
             await bot.set_group_card(group_id=event.group_id, user_id=event.get_user_id(), card="ob")
-            await matcher.send(
+            return await matcher.send(
                 manager.process_generic_event(
                     "RoleOB",
                     event=event
@@ -1357,40 +1307,34 @@ if initalized:
 
         if cp["remove"]:
             if not manager.remove_event(cp["remove"]):
-                matcher.send("错误的消息类型, 使用`.help regist`获取帮助信息.")
-                return
+                return await matcher.send("错误的消息类型, 使用`.help regist`获取帮助信息.")
 
-            await matcher.send(f"消息事件 {cp['remove']} 已经成功销毁, 该事件将采用默认回复替代.")
-            return
+            return await matcher.send(f"消息事件 {cp['remove']} 已经成功销毁, 该事件将采用默认回复替代.")
 
         if cp["enable"]:
             if not manager.enable_event(cp["enable"]):
                 matcher.send("启用消息事件时出现异常, 请检查事件名是否正确!\n使用`.help regist`获得帮助信息.")\
 
-            matcher.send(f"消息事件 {cp['enable']} 已启用.")
-            return
+            return await matcher.send(f"消息事件 {cp['enable']} 已启用.")
 
         if cp["disable"]:
             if not manager.enable_event(cp["disable"]):
                 matcher.send("禁用消息事件时出现异常, 请检查事件名是否正确!\n使用`.help regist`获得帮助信息.")\
 
-            matcher.send(f"消息事件 {cp['disable']} 已启用.")
-            return
+            return await matcher.send(f"消息事件 {cp['disable']} 已启用.")
 
         event_name = cp["event_name"]
         message = cp["message"]
         if not event_name or not message:
-            await matcher.send("消息事件注册参数不全, 使用`.help regist`获取帮助信息.")
-            return
+            return await matcher.send("消息事件注册参数不全, 使用`.help regist`获取帮助信息.")
 
         message = html.unescape(message)
         manager.register_event(event_name, message.replace("\\n", "\n"), is_custom=True)
-        await matcher.send(f"消息事件 {event_name} 已被更改为 {message}.")
+        return await matcher.send(f"消息事件 {event_name} 已被更改为 {message}.")
 
     @versioncommand.handle()
     async def versionhandler(matcher: Matcher, event: GroupMessageEvent):
         """ 骰娘版本及开源声明指令 """
-        await matcher.send(f"Unvisitor DicerGirl 版本 {VERSION} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助.")
-        return
+        return await matcher.send(f"Unvisitor DicerGirl 版本 {VERSION} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助.")
 else:
     logger.warning("Nonebot2 初始化失败, DicerGirl 无法启动!")

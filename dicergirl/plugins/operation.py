@@ -26,6 +26,7 @@ async def install(name):
 
     return True
 
+
 async def remove(name):
     plugins = await get_plugins_mixed()
 
@@ -41,6 +42,7 @@ async def remove(name):
         return PluginUninstallFailedError
 
     return True
+
 
 async def upgrade(name):
     plugins = await get_plugins_mixed()

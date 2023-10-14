@@ -1,5 +1,4 @@
 from typing import List
-from dicergirl.common.decorators import translate_punctuation
 from multilogging import multilogger
 
 import re
@@ -7,6 +6,31 @@ import re
 
 logger = multilogger(name="DicerGirl", payload="utils.cards")
 """ `utils.cards`日志 """
+
+
+def translate_punctuation(string) -> str:
+    """ 中文字符转换为英文字符 """
+    punctuation_mapping = {
+        '，': ',',
+        '。': '.',
+        '！': '!',
+        '？': '?',
+        '；': ';',
+        '：': ':',
+        '“': '"',
+        '”': '"',
+        '‘': "'",
+        '’': "'",
+        '（': '(',
+        '）': ')',
+        '【': '[',
+        '】': ']',
+        '《': '<',
+        '》': '>',
+    }
+    for ch_punct, en_punct in punctuation_mapping.items():
+        string = string.replace(ch_punct, en_punct)
+    return string
 
 
 def format_str(message: str, begin=None, lower=True) -> str:

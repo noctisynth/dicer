@@ -6,7 +6,7 @@ from nonebot.plugin import on_message
 from nonebot.rule import Rule
 from nonebot.adapters.onebot.v11.event import GroupDecreaseNoticeEvent
 
-from ..common.decorators import translate_punctuation
+from ..utils.formatters import translate_punctuation
 
 import re
 

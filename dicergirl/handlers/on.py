@@ -4,11 +4,11 @@ from nonebot.matcher import Matcher
 from nonebot.adapters import Event
 from nonebot.plugin import on_message
 from nonebot.rule import Rule
-from nonebot.adapters.onebot.v11.event import GroupDecreaseNoticeEvent
 
 from ..utils.formatters import translate_punctuation
 
 import re
+
 
 class StartswithRule:
     """

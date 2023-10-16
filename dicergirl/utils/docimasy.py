@@ -65,7 +65,7 @@ def expr(dice: Dicer, anum: int, name: str=None, reason: str=None) -> Docimasy:
     docimasy = Docimasy(display)
     docimasy += dice.description()
 
-    if anum:
+    if isinstance(anum, int):
         if result == 100:
             docimasy += "大失败！"
             docimasy.set_judge("fatal fail")
@@ -176,6 +176,3 @@ def dnd_doc(result, dc, adventurer=None):
             r += "检定结果: 失败.\n"
             r += "检定结论: 成功与失败由于一体两面, 无论是哪一种都是可能的, 但是你不必气馁, 失败与成功都是冒险的一部分."
     return r
-
-if __name__ == "__main__":
-    print(scp_doc(10, 20, agent="Oracle"))

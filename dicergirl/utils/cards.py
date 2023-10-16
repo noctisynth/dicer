@@ -13,6 +13,7 @@ import yaml
 logger = multilogger(name="DicerGirl", payload="utils.cards")
 """ `utils.cards`日志 """
 
+
 class Cards:
     """ DicerGirl 人物卡数据操作类 """
     data_path: Path = SAVED_DATA_PATH

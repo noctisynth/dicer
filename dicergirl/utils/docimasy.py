@@ -1,5 +1,7 @@
-import random
 from .dicer import Dicer
+
+import random
+
 
 class Docimasy:
     """

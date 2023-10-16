@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import Dict, List
-from dicergirl.common.const import BOT_MODES_FILE, BOT_STATUS_FILE, DICERGIRL_DATA_PATH, DICERGIRL_LOGS_PATH, LOGGERS_CACHE_FILE, SAVED_DATA_PATH, SUPERUSER_FILE
-from dicergirl.reply.init import init as reply_init
-from dicergirl.utils.handlers import get_group_id
-from dicergirl.utils.loggers import load_loggers
-from dicergirl.utils.settings import change_status, load_status_settings
 from multilogging import multilogger
+
+from ..common.const import BOT_MODES_FILE, BOT_STATUS_FILE, DICERGIRL_DATA_PATH, DICERGIRL_LOGS_PATH, LOGGERS_CACHE_FILE, SAVED_DATA_PATH, SUPERUSER_FILE
+from ..reply.init import init as reply_init
+from .handlers import get_group_id
+from .loggers import load_loggers
+from .settings import change_status, load_status_settings
 
 import json
 

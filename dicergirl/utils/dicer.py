@@ -1,9 +1,9 @@
+from multilogging import multilogger
+from typing import List
+
 import abc
 import re
 import random
-
-from multilogging import multilogger
-from typing import List
 
 
 ZERO = 0

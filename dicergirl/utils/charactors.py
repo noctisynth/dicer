@@ -1,7 +1,8 @@
+from typing import Literal
+from ..common.const import EMPTY_DICT
+
 import abc
 
-from ..common.const import EMPTY_DICT
-from typing import Literal
 
 class Character:
     """ 人物卡模板 """

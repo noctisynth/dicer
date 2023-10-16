@@ -1,8 +1,9 @@
 from nonebot.adapters.onebot.v11 import GroupMessageEvent
-from dicergirl.common.const import LOGGERS_CACHE_FILE
-from dicergirl.utils.handlers import get_group_id
 from loguru._logger import Logger
 from typing import Dict, List
+
+from ..common.const import LOGGERS_CACHE_FILE
+from .handlers import get_group_id
 
 import json
 

@@ -1,7 +1,6 @@
 from typing import Type
 from nonebot.consts import STARTSWITH_KEY
 from nonebot.matcher import Matcher
-from nonebot.adapters import Event
 from nonebot.plugin import on_message
 from nonebot.rule import Rule
 

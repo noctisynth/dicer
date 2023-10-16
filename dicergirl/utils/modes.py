@@ -1,5 +1,5 @@
-from dicergirl.common.const import BOT_MODES_FILE
-from dicergirl.utils.handlers import get_group_id
+from ..common.const import BOT_MODES_FILE
+from .handlers import get_group_id
 from typing import Dict
 
 import json

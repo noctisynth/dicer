@@ -1,6 +1,6 @@
 from typing import Dict, List, Literal
-from dicergirl.common.const import SUPERUSER_FILE
-from dicergirl.utils.handlers import get_user_id
+from ..common.const import SUPERUSER_FILE
+from .handlers import get_user_id
 
 import uuid
 import json

@@ -15,13 +15,16 @@ logger = multilogger(name="DicerGirl", payload="utils.cards")
 
 
 class Cards:
-    """ DicerGirl 人物卡数据操作类 """
+    """DicerGirl 人物卡数据操作类"""
+
     data_path: Path = SAVED_DATA_PATH
 
-    def __init__(self, mode: str=None, cache_path: Path=None):
+    def __init__(self, mode: str = None, cache_path: Path = None):
         self.data: Dict[str, Dict[str, Any]] = {}
         self.mode = mode if mode else "未知模式"
-        self.cache_path = cache_path if cache_path else self.data_path / f"{mode}_cards.yaml"
+        self.cache_path = (
+            cache_path if cache_path else self.data_path / f"{mode}_cards.yaml"
+        )
 
     def init(self):
         logger.info(f"{self.mode.upper()} 存储文件未建立, 建立它.")
@@ -51,14 +54,14 @@ class Cards:
 
         return self.data
 
-    def update(self, event: Event, cha_dict: dict, qid: str="", save: bool=True) -> None:
+    def update(
+        self, event: Event, cha_dict: dict, qid: str = "", save: bool = True
+    ) -> None:
         group_id = get_group_id(event)
         if not self.data.get(group_id):
             self.data[group_id] = {}
 
-        self.data[group_id].update(
-            {qid if qid else get_user_id(event): cha_dict}
-            )
+        self.data[group_id].update({qid if qid else get_user_id(event): cha_dict})
 
         return self.save() if save else None
 
@@ -73,14 +76,15 @@ class Cards:
     def delete(self, event: Event, qid: str = "", save: bool = True) -> bool:
         if self.get(event, qid=qid):
             if self.data[get_group_id(event)].get(qid if qid else get_user_id(event)):
-                self.data[get_group_id(event)].pop(
-                    qid if qid else get_user_id(event))
+                self.data[get_group_id(event)].pop(qid if qid else get_user_id(event))
             if save:
                 self.save()
             return True
         return False
 
-    def delete_skill(self, event: Event, skill_name: str, qid: str = "", save: bool = True) -> bool:
+    def delete_skill(
+        self, event: Event, skill_name: str, qid: str = "", save: bool = True
+    ) -> bool:
         if self.get(event, qid=qid):
             data = self.get(event, qid=qid)
             if data["skills"].get(skill_name):

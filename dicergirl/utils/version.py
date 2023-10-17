@@ -3,7 +3,7 @@ import httpx
 
 
 async def get_latest_version(package_name):
-    """ 获取当前 Pypi 上`dicergirl`的最新版本号 """
+    """获取当前 Pypi 上`dicergirl`的最新版本号"""
     async with httpx.AsyncClient() as client:
         url = f"https://pypi.org/pypi/{package_name}/json"
         try:
@@ -19,11 +19,9 @@ async def get_latest_version(package_name):
 
 
 async def run_shell_command(command):
-    """ 异步执行 shell 指令的原始方法 """
+    """异步执行 shell 指令的原始方法"""
     process = await asyncio.create_subprocess_shell(
-        command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE
+        command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
 
     stdout, stderr = await process.communicate()
@@ -31,5 +29,5 @@ async def run_shell_command(command):
     return {
         "stdout": stdout.decode().strip(),
         "stderr": stderr.decode().strip(),
-        "returncode": process.returncode
+        "returncode": process.returncode,
     }

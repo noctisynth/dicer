@@ -19,12 +19,13 @@ logger = multilogger(name="DicerGirl", payload="reply.manager")
 @dataclass
 class MethodInfo:
     """
-     用于存储可调用对象及其参数信息的数据类
+    用于存储可调用对象及其参数信息的数据类
 
-     Attributes:
-         callable (Callable): 任意方法
-         parameters (Dict[str, Type]): 参数信息的字典，其中键为参数名称，值为参数类型
-     """
+    Attributes:
+        callable (Callable): 任意方法
+        parameters (Dict[str, Type]): 参数信息的字典，其中键为参数名称，值为参数类型
+    """
+
     callable: Callable
     parameters: Dict[str, Type]
 
@@ -55,6 +56,7 @@ class ReplyRegistryManager(ReplyRegistry):
         _handle_condition_event: 处理条件事件的内部方法
         _execute_method: 执行方法的内部方法
     """
+
     _inspect_empty = inspect.signature(ReplyRegistry).empty
     global_method: Dict[str, MethodInfo] = {}
     global_variable: Dict[str, Tuple[Type, Any]] = {}
@@ -69,9 +71,13 @@ class ReplyRegistryManager(ReplyRegistry):
         """
         if method_name is None:
             method_name = method.__name__
-        self.global_method[method_name] = MethodInfo(method, {name: parameter.annotation
-                                                              for name, parameter in
-                                                              inspect.signature(method).parameters.items()})
+        self.global_method[method_name] = MethodInfo(
+            method,
+            {
+                name: parameter.annotation
+                for name, parameter in inspect.signature(method).parameters.items()
+            },
+        )
         logger.debug(f"注册全局方法: {method}")
 
     def remove_method(self, method_name: str) -> bool:
@@ -179,9 +185,7 @@ class ReplyRegistryManager(ReplyRegistry):
             logger.warning(f"未找到全局方法 '{method_name}'。")
         return None
 
-    def _handle_generic_event(self,
-                              response: GenericResponse,
-                              **kwargs) -> str | None:
+    def _handle_generic_event(self, response: GenericResponse, **kwargs) -> str | None:
         if not response:
             return None
         kwargs = self._handle_placeholders(response.send_text, **kwargs)
@@ -213,15 +217,23 @@ class ReplyRegistryManager(ReplyRegistry):
     def _filter_arguments(self, parameters, kwargs):
         kwargs = {k: v for k, v in kwargs.items() if k in parameters}
 
-        kwargs.update({k: v[1] for k, v in self.global_variable.items() if
-                       k not in kwargs and k in parameters and (
-                               parameters[k] is v[0] or parameters[k] is self._inspect_empty)})
+        kwargs.update(
+            {
+                k: v[1]
+                for k, v in self.global_variable.items()
+                if k not in kwargs
+                and k in parameters
+                and (parameters[k] is v[0] or parameters[k] is self._inspect_empty)
+            }
+        )
         return kwargs
 
     def _check_argument_types(self, method_name, kwargs, parameters):
         for parameter_name, parameter in kwargs.items():
-            if (not isinstance(parameter, parameters[parameter_name]) and
-                    parameters[parameter_name] is not self._inspect_empty):
+            if (
+                not isinstance(parameter, parameters[parameter_name])
+                and parameters[parameter_name] is not self._inspect_empty
+            ):
                 logger.warning(
                     f"方法 '{method_name}' 的参数 '{parameter_name}' 传递的类型错误。 "
                     f"期望的类型为：{parameters[parameter_name]}，但实际类型为：{type(parameter)}。"

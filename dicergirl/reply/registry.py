@@ -23,8 +23,9 @@ class ReplyType(Enum):
     - CUSTOM: 自定义回复事件，对应值为1。
     - CONDITION: 条件回复事件，对应值为2。
     """
-    DEFAULT = 0,
-    CUSTOM = 1,
+
+    DEFAULT = (0,)
+    CUSTOM = (1,)
     CONDITION = 2
 
 
@@ -67,6 +68,7 @@ class ReplyRegistry:
         registry.register_event("common.sayhi", "你好{user}!现在是北京时间{time}!", is_custom=True)  # 注册自定义通用回复
         registry.register_event("common.sayhi", "你好{user}！", "你好", MatchType.EXACT_MATCH)  # 注册特定条件下的自定义回复
     """
+
     _instance = None
     _default_generic_data: Dict[str, GenericData] = {}
     _custom_generic_data: Dict[str, GenericData] = {}
@@ -80,7 +82,9 @@ class ReplyRegistry:
             cls._instance = object.__new__(cls)
         return cls._instance
 
-    def disable_event(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
+    def disable_event(
+        self, event_name: str, is_message_event: bool = False, group_name: str = NAME
+    ):
         """
         禁用事件
 
@@ -108,12 +112,13 @@ class ReplyRegistry:
             self._add_data_in_file(filename, cache, response, True)
             return container.is_enable(event_name)
         except KeyError as e:
-            logger.error(
-                f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
+            logger.error(f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
             logger.error(f"Error: {e}")
             return None
 
-    def enable_event(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
+    def enable_event(
+        self, event_name: str, is_message_event: bool = False, group_name: str = NAME
+    ):
         """
         启用事件
 
@@ -140,12 +145,13 @@ class ReplyRegistry:
             self._add_data_in_file(filename, cache, response, True)
             return container.is_enable(event_name)
         except KeyError as e:
-            logger.error(
-                f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
+            logger.error(f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
             logger.error(f"Error: {e}")
             return None
 
-    def toggle(self, event_name: str, is_message_event: bool = False, group_name: str = NAME):
+    def toggle(
+        self, event_name: str, is_message_event: bool = False, group_name: str = NAME
+    ):
         """
         切换事件状态
 
@@ -172,8 +178,7 @@ class ReplyRegistry:
             self._add_data_in_file(filename, cache, response, True)
             return container.is_enable(event_name)
         except KeyError as e:
-            logger.error(
-                f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
+            logger.error(f"请确保您的回复配置文件包含了正确的键和相应的值。如果您不确定如何正确配置文件，请参考文档或向管理员寻求帮助。")
             logger.error(f"Error: {e}")
             return None
 
@@ -202,13 +207,15 @@ class ReplyRegistry:
             logger.warning(f"回复文件'{data.group_name.upper()}'注册失败")
             return False
 
-    def register_event(self,
-                       event_name: str,
-                       send_text: str,
-                       match_field: str = None,
-                       match_type: MatchType = None,
-                       enable: bool = True,
-                       is_custom: bool = False) -> bool:
+    def register_event(
+        self,
+        event_name: str,
+        send_text: str,
+        match_field: str = None,
+        match_type: MatchType = None,
+        enable: bool = True,
+        is_custom: bool = False,
+    ) -> bool:
         """
         注册事件:
         若只向 event_name, send_text 传参，则向 _default_generic_data 注册。
@@ -227,15 +234,20 @@ class ReplyRegistry:
             bool: 如果事件成功注册到相关容器中，则返回 True；否则返回 False。
         """
         if match_field and match_type:
-            return self._register_condition_specific_event(event_name, send_text, match_field, match_type, enable)
+            return self._register_condition_specific_event(
+                event_name, send_text, match_field, match_type, enable
+            )
         elif is_custom:
             return self._register_custom_generic_event(event_name, send_text, enable)
         else:
             return self._register_default_generic_event(event_name, send_text, enable)
 
-    def remove_event(self, event_name: str,
-                     group_name: str = NAME,
-                     reply_type: ReplyType = ReplyType.CUSTOM) -> bool:
+    def remove_event(
+        self,
+        event_name: str,
+        group_name: str = NAME,
+        reply_type: ReplyType = ReplyType.CUSTOM,
+    ) -> bool:
         """
         销毁事件
 
@@ -257,10 +269,9 @@ class ReplyRegistry:
             logger.error(f"错误的回复类型: {str(reply_type)}")
             return False
 
-    def _register_default_generic_event(self,
-                                        event_name: str,
-                                        send_text: str,
-                                        enable: bool = True) -> bool:
+    def _register_default_generic_event(
+        self, event_name: str, send_text: str, enable: bool = True
+    ) -> bool:
         """
         注册默认回复事件
 
@@ -285,10 +296,9 @@ class ReplyRegistry:
             logger.warning(f"{response_type}'{event_name}'注册失败")
             return False
 
-    def _register_custom_generic_event(self,
-                                       event_name: str,
-                                       send_text: str,
-                                       enable: bool = True) -> bool:
+    def _register_custom_generic_event(
+        self, event_name: str, send_text: str, enable: bool = True
+    ) -> bool:
         """
         注册自定义通用回复事件
 
@@ -317,11 +327,14 @@ class ReplyRegistry:
             logger.warning(f"{response_type}'{event_name}'注册失败")
             return False
 
-    def _register_condition_specific_event(self, event_name: str,
-                                           send_text: str,
-                                           match_field: str,
-                                           match_type: MatchType,
-                                           enable: bool = True) -> bool:
+    def _register_condition_specific_event(
+        self,
+        event_name: str,
+        send_text: str,
+        match_field: str,
+        match_type: MatchType,
+        enable: bool = True,
+    ) -> bool:
         """
         注册条件回复事件
 
@@ -340,7 +353,9 @@ class ReplyRegistry:
         filename = f"{NAME}.yml"
         cache = const.CONDITION_SPECIFIC_REPLY_FILE_CACHE
 
-        response = ConditionResponse(event_name, send_text, match_field, match_type, enable)
+        response = ConditionResponse(
+            event_name, send_text, match_field, match_type, enable
+        )
         container.add(response)
 
         self._add_data_in_file(filename, cache, response)
@@ -354,15 +369,15 @@ class ReplyRegistry:
 
     def _remove_default_generic_event(self, event_name, group_name: str = NAME):
         """
-          从默认通用数据容器中删除指定事件。
+        从默认通用数据容器中删除指定事件。
 
-          Args:
-              event_name (str): 要删除的事件的名称。
-              group_name (str, optional): 数据组的名称。默认值为 NAME。
+        Args:
+            event_name (str): 要删除的事件的名称。
+            group_name (str, optional): 数据组的名称。默认值为 NAME。
 
-          Returns:
-              bool: 如果成功删除事件，则返回 True；否则返回 False。
-          """
+        Returns:
+            bool: 如果成功删除事件，则返回 True；否则返回 False。
+        """
         container = self._default_generic_data[group_name]
         container.remove(event_name)
         if not container.get_response(event_name):
@@ -424,7 +439,9 @@ class ReplyRegistry:
             return False
 
     @staticmethod
-    def _add_data_in_file(filename, cache, response: GenericResponse, is_update=False) -> bool:
+    def _add_data_in_file(
+        filename, cache, response: GenericResponse, is_update=False
+    ) -> bool:
         """
         将数据添加到文件中。
 
@@ -456,7 +473,7 @@ class ReplyRegistry:
                                         break
                         if not found and not is_update:
                             data["items"].append({event_name: save_data})
-                        with open(file=filepath, mode='wb') as drf:
+                        with open(file=filepath, mode="wb") as drf:
                             const.REPLY_YAML.dump(data=data, stream=drf)
                             break
         except Exception as e:
@@ -494,7 +511,7 @@ class ReplyRegistry:
                                             tmp_map[name] = content
                                     tmp.remove(item)
                                     tmp.append(tmp_map)
-                        with open(file=filepath, mode='wb') as drf:
+                        with open(file=filepath, mode="wb") as drf:
                             const.REPLY_YAML.dump(data=data, stream=drf)
                             break
 
@@ -511,7 +528,11 @@ class ReplyRegistry:
         Returns:
             List[str]: 包含所有默认事件的名称列表
         """
-        return [response.event_name for data in self._default_generic_data.values() for response in data.items.values()]
+        return [
+            response.event_name
+            for data in self._default_generic_data.values()
+            for response in data.items.values()
+        ]
 
     @property
     def custom_event_names(self) -> List[str]:
@@ -521,7 +542,11 @@ class ReplyRegistry:
         Returns:
             List[str]: 包含所有自定义通用事件的名称列表
         """
-        return [response.event_name for data in self._custom_generic_data.values() for response in data.items.values()]
+        return [
+            response.event_name
+            for data in self._custom_generic_data.values()
+            for response in data.items.values()
+        ]
 
     @property
     def message_event_names(self) -> List[str]:
@@ -531,8 +556,11 @@ class ReplyRegistry:
         Returns:
             List[str]: 包含所有消息事件的名称列表
         """
-        return [response.event_name for data in self._condition_specific_data.values() for response in
-                data.items.values()]
+        return [
+            response.event_name
+            for data in self._condition_specific_data.values()
+            for response in data.items.values()
+        ]
 
     @property
     def all_event_names(self) -> List[str]:
@@ -542,4 +570,8 @@ class ReplyRegistry:
         Returns:
             List[str]: 包含所有事件的事件名称的列表。
         """
-        return self.generic_event_names + self.message_event_names + self.custom_event_names
+        return (
+            self.generic_event_names
+            + self.message_event_names
+            + self.custom_event_names
+        )

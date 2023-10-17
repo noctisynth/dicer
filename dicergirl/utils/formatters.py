@@ -9,24 +9,24 @@ logger = multilogger(name="DicerGirl", payload="utils.cards")
 
 
 def translate_punctuation(string) -> str:
-    """ 中文字符转换为英文字符 """
+    """中文字符转换为英文字符"""
     punctuation_mapping = {
-        '，': ',',
-        '。': '.',
-        '！': '!',
-        '？': '?',
-        '；': ';',
-        '：': ':',
-        '“': '"',
-        '”': '"',
-        '‘': "'",
-        '’': "'",
-        '（': '(',
-        '）': ')',
-        '【': '[',
-        '】': ']',
-        '《': '<',
-        '》': '>',
+        "，": ",",
+        "。": ".",
+        "！": "!",
+        "？": "?",
+        "；": ";",
+        "：": ":",
+        "“": '"',
+        "”": '"',
+        "‘": "'",
+        "’": "'",
+        "（": "(",
+        "）": ")",
+        "【": "[",
+        "】": "]",
+        "《": "<",
+        "》": ">",
     }
     for ch_punct, en_punct in punctuation_mapping.items():
         string = string.replace(ch_punct, en_punct)
@@ -34,7 +34,7 @@ def translate_punctuation(string) -> str:
 
 
 def format_str(message: str, begin=None, lower=True) -> str:
-    """ 骰娘指令转义及解析 """
+    """骰娘指令转义及解析"""
     regex = r"[<\[](.*?)[\]>]"
     message = str(message).lower() if lower else str(message)
     msg = re.sub("\s+", " ", re.sub(regex, "", message)).strip(" ")
@@ -43,7 +43,9 @@ def format_str(message: str, begin=None, lower=True) -> str:
 
     if begin:
         if isinstance(begin, str):
-            begin = [begin, ]
+            begin = [
+                begin,
+            ]
         elif isinstance(begin, tuple):
             begin = list(begin)
 
@@ -56,10 +58,14 @@ def format_str(message: str, begin=None, lower=True) -> str:
 
 
 def format_msg(message, begin=None, zh_en=True) -> List[str]:
-    """ 骰娘指令拆析为`list`的方法 """
+    """骰娘指令拆析为`list`的方法"""
     msgs = format_str(message, begin=begin)
     outer = []
-    regex = r'([+-]?\d+)|("[^"]+")|([a-zA-Z\u4e00-\u9fa5]+)' if not zh_en else r'([+-]?\d+)|([a-zA-Z]+)|("[^"]+")|([\u4e00-\u9fa5]+)'
+    regex = (
+        r'([+-]?\d+)|("[^"]+")|([a-zA-Z\u4e00-\u9fa5]+)'
+        if not zh_en
+        else r'([+-]?\d+)|([a-zA-Z]+)|("[^"]+")|([\u4e00-\u9fa5]+)'
+    )
     msgs = list(filter(None, re.split(regex, msgs)))
     logger.debug(msgs)
 

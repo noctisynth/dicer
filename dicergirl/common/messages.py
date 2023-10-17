@@ -3,15 +3,23 @@ from ..reply.manager import manager
 
 import Levenshtein
 
-manager.register_event("HelpNotFoundRelated", "{BotName}没有找到相关帮助, 你是否是指: {MostRelated}?")
-manager.register_event("HelpNotFoundSomeRelated", "{BotName}没有找到相关帮助, 你是否是指:\n{MostRelated}\n使用.help [以上参数]来获得相关帮助内容.")
+manager.register_event(
+    "HelpNotFoundRelated", "{BotName}没有找到相关帮助, 你是否是指: {MostRelated}?"
+)
+manager.register_event(
+    "HelpNotFoundSomeRelated",
+    "{BotName}没有找到相关帮助, 你是否是指:\n{MostRelated}\n使用.help [以上参数]来获得相关帮助内容.",
+)
+
 
 def similar(str1, str2):
     distance = Levenshtein.distance(str1, str2)
     return 1 - (distance / max(len(str1), len(str2)))
 
+
 class Messages:
-    """ 骰娘帮助信息 """
+    """骰娘帮助信息"""
+
     keys: Dict[str, List[str]] = {
         "帮助": ["main", "", None, "帮助"],
         "指令": ["commands", "command", "cmd", "指令"],
@@ -29,7 +37,7 @@ class Messages:
         "激励": ["en", "激励检定", "激励检定"],
         "删除": ["delete", "del", "remove", "rm", "删除"],
         "日志": ["log", "logger", "日志管理", "日志系统", "日志"],
-        "消息": ["regist", "reg", "消息事件", "回复", "消息"]
+        "消息": ["regist", "reg", "消息事件", "回复", "消息"],
     }
     main = """Unvisitor DicerGirl 版本 {version} [Python {py_version} For Nonebot2 {nonebot_version}]
 .help (.h)  展示此帮助信息
@@ -240,10 +248,12 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
 
         return
 
+
 messages = Messages()
 
+
 def help_message(args: str) -> str:
-    """ `.help`指令后端方法 """
+    """`.help`指令后端方法"""
     similarcmd = {}
     got = messages.get(args)
     if got:
@@ -268,8 +278,7 @@ def help_message(args: str) -> str:
 
     if not related:
         return manager.process_generic_event(
-            "HelpNotFoundRelated",
-            MostRelated=most_related[0]
+            "HelpNotFoundRelated", MostRelated=most_related[0]
         )
 
     i = 1
@@ -278,18 +287,19 @@ def help_message(args: str) -> str:
         reply += f"{i}. {relate}\n"
         i += 1
 
-    reply = manager.process_generic_event(
-        "HelpNotFoundSomeRelated",
-        MostRelated=reply
-    )
+    reply = manager.process_generic_event("HelpNotFoundSomeRelated", MostRelated=reply)
     return reply
+
 
 def regist(name, message, alias=[]):
     if not alias:
-        alias = [name, ]
+        alias = [
+            name,
+        ]
 
     messages.keys[name] = alias
     setattr(messages, alias[0], message)
+
 
 if __name__ == "__main__":
     regist("test", "测试指令", alias=["test", "测试指令"])

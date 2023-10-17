@@ -16,6 +16,7 @@ class StartswithRule:
         1. 无视中英文字符串
         2. 无视前后多余空字符
     """
+
     __slots__ = ("msg", "ignorecase")
 
     def __init__(self, msg, ignorecase=False):
@@ -51,7 +52,7 @@ class StartswithRule:
 
 
 def startswith(msg, ignorecase=True) -> Rule:
-    """ 实例化指令检查方法 """
+    """实例化指令检查方法"""
     if isinstance(msg, str):
         msg = (msg,)
 
@@ -59,8 +60,10 @@ def startswith(msg, ignorecase=True) -> Rule:
 
 
 def on_startswith(commands, priority=0, block=True) -> Type[Matcher]:
-    """ 获得`Nonebot2`指令检查及参数注入方法 """
+    """获得`Nonebot2`指令检查及参数注入方法"""
     if isinstance(commands, str):
-        commands = (commands, )
+        commands = (commands,)
 
-    return on_message(startswith(commands, True), priority=priority, block=block, _depth=1)
+    return on_message(
+        startswith(commands, True), priority=priority, block=block, _depth=1
+    )

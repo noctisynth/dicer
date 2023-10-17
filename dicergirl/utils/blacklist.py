@@ -4,8 +4,10 @@ from ..common.const import BLACKLIST_FILE
 
 import yaml
 
+
 class BlackList:
-    """ 黑名单类 """
+    """黑名单类"""
+
     def __init__(self) -> None:
         if not BLACKLIST_FILE.exists():
             BLACKLIST_FILE.parent.mkdir(parents=True, exist_ok=True)
@@ -16,8 +18,12 @@ class BlackList:
 
     def load(self) -> bool:
         try:
-            self.blacklist: list = yaml.load(BLACKLIST_FILE.open("r"), FullLoader)["user"]
-            self.group_blacklist: list = yaml.load(BLACKLIST_FILE.open("r"), FullLoader)["group"]
+            self.blacklist: list = yaml.load(BLACKLIST_FILE.open("r"), FullLoader)[
+                "user"
+            ]
+            self.group_blacklist: list = yaml.load(
+                BLACKLIST_FILE.open("r"), FullLoader
+            )["group"]
             return True
         except:
             return False
@@ -25,11 +31,8 @@ class BlackList:
     def dump(self) -> str:
         BLACKLIST_FILE.write_text("")
         return yaml.dump(
-            {
-                "user": self.blacklist,
-                "group": self.group_blacklist
-            },
-            BLACKLIST_FILE.open("w")
+            {"user": self.blacklist, "group": self.group_blacklist},
+            BLACKLIST_FILE.open("w"),
         )
 
     def get_blacklist(self) -> List[str]:

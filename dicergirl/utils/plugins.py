@@ -9,6 +9,8 @@ logger = multilogger(name="Dicer Girl", payload="Plugin")
 
 loaded = False
 """ 首次加载标识, 防止nb指令重复注册 """
+
+
 def modules():
     global loaded
     if loaded:
@@ -56,7 +58,9 @@ def modules():
                 try:
                     getattr(handlers, command)(getattr(handlers, handler))
                 except AttributeError:
-                    logger.error(f"{module_type} {folder.name} 中 Nonebot2 指令配置异常, 导入失败.")
+                    logger.error(
+                        f"{module_type} {folder.name} 中 Nonebot2 指令配置异常, 导入失败."
+                    )
                     continue
                 except Exception as error:
                     logger.error("未知错误:")
@@ -66,12 +70,13 @@ def modules():
                 modes_dict[module.__name__] = module
             elif module.__type__ == "library":
                 library_dict[module.__name__] = module
-            
+
             logger.success(f"{module_type} {folder.name.upper()} 导入完成.")
 
     sys.path.pop(-1)
     loaded = True
     return modes_dict, library_dict
+
 
 modules_dict, library_dict = modules()
 

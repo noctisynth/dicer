@@ -8,22 +8,27 @@ status: Dict[str, bool] = {}
 DEBUG = False
 """ 漏洞监测模式 """
 
+
 def change_status(var) -> bool:
-    """ 录入新的`status`内容 """
+    """录入新的`status`内容"""
     global status
     status = var
     return True
 
+
 def load_status_settings() -> bool:
-    """ 导出当前机器人在各群聊的状态 """
+    """导出当前机器人在各群聊的状态"""
     return status
+
 
 def is_debug() -> Literal[False]:
     return DEBUG
 
+
 def debugon() -> Literal[True]:
     global DEBUG
     DEBUG = True
+
 
 def debugoff() -> Literal[True]:
     global DEBUG

@@ -15,12 +15,12 @@ saved_loggers: Dict[str, dict]
 
 
 def load_loggers() -> Dict[str, list]:
-    """ 加载所有的已存储的日志 """
+    """加载所有的已存储的日志"""
     return json.loads(open(LOGGERS_CACHE_FILE, "r").read())
 
 
 def get_loggers(event) -> List[str]:
-    """ 获取`event`所指向的群聊中所有的日志 """
+    """获取`event`所指向的群聊中所有的日志"""
     got_loggers = json.load(open(LOGGERS_CACHE_FILE, "r"))
     if not get_group_id(event) in got_loggers:
         return []
@@ -29,7 +29,7 @@ def get_loggers(event) -> List[str]:
 
 
 def add_logger(event: GroupMessageEvent, logname) -> bool:
-    """ 新增日志序列 """
+    """新增日志序列"""
     global saved_loggers
     if not get_group_id(event) in saved_loggers.keys():
         saved_loggers[get_group_id(event)] = []
@@ -43,7 +43,7 @@ def add_logger(event: GroupMessageEvent, logname) -> bool:
 
 
 def remove_logger(event: GroupMessageEvent, id: int) -> Dict[str, list]:
-    """ 从存储的`loggers.json`中移除指定`logger` """
+    """从存储的`loggers.json`中移除指定`logger`"""
     saved_loggers[get_group_id(event)].pop(id)
     json.dump(saved_loggers, open(LOGGERS_CACHE_FILE, "w"))
     return saved_loggers

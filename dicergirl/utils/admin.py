@@ -11,19 +11,19 @@ su_uuid: str
 
 
 def make_uuid() -> str:
-    """ 创建新的超级管理员鉴权令牌 """
+    """创建新的超级管理员鉴权令牌"""
     global su_uuid
     su_uuid = (str(uuid.uuid1()) + str(uuid.uuid4())).replace("-", "")
     return su_uuid
 
 
 def get_uuid() -> str:
-    """ 获取超级管理员鉴权令牌 """
+    """获取超级管理员鉴权令牌"""
     return su_uuid
 
 
 def add_super_user(message) -> bool:
-    """ 新增超级管理员 """
+    """新增超级管理员"""
     with open(SUPERUSER_FILE, "w+") as _su:
         sr = _su.read()
         if not sr:
@@ -36,7 +36,7 @@ def add_super_user(message) -> bool:
 
 
 def rm_super_user(message) -> bool:
-    """ 删除超级管理员 """
+    """删除超级管理员"""
     rsu = open(SUPERUSER_FILE, "r")
     sr = rsu.read()
     if not sr:
@@ -52,7 +52,7 @@ def rm_super_user(message) -> bool:
 
 
 def is_super_user(event) -> bool:
-    """ 判断`event`所指向的用户是否为超级管理员 """
+    """判断`event`所指向的用户是否为超级管理员"""
     su = False
     with open(SUPERUSER_FILE, "r") as _su:
         sr = _su.read()
@@ -68,7 +68,7 @@ def is_super_user(event) -> bool:
 
 
 def get_super_users() -> List[str]:
-    """ 捕获所有骰娘管理员 """
+    """捕获所有骰娘管理员"""
     su_read = SUPERUSER_FILE.read_text()
     if not su_read:
         return []

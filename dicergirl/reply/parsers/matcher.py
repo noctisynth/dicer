@@ -11,6 +11,7 @@ class MatchType(Enum):
     REGEX_MATCH 正则匹配
     FUNCTION_MATCH 方法匹配
     """
+
     EXACT_MATCH = 0
     PARTIAL_MATCH = 1
     REGEX_MATCH = 2
@@ -36,7 +37,7 @@ class TextMatcher:
     @staticmethod
     def __exact_matcher(first, second) -> bool:
         """
-         完全匹配器
+        完全匹配器
         """
         return str(first) == str(second)
 

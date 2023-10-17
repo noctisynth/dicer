@@ -9,12 +9,14 @@ logger = multilogger(name="DicerGirl", payload="ReplyData")
 
 
 class GenericData:
-    def __init__(self,
-                 group_name: str,
-                 version: str,
-                 author: str = "",
-                 description: str = "",
-                 enable: bool = True):
+    def __init__(
+        self,
+        group_name: str,
+        version: str,
+        author: str = "",
+        description: str = "",
+        enable: bool = True,
+    ):
         self.group_name = group_name
         self.items: Dict = {}
         self.version = version
@@ -59,15 +61,21 @@ class GenericData:
                 return value
 
     def is_enable(self, event_name: str = None):
-        return self._enable and (not event_name or (self.items.get(event_name) and self.items[event_name].enable))
+        return self._enable and (
+            not event_name
+            or (self.items.get(event_name) and self.items[event_name].enable)
+        )
 
 
 class ConditionData(GenericData):
-    def __init__(self, group_name: str,
-                 version: str,
-                 author: str = "",
-                 description: str = "",
-                 enable: bool = True):
+    def __init__(
+        self,
+        group_name: str,
+        version: str,
+        author: str = "",
+        description: str = "",
+        enable: bool = True,
+    ):
         super().__init__(group_name, version, author, description, enable)
 
     def add(self, *args):

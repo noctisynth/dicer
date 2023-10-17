@@ -1,14 +1,22 @@
 from typing import Dict, List, Any
-from ..common.exceptions.parseerror import NoneTypeCommandError, CommandRequired, TooManyAliasCommandError
+from ..common.exceptions.parseerror import (
+    NoneTypeCommandError,
+    CommandRequired,
+    TooManyAliasCommandError,
+)
+
 
 class Optional:
-    """ 可选指令 """
-    def __init__(self, key: str, cls: type, default: Any=None):
+    """可选指令"""
+
+    def __init__(self, key: str, cls: type, default: Any = None):
         if not key:
             raise NoneTypeCommandError("Optional parameter must not be `None`.")
 
         if isinstance(key, str):
-            key = [key, ]
+            key = [
+                key,
+            ]
 
         self.key = key
         self.cls = cls
@@ -17,14 +25,18 @@ class Optional:
     def __str__(self):
         return self.key[0]
 
+
 class Required:
-    """ 必选指令 """
-    def __init__(self, key, cls: type, default: Any=None):
+    """必选指令"""
+
+    def __init__(self, key, cls: type, default: Any = None):
         if not key:
             raise NoneTypeCommandError("Required parameter must not be `None`.")
 
         if isinstance(key, str):
-            key = [key, ]
+            key = [
+                key,
+            ]
 
         self.key = key
         self.cls = cls
@@ -33,14 +45,18 @@ class Required:
     def __str__(self):
         return self.key[0]
 
+
 class Only:
-    """ 布尔指令 """
-    def __init__(self, key, default: bool=None):
+    """布尔指令"""
+
+    def __init__(self, key, default: bool = None):
         if not key:
             raise NoneTypeCommandError("Bool parameter must not be `None`.")
 
         if isinstance(key, str):
-            key = [key, ]
+            key = [
+                key,
+            ]
 
         self.key = key
         self.default = default
@@ -48,14 +64,18 @@ class Only:
     def __str__(self):
         return self.key[0]
 
+
 class Positional:
-    """ 定位指令 """
-    def __init__(self, key, cls: type, default: Any=None):
+    """定位指令"""
+
+    def __init__(self, key, cls: type, default: Any = None):
         if not key:
             raise NoneTypeCommandError("Postional parameter must not be `None`.")
 
         if isinstance(key, str):
-            key = [key, ]
+            key = [
+                key,
+            ]
 
         self.key = key
         self.cls = cls
@@ -64,8 +84,10 @@ class Positional:
     def __str__(self):
         return self.key[0]
 
+
 class Commands(list):
-    """ 指令集合 """
+    """指令集合"""
+
     def __init__(self, *args, **kwargs):
         super(Commands, self).__init__(*args, **kwargs)
 
@@ -85,19 +107,25 @@ class Commands(list):
         return [str(optional) for optional in self if isinstance(optional, Optional)]
 
     def get_plain_positional(self) -> List[str]:
-        return [str(positional) for positional in self if isinstance(positional, Positional)]
+        return [
+            str(positional) for positional in self if isinstance(positional, Positional)
+        ]
 
     def get_plain_commands(self) -> List[str]:
         return [str(command) for command in self]
 
+
 def required(commands: Commands):
     return commands.__required__()
+
 
 def optional(commands: Commands):
     return commands.__optional__()
 
+
 def positional(commands: Commands):
     return commands.__positional__()
+
 
 class CommandParser:
     """指令解析类
@@ -113,7 +141,10 @@ class CommandParser:
         print(cp["bool"]) # 输出为`True`
         ```
     """
-    def __init__(self, commands: Commands=None, args: List[str]=None, auto: bool=False):
+
+    def __init__(
+        self, commands: Commands = None, args: List[str] = None, auto: bool = False
+    ):
         self.results: Dict[str, str] = {}
 
         if not isinstance(commands, Commands):
@@ -128,8 +159,8 @@ class CommandParser:
         if auto:
             self.shlex()
 
-    def shlex(self, args: List[str]=None):
-        """ 开始拆析指令集合 """
+    def shlex(self, args: List[str] = None):
+        """开始拆析指令集合"""
         if not args:
             args = self.args
         iter_args = [arg for arg in args]
@@ -159,9 +190,11 @@ class CommandParser:
                 iter_index = iter_args.index(key[0])
                 if len(args) > index + 1:
                     try:
-                        value = command.cls(args[index+1])
+                        value = command.cls(args[index + 1])
                     except ValueError:
-                        raise TypeError(f"Value type of {command.key} is mismatch, {command.key} required but {type(args[index+1])} was given.")
+                        raise TypeError(
+                            f"Value type of {command.key} is mismatch, {command.key} required but {type(args[index+1])} was given."
+                        )
                     results[command.key[0]] = value
                     iter_args.pop(iter_index)
                     iter_args.pop(iter_index)
@@ -170,7 +203,9 @@ class CommandParser:
                     results[command.key[0]] = command.default
             else:
                 if isinstance(command, Required):
-                    raise CommandRequired(f"Required parameter `{command.key[0]}` not found.")
+                    raise CommandRequired(
+                        f"Required parameter `{command.key[0]}` not found."
+                    )
 
                 results[command.key[0]] = command.default
 
@@ -181,11 +216,13 @@ class CommandParser:
                 break
 
             index = str_positionals.index(str(positional_command))
-            if len(iter_args) >= index+1:
+            if len(iter_args) >= index + 1:
                 try:
                     value = positional_command.cls(iter_args[index])
                 except ValueError:
-                    raise TypeError(f"Value type of {positional_command.key} is mismatch, {positional_command.key} required but {type(iter_args[index])} was given.")
+                    raise TypeError(
+                        f"Value type of {positional_command.key} is mismatch, {positional_command.key} required but {type(iter_args[index])} was given."
+                    )
                 results[str(positional_command)] = value
                 nothing = False
 
@@ -195,10 +232,20 @@ class CommandParser:
     def __iter__(self):
         return iter(self.results.items())
 
+
 if __name__ == "__main__":
     cp = CommandParser(
-        Commands([Positional("roll", int), Only("cache"), Positional("test", int), Optional("age", int), Optional(("name", "n"), str, "欧若可"), Optional("sex", str)]),
-        )
+        Commands(
+            [
+                Positional("roll", int),
+                Only("cache"),
+                Positional("test", int),
+                Optional("age", int),
+                Optional(("name", "n"), str, "欧若可"),
+                Optional("sex", str),
+            ]
+        ),
+    )
     cp.args = ["cache", "age", "20", "n", "先生", "7", "10"]
     cp.shlex()
     print(cp.results)

@@ -5,7 +5,8 @@ import abc
 
 
 class Character:
-    """ 人物卡模板 """
+    """人物卡模板"""
+
     name: str
     sex: Literal["男", "女"]
     age: int

@@ -7,8 +7,9 @@ from ..utils.cards import Cards
 from ..utils.charactors import Character
 from ..reply.manager import manager
 
+
 class StatusCode:
-    def __init__(self, status_code: int=1) -> None:
+    def __init__(self, status_code: int = 1) -> None:
         self.status_code = status_code
 
     def __eq__(self, __value: object) -> bool:
@@ -20,38 +21,46 @@ class StatusCode:
         else:
             return False
 
+
 def __set_plus_format(args: list):
-    """ `.set 技能 +x`语法解析 """
+    """`.set 技能 +x`语法解析"""
     while True:
         try:
             index = args.index("+")
         except:
             break
-        args[index] = args[index] + args[index+1]
-        args.pop(index+1)
+        args[index] = args[index] + args[index + 1]
+        args.pop(index + 1)
 
     while True:
         try:
             index = args.index("-")
         except:
             break
-        args[index] = args[index] + args[index+1]
-        args.pop(index+1)
+        args[index] = args[index] + args[index + 1]
+        args.pop(index + 1)
 
     return args
 
-def __set_default(args: list, event: MessageEvent, reply: list, cards: Cards=None, module=None, attrs_dict: dict=None, cha: Character=None, qid: str=None) -> bool:
-    """ 设置属性 """
+
+def __set_default(
+    args: list,
+    event: MessageEvent,
+    reply: list,
+    cards: Cards = None,
+    module=None,
+    attrs_dict: dict = None,
+    cha: Character = None,
+    qid: str = None,
+) -> bool:
+    """设置属性"""
     for attr, alias in attrs_dict.items():
         if args[0] in alias:
             if attr in ["名字", "性别"]:
                 if attr == "性别" and not args[1] in ["男", "女"]:
                     reply.append(
                         manager.process_generic_event(
-                            "BadSex",
-                            event=event,
-                            CharactorName="角色",
-                            Value=args[1]
+                            "BadSex", event=event, CharactorName="角色", Value=args[1]
                         )
                     )
                     return StatusCode(-1)
@@ -67,18 +76,24 @@ def __set_default(args: list, event: MessageEvent, reply: list, cards: Cards=Non
                 except ValueError:
                     reply.append(
                         manager.process_generic_event(
-                            "ValueError",
-                            event=event,
-                            SkillName=args[0],
-                            Value=args[1]
+                            "ValueError", event=event, SkillName=args[0], Value=args[1]
                         )
                     )
                     return StatusCode(0)
             cards.update(event, cha.__dict__, qid=qid)
             return StatusCode(1)
 
-def __set_skill(args, event: MessageEvent, reply: list, cards: Cards=None, cha: Character=None, module=None, qid: str=None) -> bool:
-    """ 设置技能 """
+
+def __set_skill(
+    args,
+    event: MessageEvent,
+    reply: list,
+    cards: Cards = None,
+    cha: Character = None,
+    module=None,
+    qid: str = None,
+) -> bool:
+    """设置技能"""
     try:
         if not args[1].startswith(("-", "+")):
             cha.skills[args[0]] = int(args[1])
@@ -91,16 +106,14 @@ def __set_skill(args, event: MessageEvent, reply: list, cards: Cards=None, cha: 
     except ValueError:
         reply.append(
             manager.process_generic_event(
-                "ValueError",
-                event=event,
-                SkillName=args[0],
-                Value=args[1]
+                "ValueError", event=event, SkillName=args[0], Value=args[1]
             )
         )
         return StatusCode(0)
 
-def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> str:
-    """ 兼容所有模式的`.set`指令后端方法 """
+
+def set_handler(event: MessageEvent, args: list, at: list, mode: str = None) -> str:
+    """兼容所有模式的`.set`指令后端方法"""
     module = modes[mode]
     cards: Cards = module.__cards__
     cache_cards: Cards = module.__cache__
@@ -124,15 +137,11 @@ def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> st
             cha = charactor.load(card_data)
             cache_cards.delete(event)
             return manager.process_generic_event(
-                "CardSaved",
-                event=event,
-                CardDetail=cha.output()
+                "CardSaved", event=event, CardDetail=cha.output()
             )
         else:
             return manager.process_generic_event(
-                "CacheNotFound",
-                event=event,
-                ModuleName=module.__name__
+                "CacheNotFound", event=event, ModuleName=module.__name__
             )
     else:
         if cards.get(event, qid=qid):
@@ -140,17 +149,13 @@ def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> st
             cha = charactor.load(card_data)
         else:
             return manager.process_generic_event(
-                "CacheNotFound",
-                event=event,
-                ModuleName=module.__name__
+                "CacheNotFound", event=event, ModuleName=module.__name__
             )
 
         if len(args) % 2 != 0:
             return manager.process_generic_event(
-                "AttributeCountError",
-                event=event,
-                Command="set"
-                )
+                "AttributeCountError", event=event, Command="set"
+            )
 
         reply = []
 
@@ -166,13 +171,20 @@ def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> st
                 sub_li = []
             else:
                 return manager.process_generic_event(
-                    "AttributeCountError",
-                    event=event,
-                    Command="set"
+                    "AttributeCountError", event=event, Command="set"
                 )
 
         for sub_li in li:
-            set_default_code = __set_default(sub_li, event, reply, cards=cards, module=module, attrs_dict=attrs_dict, cha=cha, qid=qid)
+            set_default_code = __set_default(
+                sub_li,
+                event,
+                reply,
+                cards=cards,
+                module=module,
+                attrs_dict=attrs_dict,
+                cha=cha,
+                qid=qid,
+            )
             if set_default_code:
                 attr_saved += 1
                 continue
@@ -180,7 +192,9 @@ def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> st
                 saved_failed += 1
                 continue
 
-            if __set_skill(sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid):
+            if __set_skill(
+                sub_li, event, reply, cards=cards, cha=cha, module=module, qid=qid
+            ):
                 skill_saved += 1
             else:
                 saved_failed += 1
@@ -191,7 +205,7 @@ def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> st
                 event=event,
                 AttrSetNumber=attr_saved,
                 SkillSetNumber=skill_saved,
-                SkillSetFailed=saved_failed
+                SkillSetFailed=saved_failed,
             )
         else:
             details = ""
@@ -205,11 +219,12 @@ def set_handler(event: MessageEvent, args: list, at: list, mode: str=None) -> st
                 AttrSetNumber=attr_saved,
                 SkillSetNumber=skill_saved,
                 SkillSetFailed=saved_failed,
-                FailedDetail=details
+                FailedDetail=details,
             )
 
+
 def show_handler(event: MessageEvent, args, at, mode=None):
-    """ 兼容所有模式的`.show`指令后端方法 """
+    """兼容所有模式的`.show`指令后端方法"""
     module = modes[mode]
     cards: Cards = module.__cards__
     cache_cards: Cards = module.__cache__
@@ -227,9 +242,7 @@ def show_handler(event: MessageEvent, args, at, mode=None):
             cha = charactor.load(card_data)
             reply.append(
                 manager.process_generic_event(
-                    "CardInUse",
-                    event=event,
-                    CardDetail=cha.output()
+                    "CardInUse", event=event, CardDetail=cha.output()
                 )
             )
 
@@ -238,9 +251,7 @@ def show_handler(event: MessageEvent, args, at, mode=None):
             cha = charactor.load(card_data)
             reply.append(
                 manager.process_generic_event(
-                    "CardInCache",
-                    event=event,
-                    CardDetail=cha.output()
+                    "CardInCache", event=event, CardDetail=cha.output()
                 )
             )
     elif args[0] in ["detail", "de", "details"]:
@@ -252,9 +263,9 @@ def show_handler(event: MessageEvent, args, at, mode=None):
         if cards.get(event, qid=qid):
             card_data = cards.get(event, qid=qid)
             cha = charactor.load(card_data)
-            if hasattr(cha, "out_"+args[0]):
+            if hasattr(cha, "out_" + args[0]):
                 try:
-                    reply.append(getattr(cha, "out_"+args[0])())
+                    reply.append(getattr(cha, "out_" + args[0])())
                 except:
                     reply.append("查询时出现异常, 可能你想要查询的内容不存在?")
             else:
@@ -271,8 +282,9 @@ def show_handler(event: MessageEvent, args, at, mode=None):
 
     return reply
 
-def del_handler(event: MessageEvent, args: list, at: list, mode: str=None):
-    """ 兼容所有模式的`.del`指令后端方法 """
+
+def del_handler(event: MessageEvent, args: list, at: list, mode: str = None):
+    """兼容所有模式的`.del`指令后端方法"""
     module = modes[mode]
     cache_cards: Cards = module.__cache__
     cards: Cards = module.__cards__
@@ -289,46 +301,55 @@ def del_handler(event: MessageEvent, args: list, at: list, mode: str=None):
         elif arg == "cache":
             if cache_cards.get(event, qid=qid):
                 if cache_cards.delete(event, save=False):
-                    r.append(manager.process_generic_event(
-                        "CacheCardCleared",
-                        event=event,
-                    ))
+                    r.append(
+                        manager.process_generic_event(
+                            "CacheCardCleared",
+                            event=event,
+                        )
+                    )
                 else:
-                    r.append(manager.process_generic_event(
-                        "UnknownError",
-                        event=event,
-                    ))
+                    r.append(
+                        manager.process_generic_event(
+                            "UnknownError",
+                            event=event,
+                        )
+                    )
             else:
                 r.append("暂无缓存人物卡数据.")
         elif arg == "card":
             if cards.get(event):
                 if cards.delete(event):
-                    r.append(manager.process_generic_event(
-                        "CardDeleted",
-                        event=event,
-                    ))
+                    r.append(
+                        manager.process_generic_event(
+                            "CardDeleted",
+                            event=event,
+                        )
+                    )
                 else:
-                    r.append(manager.process_generic_event(
-                        "UnknownError",
-                        event=event,
-                    ))
+                    r.append(
+                        manager.process_generic_event(
+                            "UnknownError",
+                            event=event,
+                        )
+                    )
             else:
                 r.append("暂无使用中的人物卡.")
         else:
             if cards.delete_skill(event, arg):
-                r.append(manager.process_generic_event(
-                        "SkillDeleted",
-                        event=event,
-                        SkillName=arg
-                    ))
+                r.append(
+                    manager.process_generic_event(
+                        "SkillDeleted", event=event, SkillName=arg
+                    )
+                )
 
     if not r:
         r.append("使用`.help del`获得指令使用帮助.")
 
     return r
 
-def roll(args: str, name: str=None) -> str:
-    """ 标准掷骰指令后端方法 """
+
+def roll(args: str, name: str = None) -> str:
+    """标准掷骰指令后端方法"""
     time = 1
     if "#" in args:
         args = args.split("#")
@@ -337,13 +358,11 @@ def roll(args: str, name: str=None) -> str:
             time = int(args[0].strip())
             if time > 20:
                 return manager.process_generic_event(
-                        "BadMultipleRollString",
-                        SenderCard=name
-                    )
+                    "BadMultipleRollString", SenderCard=name
+                )
         except ValueError:
             return manager.process_generic_event(
-                "MultipleRollStringError",
-                SenderCard=name
+                "MultipleRollStringError", SenderCard=name
             )
 
         if len(args) == 1:
@@ -365,15 +384,13 @@ def roll(args: str, name: str=None) -> str:
         d = Dicer(args)
         r = expr(d, None, name=name, reason=reason)
 
-        for _ in range(time-1):
+        for _ in range(time - 1):
             r += expr(d, None, name=name, reason=reason)
 
         return r.detail
     except ValueError:
-        return manager.process_generic_event(
-            "BadRollString",
-            SenderCard=name
-        )
+        return manager.process_generic_event("BadRollString", SenderCard=name)
+
 
 def shoot(event: MessageEvent):
     dice = Dicer("1d20").roll()
@@ -395,8 +412,5 @@ def shoot(event: MessageEvent):
         rstr = "头部"
 
     return manager.process_generic_event(
-        "ShootDocimasy",
-        event=event,
-        DiceDescription=dice.description(),
-        OnShoot=rstr
+        "ShootDocimasy", event=event, DiceDescription=dice.description(), OnShoot=rstr
     )

@@ -2,7 +2,15 @@ from pathlib import Path
 from typing import Dict, List
 from multilogging import multilogger
 
-from ..common.const import BOT_MODES_FILE, BOT_STATUS_FILE, DICERGIRL_DATA_PATH, DICERGIRL_LOGS_PATH, LOGGERS_CACHE_FILE, SAVED_DATA_PATH, SUPERUSER_FILE
+from ..common.const import (
+    BOT_MODES_FILE,
+    BOT_STATUS_FILE,
+    DICERGIRL_DATA_PATH,
+    DICERGIRL_LOGS_PATH,
+    LOGGERS_CACHE_FILE,
+    SAVED_DATA_PATH,
+    SUPERUSER_FILE,
+)
 from ..reply.init import init as reply_init
 from .handlers import get_group_id
 from .loggers import load_loggers
@@ -16,7 +24,7 @@ logger = multilogger(name="DicerGirl", payload="utils.operator")
 
 
 def set_name(name) -> bool | str:
-    """ 给骰娘命名 """
+    """给骰娘命名"""
     if len(name) >= 5:
         return "我不想要太长的名字!"
 
@@ -27,7 +35,7 @@ def set_name(name) -> bool | str:
 
 
 def get_name() -> str:
-    """ 获得骰娘的名字 """
+    """获得骰娘的名字"""
     path = DICERGIRL_DATA_PATH / "name"
     if not path.exists():
         return "欧若可"
@@ -36,7 +44,7 @@ def get_name() -> str:
 
 
 def botoff(event):
-    """ 机器人在`event`所指向的群聊中开启指令限制 """
+    """机器人在`event`所指向的群聊中开启指令限制"""
     status = load_status_settings()
     status[get_group_id(event)] = False
     change_status(status)
@@ -45,7 +53,7 @@ def botoff(event):
 
 
 def boton(event):
-    """ 机器人在`event`所指向的群聊中开启完全功能 """
+    """机器人在`event`所指向的群聊中开启完全功能"""
     status = load_status_settings()
     status[get_group_id(event)] = True
     change_status(status)
@@ -54,7 +62,7 @@ def boton(event):
 
 
 def get_status(event):
-    """ 判断机器人在`event`所指向的群聊中是否处于完全功能状态 """
+    """判断机器人在`event`所指向的群聊中是否处于完全功能状态"""
     status = load_status_settings()
     group_id = get_group_id(event)
 
@@ -71,7 +79,7 @@ def get_status(event):
 
 
 def load_status() -> dict:
-    """ 导入目前所存储的机器人在各群聊中状态 """
+    """导入目前所存储的机器人在各群聊中状态"""
     status_text = BOT_STATUS_FILE.read_text(encoding="utf-8")
     if status_text:
         status = json.loads(status_text)
@@ -83,7 +91,7 @@ def load_status() -> dict:
 
 
 def init() -> None:
-    """ 骰娘初始化 """
+    """骰娘初始化"""
     global saved_loggers
     dirs: Dict[str, List[Path, list]] = {
         "Dicer Girl": [DICERGIRL_DATA_PATH, "dir"],
@@ -92,7 +100,7 @@ def init() -> None:
         "Dicer Girl 状态管理": [BOT_STATUS_FILE, "file"],
         "日志管理": [LOGGERS_CACHE_FILE, "file"],
         "跑团模式存储": [BOT_MODES_FILE, "file"],
-        "超级用户存储": [SUPERUSER_FILE, "file"]
+        "超级用户存储": [SUPERUSER_FILE, "file"],
     }
     for name, dir in dirs.items():
         if not dir[0].exists():

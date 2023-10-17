@@ -11,7 +11,7 @@ logger = multilogger(name="DicerGirl", payload="utils.handlers")
 
 
 def get_mentions(event: GroupMessageEvent) -> List[str]:
-    """ 获取`event`指向的消息所有被`@`的用户 QQ 号 """
+    """获取`event`指向的消息所有被`@`的用户 QQ 号"""
     mentions = []
     message = json.loads(event.json())["message"]
 
@@ -23,20 +23,20 @@ def get_mentions(event: GroupMessageEvent) -> List[str]:
 
 
 def get_handlers(main) -> List[Callable]:
-    """ 获取目前所有的指令触发函数方法 """
+    """获取目前所有的指令触发函数方法"""
     commands_functions = []
 
     for _, obj in vars(main).items():
-        if inspect.isfunction(obj) and hasattr(obj, '__annotations__'):
+        if inspect.isfunction(obj) and hasattr(obj, "__annotations__"):
             annotations = obj.__annotations__
-            if annotations.get('message') is GroupMessageEvent:
+            if annotations.get("message") is GroupMessageEvent:
                 commands_functions.append(obj)
 
     return commands_functions
 
 
 def get_group_id(event) -> str:
-    """ 获取`event`指向的群聊`ID` """
+    """获取`event`指向的群聊`ID`"""
     try:
         if isinstance(event, PrivateMessageEvent):
             return "private"
@@ -53,7 +53,7 @@ def get_group_id(event) -> str:
 
 
 def get_user_id(event) -> str:
-    """ 获取`event`指向的用户`ID` """
+    """获取`event`指向的用户`ID`"""
     try:
         return str(event.user_id)
     except Exception as error:
@@ -62,22 +62,22 @@ def get_user_id(event) -> str:
 
 
 def get_user_card(event) -> str:
-    """ 获取`event`指向的用户群名片 """
+    """获取`event`指向的用户群名片"""
     try:
-        raw_json = json.loads(event.json())['sender']
-        if raw_json['card']:
-            return raw_json['card']
+        raw_json = json.loads(event.json())["sender"]
+        if raw_json["card"]:
+            return raw_json["card"]
         else:
-            return raw_json['nickname']
+            return raw_json["nickname"]
     except:
         return "未知用户"
 
 
 def get_user_nickname(event) -> str:
-    """ 获取用户昵称 """
+    """获取用户昵称"""
     try:
-        raw_json = json.loads(event.json())['sender']
-        return raw_json['nickname']
+        raw_json = json.loads(event.json())["sender"]
+        return raw_json["nickname"]
     except:
         return "未知用户"
 

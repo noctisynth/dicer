@@ -5,8 +5,9 @@ import random
 
 class Docimasy:
     """
-        检定结果解析类
+    检定结果解析类
     """
+
     judge_dict = {
         "critical success": 4,
         "very hard success": 3,
@@ -15,7 +16,8 @@ class Docimasy:
         "fail": 0,
         "fatal fail": -1,
     }
-    def __init__(self, detail, judge: str | int=None):
+
+    def __init__(self, detail, judge: str | int = None):
         self.detail = detail
 
         if isinstance(judge, int):
@@ -60,10 +62,13 @@ class Docimasy:
     def __str__(self):
         return self.detail
 
-def expr(dice: Dicer, anum: int, name: str=None, reason: str=None) -> Docimasy:
-    """ 类 COC 模式技能检定结果 """
+
+def expr(dice: Dicer, anum: int, name: str = None, reason: str = None) -> Docimasy:
+    """类 COC 模式技能检定结果"""
     result = dice.roll().calc()
-    display = f"{f'[{name}]' if name else ''}{f'由于[{reason}]' if reason else ''}掷骰: {dice.db}"
+    display = (
+        f"{f'[{name}]' if name else ''}{f'由于[{reason}]' if reason else ''}掷骰: {dice.db}"
+    )
     docimasy = Docimasy(display)
     docimasy += dice.description()
 
@@ -95,8 +100,9 @@ def expr(dice: Dicer, anum: int, name: str=None, reason: str=None) -> Docimasy:
             docimasy.set_judge("fail")
     return docimasy
 
+
 def scp_doc(result, difficulty, encourage=None, agent=None, great=False) -> Docimasy:
-    """ 类 SCP 模式技能检定结果 """
+    """类 SCP 模式技能检定结果"""
     if not agent:
         agent = "该特工"
 
@@ -123,7 +129,7 @@ def scp_doc(result, difficulty, encourage=None, agent=None, great=False) -> Doci
         else:
             r += "检定结论: 被 Administrator 所眷顾的人, 毫无疑问这是一次完美的成功, 但是你或许会面对更加绝望的未来."
         r.set_judge("critical success")
-    elif result >= (difficulty*2):
+    elif result >= (difficulty * 2):
         r += "检定结果: 关键成功."
         r += "检定结论: 绝境之中的人常常能够爆发出无尽的潜力, 疯狂是人类最强大的武器, 用疯狂去嗤笑命运吧."
         r.set_judge("critical success")
@@ -131,7 +137,7 @@ def scp_doc(result, difficulty, encourage=None, agent=None, great=False) -> Doci
         r += "检定结果: 成功."
         r += "检定结论: 命运常常给予人们无声的嗤笑, 一次成功当然是好事, 但也要警惕这是否是步入深渊的开始."
         r.set_judge("success")
-    elif result < (difficulty/2):
+    elif result < (difficulty / 2):
         r += "检定结果: 致命失败."
         r += "检定结论: 努力或许的确有用处, 但是努力只是提高运气的一种手段. 在低劣的运气面前, 任何努力都是没有用的."
         r.set_judge("fatal fail")
@@ -151,8 +157,9 @@ def scp_doc(result, difficulty, encourage=None, agent=None, great=False) -> Doci
             r.set_judge("fail")
     return r
 
+
 def dnd_doc(result, dc, adventurer=None):
-    """ DND 技能检定结果 """
+    """DND 技能检定结果"""
     if not adventurer:
         adventurer = "该冒险者"
     r = f"事件难度: {dc}\n"

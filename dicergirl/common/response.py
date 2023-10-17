@@ -16,7 +16,7 @@ class GenericResponse:
         self.enable = enable
 
     def to_dict(self):
-        return {'enable': self.enable, 'send_text': self.send_text}
+        return {"enable": self.enable, "send_text": self.send_text}
 
 
 class ConditionResponse(GenericResponse):
@@ -28,15 +28,22 @@ class ConditionResponse(GenericResponse):
     :argument enable 是否启用响应事件
     """
 
-    def __init__(self, event_name: str,
-                 send_text: str,
-                 match_field: str,
-                 match_type: MatchType,
-                 enable: bool = True):
+    def __init__(
+        self,
+        event_name: str,
+        send_text: str,
+        match_field: str,
+        match_type: MatchType,
+        enable: bool = True,
+    ):
         super().__init__(event_name, send_text, enable)
         self.match_type = match_type
         self.match_field = match_field
 
     def to_dict(self):
-        return {'enable': self.enable, 'send_text': self.send_text, 'match_field': self.match_field,
-                'match_type': self.match_type.name}
+        return {
+            "enable": self.enable,
+            "send_text": self.send_text,
+            "match_field": self.match_field,
+            "match_type": self.match_type.name,
+        }

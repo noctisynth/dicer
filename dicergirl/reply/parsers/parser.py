@@ -7,12 +7,13 @@ class MessageParser:
     """
 
     def __init__(self):
-        self.regex = '{([^{}]+)}'
+        self.regex = "{([^{}]+)}"
 
     def replacement(self, text, **kwargs):
         """
         替换基本元素
         """
+
         def replace(match):
             key = match.group(1)
             return str(kwargs.get(key, match.group(0)))

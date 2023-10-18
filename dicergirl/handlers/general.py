@@ -229,6 +229,7 @@ def show_handler(event: MessageEvent, args, at, mode=None):
     cards: Cards = module.__cards__
     cache_cards: Cards = module.__cache__
     charactor: Character = module.__charactor__()
+    attrs_dict: dict = module.__baseattrs__
 
     if len(at) == 1:
         qid = at[0]
@@ -269,13 +270,20 @@ def show_handler(event: MessageEvent, args, at, mode=None):
                 except:
                     reply.append("查询时出现异常, 可能你想要查询的内容不存在?")
             else:
-                exp = 0
+                name = args[0]
+                exp = 1
+                for key, attrs in attrs_dict.items():
+                    if args[0] in attrs:
+                        exp = getattr(cha, attrs[0])
+                        name = key
+                        break
+
                 for skill in cha.skills.keys():
                     if args[0] == skill:
                         exp = cha.skills[skill]
                         break
 
-                reply.append(f"{args[0]}: {exp}")
+                reply.append(f"{name}: {exp}")
 
     if not reply:
         reply.append("未查询到保存或暂存信息.")

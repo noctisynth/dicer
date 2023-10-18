@@ -238,7 +238,7 @@ if initalized:
             logger.info(f"用户[{event.user_id}]被移出群聊.")
             return
 
-        if not event.group_id and event.operator_id:
+        if not (event.group_id or event.operator_id) or event.user_id == event.operator_id:
             return
 
         if event.group_id:

@@ -631,7 +631,9 @@ if initalized:
                     f"插件[{commands['plgup']}]已经是最新版本了.\n`.bot remove {commands['plgup']}`并`.bot install {commands['plgup']}`可以重新安装插件.\n如果遇到问题, 使用`.help 支持`获得开发者联系方式."
                 )
             else:
-                await matcher.send(f"发现插件[{commands['plgup']}]新版本[{latest_version}], 开始更新.")
+                await matcher.send(
+                    f"发现插件[{commands['plgup']}]新版本[{latest_version}], 开始更新."
+                )
 
             up = await plgupgrade(commands["plgup"])
 
@@ -894,7 +896,11 @@ if initalized:
             await bot.set_group_card(
                 group_id=event.group_id, user_id=event.user_id, card=commands["name"]
             )
-            return await matcher.send(f"命名角色为 {commands['name']}")
+            return await matcher.send(
+                manager.process_generic_event(
+                    "main.set.name", event=event, Name=commands["name"]
+                )
+            )
 
         if commands["init"]:
             cards: Cards = modes[mode].__cards__

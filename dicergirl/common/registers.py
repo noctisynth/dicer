@@ -73,6 +73,7 @@ def regist_main_event():
         "main.friend.new",
         "欢迎使用 DicerGirl {Version}, 我是{BotName}. 使用`.help`查看帮助信息, 使用`.bot exit`移除群骰娘, 严禁踢出骰娘. 加入公测群[770386358]可以获得更多支持.",
     )
+    manager.register_event("main.set.name", "[{SenderCard}]角色被命名为[{Name}], 新的诗篇就要被奏响了.")
 
 
 def regist_general_event():

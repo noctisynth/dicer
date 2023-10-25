@@ -98,7 +98,7 @@ def judger(
 
     if reason and not isinstance(exp, int):
         docimasy += manager.process_generic_event(
-            "plugins.coc.docimasy.reason",
+            "utils.docimasy.reason",
             event=event,
             SkillName=name,
             Value=exp,
@@ -107,7 +107,7 @@ def judger(
         )
     elif not reason and isinstance(exp, int):
         docimasy += manager.process_generic_event(
-            "plugins.coc.docimasy.skill",
+            "utils.docimasy.skill",
             event=event,
             SkillName=name,
             Value=exp,
@@ -116,7 +116,7 @@ def judger(
         )
     else:
         docimasy += manager.process_generic_event(
-            "plugins.coc.docimasy",
+            "utils.docimasy",
             event=event,
             DiceDiscription=dice.description(),
         )

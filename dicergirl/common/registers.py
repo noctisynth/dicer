@@ -25,6 +25,7 @@ def regist_vars():
 def regist_events():
     regist_main_event()
     regist_general_event()
+    regist_docimasy_event()
 
 
 def regist_main_event():
@@ -109,4 +110,18 @@ def regist_general_event():
     )
     manager.register_event(
         "CacheNotFound", "未找到缓存数据, 请先使用无参数的`.{ModuleName}`指令进行车卡生成角色卡, 或使用`.st`指令进行录卡."
+    )
+
+
+def regist_docimasy_event():
+    manager.register_event(
+        "utils.docimasy", "[{SenderCard}]掷骰: {DiceDiscription}."
+    )
+    manager.register_event(
+        "utils.docimasy.reason",
+        "[{SenderCard}]由于[{Reason}]掷骰: {DiceDescription}.",
+    )
+    manager.register_event(
+        "utils.docimasy.skill",
+        "[{SenderCard}]进行技能[{SkillName}:{Value}]检定: {DiceDescription}, 检定[{Docimasy}].",
     )

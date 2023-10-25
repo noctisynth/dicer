@@ -238,7 +238,10 @@ if initalized:
             logger.info(f"用户[{event.user_id}]被移出群聊.")
             return
 
-        if not (event.group_id or event.operator_id) or event.user_id == event.operator_id:
+        if (
+            not (event.group_id or event.operator_id)
+            or event.user_id == event.operator_id
+        ):
             return
 
         if event.group_id:
@@ -818,7 +821,7 @@ if initalized:
 
     @showcommand.handle()
     async def showhandler(
-        matcher: Matcher, event: GroupMessageEvent, args: list = None
+        matcher: Matcher, event: MessageEvent, args: list = None
     ):
         """角色卡展示指令"""
         if not get_status(event) and not event.to_me:
@@ -849,12 +852,12 @@ if initalized:
         return
 
     @setcommand.handle()
-    async def sethandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def sethandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
         """角色卡设置指令"""
         if not get_status(event) and not event.to_me:
             return
 
-        args = format_msg(event.get_message(), begin=(".set", ".st", ".s"), zh_en=True)
+        args = format_msg(event.get_message(), begin=(".set", ".st", ".s"), zh_en=False)
         at = get_mentions(event)
         commands = CommandParser(
             Commands(
@@ -1053,7 +1056,7 @@ if initalized:
             await matcher.send(reply)
 
     @shootcommand.handle()
-    async def shoothandler(matcher: Matcher, event: GroupMessageEvent):
+    async def shoothandler(matcher: Matcher, event: MessageEvent):
         """射击检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1083,7 +1086,7 @@ if initalized:
             )
 
     @damcommand.handle()
-    async def damhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def damhandler(matcher: Matcher, event: MessageEvent):
         """承伤检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1105,7 +1108,7 @@ if initalized:
             )
 
     @encommand.handle()
-    async def enhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def enhandler(matcher: Matcher, event: MessageEvent):
         """属性或技能激励指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1127,7 +1130,7 @@ if initalized:
             )
 
     @racommand.handle()
-    async def rahandler(matcher: Matcher, event: GroupMessageEvent):
+    async def rahandler(matcher: Matcher, event: MessageEvent):
         """属性或技能检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1156,7 +1159,7 @@ if initalized:
             )
 
     @rhcommand.handle()
-    async def rhhandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def rhhandler(bot: Bot, matcher: Matcher, event: MessageEvent):
         """暗骰指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1164,7 +1167,7 @@ if initalized:
         args = format_str(event.get_message(), begin=".rh")
         await matcher.send("暗骰: 命运的骰子在滚动.")
         return await bot.send_private_msg(
-            user_id=event.get_user_id(), message=roll(args)
+            user_id=event.get_user_id(), message=roll(event, args)
         )
 
     @rahcommand.handle()
@@ -1210,10 +1213,10 @@ if initalized:
         args = format_str(event.get_message(), begin=(".r", ".roll"))
         name = get_user_card(event)
         if not args:
-            return await matcher.send(roll("1d100", name=name))
+            return await matcher.send(roll(event, "1d100", name=name))
 
         try:
-            await matcher.send(roll(args, name=name))
+            await matcher.send(roll(event, args, name=name))
         except Exception as error:
             logger.exception(error)
             await matcher.send(
@@ -1221,7 +1224,7 @@ if initalized:
             )
 
     @delcommand.handle()
-    async def delhandler(matcher: Matcher, event: GroupMessageEvent, args: list = None):
+    async def delhandler(matcher: Matcher, event: MessageEvent, args: list = None):
         """角色卡或角色卡技能删除指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1245,7 +1248,7 @@ if initalized:
                 await matcher.send(msg)
 
     @rolecommand.handle()
-    async def rolehandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def rolehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
         """身份组认证"""
         if not get_status(event) and not event.to_me:
             return
@@ -1336,7 +1339,7 @@ if initalized:
             )
 
     @registcommand.handle()
-    async def registhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def registhandler(matcher: Matcher, event: MessageEvent):
         """消息事件注册指令"""
         if not get_status(event) and not event.to_me:
             return

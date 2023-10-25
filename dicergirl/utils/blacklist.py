@@ -18,12 +18,12 @@ class BlackList:
 
     def load(self) -> bool:
         try:
-            self.blacklist: list = yaml.load(BLACKLIST_FILE.open("r"), FullLoader)[
-                "user"
-            ] or []
-            self.group_blacklist: list = yaml.load(
-                BLACKLIST_FILE.open("r"), FullLoader
-            )["group"] or []
+            self.blacklist: list = (
+                yaml.load(BLACKLIST_FILE.open("r"), FullLoader)["user"] or []
+            )
+            self.group_blacklist: list = (
+                yaml.load(BLACKLIST_FILE.open("r"), FullLoader)["group"] or []
+            )
             return True
         except:
             return False

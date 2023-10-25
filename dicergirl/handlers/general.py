@@ -1,7 +1,7 @@
 from nonebot.adapters.onebot.v11 import MessageEvent
 
 from ..utils.dicer import Dicer
-from ..utils.docimasy import expr
+from ..utils.docimasy import judger
 from ..utils.plugins import modes
 from ..utils.cards import Cards
 from ..utils.charactors import Character
@@ -356,7 +356,7 @@ def del_handler(event: MessageEvent, args: list, at: list, mode: str = None):
     return r
 
 
-def roll(args: str, name: str = None) -> str:
+def roll(event: MessageEvent, args: str, name: str = None) -> str:
     """标准掷骰指令后端方法"""
     time = 1
     if "#" in args:
@@ -389,11 +389,11 @@ def roll(args: str, name: str = None) -> str:
     args = args[0]
 
     try:
-        d = Dicer(args)
-        r = expr(d, None, name=name, reason=reason)
+        dice = Dicer(args)
+        r = judger(event, dice, None, name=name, reason=reason)
 
         for _ in range(time - 1):
-            r += expr(d, None, name=name, reason=reason)
+            r += judger(event, dice, None, name=name, reason=reason)
 
         return r.detail
     except ValueError:

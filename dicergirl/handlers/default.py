@@ -1,7 +1,7 @@
 from dicergirl.utils.dicer import Dicer
-from dicergirl.utils.docimasy import expr
+from dicergirl.utils.docimasy import judger
 from dicergirl.utils.cards import Cards
-from typing import Any, Dict, List
+from typing import Dict, List
 
 
 class DefaultCommand:
@@ -42,7 +42,7 @@ class DefaultRA(DefaultCommand):
             if len(args) == 1:
                 return f"你尚未保存人物卡, 请先执行`.{self.name}`车卡并执行`.set`保存.\n如果你希望快速检定, 请执行`.ra [str: 技能名] [int: 技能值]`."
 
-            return str(expr(Dicer(), int(args[1])))
+            return str(judger(Dicer(), int(args[1])))
 
         inv = self.charactor().load(card_data)
 
@@ -69,20 +69,20 @@ class DefaultRA(DefaultCommand):
             if not args[1].isdigit():
                 return "技能值应当为整型数, 使用`.help ra`查看技能检定指令使用帮助."
 
-            return str(expr(Dicer(), int(args[1])))
+            return str(judger(Dicer(), int(args[1])))
         elif exp and len(args) > 1:
             if not args[1].isdigit():
                 return "技能值应当为整型数, 使用`.help ra`查看技能检定指令使用帮助."
 
             reply = [f"你已经设置了技能 {args[0]} 为 {exp}, 但你指定了检定值, 使用指定检定值作为替代."]
-            reply.append(str(expr(Dicer(), int(args[1]))))
+            reply.append(str(judger(Dicer(), int(args[1]))))
             return reply
 
         time = 1
-        r = expr(Dicer(), exp)
+        r = judger(Dicer(), exp)
 
         for _ in range(time - 1):
-            r += expr(Dicer(), exp)
+            r += judger(Dicer(), exp)
 
         return r.detail
 

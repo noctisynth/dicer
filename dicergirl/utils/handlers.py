@@ -39,7 +39,7 @@ def get_group_id(event) -> str:
     """获取`event`指向的群聊`ID`"""
     try:
         if isinstance(event, PrivateMessageEvent):
-            return "private"
+            return str(event.user_id)
         elif isinstance(event, GroupMessageEvent):
             return str(event.group_id)
         else:

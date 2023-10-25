@@ -78,22 +78,22 @@ def judger(
             judge = "大失败!"
             docimasy.set_judge("fatal fail")
         elif exp < 50 and result > 95:
-            judge += f"大失败!"
+            judge = "大失败!"
             docimasy.set_judge("fatal fail")
         elif result == 1:
-            judge += "大成功!"
+            judge = "大成功!"
             docimasy.set_judge("critical success")
         elif result <= exp // 5:
-            judge += "极难成功"
+            judge = "极难成功"
             docimasy.set_judge("very hard success")
         elif result <= exp // 2:
-            judge += "困难成功"
+            judge = "困难成功"
             docimasy.set_judge("hard success")
         elif result <= exp:
-            judge += "成功"
+            judge = "成功"
             docimasy.set_judge("success")
         else:
-            judge += "失败"
+            judge = "失败"
             docimasy.set_judge("fail")
 
     if reason and not isinstance(exp, int):

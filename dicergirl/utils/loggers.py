@@ -1,4 +1,4 @@
-from nonebot.adapters.onebot.v11 import GroupMessageEvent
+from nonebot.adapters import Event
 from loguru._logger import Logger
 from typing import Dict, List
 
@@ -16,7 +16,9 @@ saved_loggers: Dict[str, dict]
 
 def load_loggers() -> Dict[str, list]:
     """加载所有的已存储的日志"""
-    return json.loads(open(LOGGERS_CACHE_FILE, "r").read())
+    global saved_loggers
+    saved_loggers = json.loads(open(LOGGERS_CACHE_FILE, "r").read())
+    return saved_loggers
 
 
 def get_loggers(event) -> List[str]:
@@ -28,7 +30,7 @@ def get_loggers(event) -> List[str]:
     return got_loggers[get_group_id(event)]
 
 
-def add_logger(event: GroupMessageEvent, logname) -> bool:
+def add_logger(event: Event, logname) -> bool:
     """新增日志序列"""
     global saved_loggers
     if not get_group_id(event) in saved_loggers.keys():
@@ -42,7 +44,7 @@ def add_logger(event: GroupMessageEvent, logname) -> bool:
         return False
 
 
-def remove_logger(event: GroupMessageEvent, id: int) -> Dict[str, list]:
+def remove_logger(event: Event, id: int) -> Dict[str, list]:
     """从存储的`loggers.json`中移除指定`logger`"""
     saved_loggers[get_group_id(event)].pop(id)
     json.dump(saved_loggers, open(LOGGERS_CACHE_FILE, "w"))

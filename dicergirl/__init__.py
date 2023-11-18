@@ -4,11 +4,9 @@ from multilogging import multilogger
 
 from nonebot.matcher import Matcher
 from nonebot.plugin import on, on_request, on_notice, PluginMetadata
-from nonebot.adapters import Bot as Bot
 from nonebot.adapters.onebot import V11Bot
-from nonebot.adapters.onebot.v11 import (
-    MessageEvent,
-    GroupMessageEvent,
+from nonebot.adapters import (
+    Bot as Bot,
     Event,
     MessageSegment,
 )
@@ -17,7 +15,7 @@ from nonebot.adapters.onebot.v11.event import (
     GroupRequestEvent,
     GroupDecreaseNoticeEvent,
 )
-from nonebot.adapters.onebot.v11.exception import ActionFailed
+from nonebot.exception import ActionFailed
 from nonebot.internal.matcher.matcher import Matcher
 
 from .handlers.on import on_startswith
@@ -79,7 +77,6 @@ __plugin_meta__ = PluginMetadata(
     usage="开箱即用",
     type="application",
     homepage="https://gitee.com/unvisitor/dicer",
-    supported_adapters={"~onebot.v11"},
 )
 __author__ = "苏向夜 <fu050409@163.com>"
 
@@ -273,7 +270,7 @@ if initalized:
             )
 
     @testcommand.handle()
-    async def testhandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
+    async def testhandler(bot: V11Bot, matcher: Matcher, event: Event):
         """测试指令"""
         args = format_msg(event.get_message(), begin=".test")
         cp = CommandParser(
@@ -339,7 +336,7 @@ if initalized:
             return await matcher.send(result)
 
     @debugcommand.handle()
-    async def debughandler(matcher: Matcher, event: MessageEvent):
+    async def debughandler(matcher: Matcher, event: Event):
         """漏洞检测指令"""
         args = format_msg(event.get_message(), begin=".debug")
         if not is_super_user(event):
@@ -382,7 +379,7 @@ if initalized:
             return await matcher.send("错误, 我无法解析你的指令.")
 
     @superusercommand.handle()
-    async def superuser_handler(matcher: Matcher, event: MessageEvent):
+    async def superuser_handler(matcher: Matcher, event: Event):
         """超级用户管理指令"""
         args = format_str(event.get_message(), begin=(".su", ".sudo"))
         arg = list(filter(None, args.split(" ")))
@@ -421,7 +418,7 @@ if initalized:
 
     @botcommand.handle()
     async def bothandler(
-        bot: V11Bot, matcher: Matcher, event: MessageEvent, args: list = []
+        bot: Bot, matcher: Matcher, event: Event, args: list = []
     ):
         """机器人管理指令"""
         if get_mentions(event) and not event.to_me:
@@ -650,11 +647,11 @@ if initalized:
         return await matcher.send("未知的指令, 使用`.help bot`获得机器人管理指令使用帮助.")
 
     @dismisscommand.handle()
-    async def dismisshandler(bot: V11Bot, matcher: Matcher, event: Event):
+    async def dismisshandler(bot: Bot, matcher: Matcher, event: Event):
         await bothandler(bot=bot, matcher=matcher, event=event, args=["exit"])
 
     @logcommand.handle()
-    async def loghandler(bot: V11Bot, matcher: Matcher, event: Event):
+    async def loghandler(bot: Bot, matcher: Matcher, event: Event):
         """日志管理指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -793,7 +790,7 @@ if initalized:
             return
 
         for log in loggers[get_group_id(event)].keys():
-            if isinstance(event, GroupMessageEvent):
+            if isinstance(event, Event):
                 raw_json = json.loads(event.json())
                 if raw_json["sender"]["card"]:
                     if raw_json["sender"]["card"].lower() == "ob":
@@ -820,9 +817,7 @@ if initalized:
         return trpg_log(event)
 
     @showcommand.handle()
-    async def showhandler(
-        matcher: Matcher, event: MessageEvent, args: list = None
-    ):
+    async def showhandler(matcher: Matcher, event: Event, args: list = None):
         """角色卡展示指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -852,7 +847,7 @@ if initalized:
         return
 
     @setcommand.handle()
-    async def sethandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
+    async def sethandler(bot: Bot, matcher: Matcher, event: Event):
         """角色卡设置指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -971,7 +966,7 @@ if initalized:
         return await matcher.send(sh)
 
     @helpcommand.handle()
-    async def helphandler(matcher: Matcher, event: MessageEvent):
+    async def helphandler(matcher: Matcher, event: Event):
         """帮助指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -991,7 +986,7 @@ if initalized:
 
     @modecommand.handle()
     async def modehandler(
-        bot: V11Bot, matcher: Matcher, event: MessageEvent, args: list = []
+        bot: Bot, matcher: Matcher, event: Event, args: list = []
     ):
         """跑团模式切换指令"""
         if not get_status(event) and not event.to_me:
@@ -1056,7 +1051,7 @@ if initalized:
             await matcher.send(reply)
 
     @shootcommand.handle()
-    async def shoothandler(matcher: Matcher, event: MessageEvent):
+    async def shoothandler(matcher: Matcher, event: Event):
         """射击检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1064,7 +1059,7 @@ if initalized:
         await matcher.send(shoot(event))
 
     @attackcommand.handle()
-    async def attackhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def attackhandler(matcher: Matcher, event: Event):
         """伤害检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1086,7 +1081,7 @@ if initalized:
             )
 
     @damcommand.handle()
-    async def damhandler(matcher: Matcher, event: MessageEvent):
+    async def damhandler(matcher: Matcher, event: Event):
         """承伤检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1108,7 +1103,7 @@ if initalized:
             )
 
     @encommand.handle()
-    async def enhandler(matcher: Matcher, event: MessageEvent):
+    async def enhandler(matcher: Matcher, event: Event):
         """属性或技能激励指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1130,7 +1125,7 @@ if initalized:
             )
 
     @racommand.handle()
-    async def rahandler(matcher: Matcher, event: MessageEvent):
+    async def rahandler(matcher: Matcher, event: Event):
         """属性或技能检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1159,7 +1154,7 @@ if initalized:
             )
 
     @rhcommand.handle()
-    async def rhhandler(bot: Bot, matcher: Matcher, event: MessageEvent):
+    async def rhhandler(bot: Bot, matcher: Matcher, event: Event):
         """暗骰指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1171,7 +1166,7 @@ if initalized:
         )
 
     @rahcommand.handle()
-    async def rhahandler(bot: Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def rhahandler(bot: Bot, matcher: Matcher, event: Event):
         """暗骰技能检定指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1205,7 +1200,7 @@ if initalized:
             )
 
     @rollcommand.handle()
-    async def rollhandler(matcher: Matcher, event: MessageEvent):
+    async def rollhandler(matcher: Matcher, event: Event):
         """标准掷骰指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1224,7 +1219,7 @@ if initalized:
             )
 
     @delcommand.handle()
-    async def delhandler(matcher: Matcher, event: MessageEvent, args: list = None):
+    async def delhandler(matcher: Matcher, event: Event, args: list = None):
         """角色卡或角色卡技能删除指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1248,7 +1243,7 @@ if initalized:
                 await matcher.send(msg)
 
     @rolecommand.handle()
-    async def rolehandler(bot: V11Bot, matcher: Matcher, event: MessageEvent):
+    async def rolehandler(bot: Bot, matcher: Matcher, event: Event):
         """身份组认证"""
         if not get_status(event) and not event.to_me:
             return
@@ -1273,7 +1268,7 @@ if initalized:
             return await roleobhandler(bot, matcher, event)
 
     @rolekpcommand.handle()
-    async def rolekphandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def rolekphandler(bot: V11Bot, matcher: Matcher, event: Event):
         """KP 身份组认证"""
         if not get_status(event) and not event.to_me:
             return
@@ -1316,7 +1311,7 @@ if initalized:
         return await matcher.send(manager.process_generic_event("RoleKP", event=event))
 
     @roleobcommand.handle()
-    async def roleobhandler(bot: V11Bot, matcher: Matcher, event: GroupMessageEvent):
+    async def roleobhandler(bot: Bot, matcher: Matcher, event: Event):
         """OB 身份组认证"""
         if not get_status(event) and not event.to_me:
             return
@@ -1339,7 +1334,7 @@ if initalized:
             )
 
     @registcommand.handle()
-    async def registhandler(matcher: Matcher, event: MessageEvent):
+    async def registhandler(matcher: Matcher, event: Event):
         """消息事件注册指令"""
         if not get_status(event) and not event.to_me:
             return
@@ -1388,7 +1383,7 @@ if initalized:
         return await matcher.send(f"消息事件 {event_name} 已被更改为 {message}.")
 
     @versioncommand.handle()
-    async def versionhandler(matcher: Matcher, event: GroupMessageEvent):
+    async def versionhandler(matcher: Matcher, event: Event):
         """骰娘版本及开源声明指令"""
         return await matcher.send(
             f"Unvisitor DicerGirl 版本 {VERSION} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助."

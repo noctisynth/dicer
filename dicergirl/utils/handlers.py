@@ -1,4 +1,4 @@
-from nonebot.adapters.onebot.v11 import GroupMessageEvent, PrivateMessageEvent
+from nonebot.adapters import Event
 from multilogging import multilogger
 from typing import Callable, List
 
@@ -10,7 +10,7 @@ logger = multilogger(name="DicerGirl", payload="utils.handlers")
 """ `utils.handlers`日志 """
 
 
-def get_mentions(event: GroupMessageEvent) -> List[str]:
+def get_mentions(event: Event) -> List[str]:
     """获取`event`指向的消息所有被`@`的用户 QQ 号"""
     mentions = []
     message = json.loads(event.json())["message"]
@@ -29,7 +29,7 @@ def get_handlers(main) -> List[Callable]:
     for _, obj in vars(main).items():
         if inspect.isfunction(obj) and hasattr(obj, "__annotations__"):
             annotations = obj.__annotations__
-            if annotations.get("message") is GroupMessageEvent:
+            if annotations.get("message") is Event:
                 commands_functions.append(obj)
 
     return commands_functions
@@ -38,10 +38,15 @@ def get_handlers(main) -> List[Callable]:
 def get_group_id(event) -> str:
     """获取`event`指向的群聊`ID`"""
     try:
-        if isinstance(event, PrivateMessageEvent):
-            return str(event.user_id)
-        elif isinstance(event, GroupMessageEvent):
-            return str(event.group_id)
+        if isinstance(event, Event):
+            try:
+                return str(event.user_id)
+            except:
+                pass
+            try:
+                return str(event.group_id)
+            except:
+                raise ValueError("该适配器没有user_id和group_id")
         else:
             if hasattr(event, "post_type"):
                 if event.post_type == "message_sent":

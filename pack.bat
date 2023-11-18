@@ -1,6 +1,6 @@
 @echo off
 del dist /F /Q
-python setup.py sdist bdist_wheel
+C://Users/fu050/Desktop/Projects/DicerGirl/.venv/Scripts/python setup.py sdist bdist_wheel
 twine upload dist/*
 del dist /F /Q
 pause

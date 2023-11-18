@@ -576,7 +576,7 @@ if initalized:
         if commands["store"]:
             official, community = await get_plugins()
             reply = "从商店搜索到以下插件:\n"
-            reply += "Unvisitor 官方插件:\n"
+            reply += "Noctisynth 官方插件:\n"
 
             i = 1
             for name, detail in official.items():
@@ -1331,15 +1331,17 @@ if initalized:
 
         roleob(event)
 
-        if json.loads(event.json())["sender"]["card"] == "ob":
-            await bot.set_group_card(
-                group_id=event.group_id, user_id=event.get_user_id()
-            )
-            return await matcher.send("取消旁观者 (OB) 身份.")
-        else:
-            await bot.set_group_card(
-                group_id=event.group_id, user_id=event.get_user_id(), card="ob"
-            )
+        try:
+            if json.loads(event.json())["sender"]["card"] == "ob":
+                await bot.set_group_card(
+                    group_id=event.group_id, user_id=event.get_user_id()
+                )
+                return await matcher.send("取消旁观者 (OB) 身份.")
+            else:
+                await bot.set_group_card(
+                    group_id=event.group_id, user_id=event.get_user_id(), card="ob"
+                )
+        except:
             return await matcher.send(
                 manager.process_generic_event("RoleOB", event=event)
             )
@@ -1397,7 +1399,7 @@ if initalized:
     async def versionhandler(matcher: Matcher, event: Event):
         """骰娘版本及开源声明指令"""
         return await matcher.send(
-            f"Unvisitor DicerGirl 版本 {VERSION} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以Apache-2.0协议开源.\nThis project is open source under the Apache-2.0 license.\n欢迎使用 DicerGirl, 使用`.help 指令`查看指令帮助."
+            f"Noctisynth DicerGirl 版本 {VERSION} [Python {platform.python_version()} For Nonebot2 {nonebot.__version__}]\n此项目以 Apache-2.0 协议开源.\n欢迎使用 Noctisynth DicerGirl, 使用`.help 指令`查看指令帮助."
         )
 
 else:

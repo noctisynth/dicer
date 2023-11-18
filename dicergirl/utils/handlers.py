@@ -50,6 +50,10 @@ def get_group_id(event) -> str:
             try:
                 return str(event.user_id)
             except:
+                pass
+            try:
+                return str(event.author.id)
+            except:
                 raise ValueError("该适配器没有user_id和group_id")
         else:
             if hasattr(event, "post_type"):
@@ -84,6 +88,7 @@ def get_user_card(event: Event) -> str:
                 return raw_json["nickname"]
         except:
             from .plugins import modes
+
             cards = modes[get_mode(event)].__cards__
             got = cards.get(event, qid=get_user_id(event))
             if got:
@@ -102,6 +107,7 @@ def get_user_nickname(event) -> str:
             return raw_json["nickname"]
         except:
             from .plugins import modes
+
             cards = modes[get_mode(event)].__cards__
             got = cards.get(event, qid=get_user_id(event))
             if got:

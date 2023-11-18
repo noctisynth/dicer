@@ -12,7 +12,7 @@ EMPTY_DICT = {}
 NONE = NULL = None
 ZERO = 0
 
-VERSION = "3.5.0beta11"
+VERSION = "3.5.0rc2"
 """ Dicer Girl 版本号 """
 HOME_PATH = Path.home()
 """ 主目录 """
@@ -20,7 +20,7 @@ PLUGINS_PATH = Path(__file__).resolve().parent.parent / "plugins"
 DICERGIRL_DATA_PATH = HOME_PATH / ".dicergirl"
 """ DicerGirl 数据文件夹路径 """
 CURRENT_DIR = Path(__file__).resolve().parent
-""" Dicer Girl 当前目录 """
+""" DicerGirl 当前目录 """
 SAVED_DATA_PATH = DICERGIRL_DATA_PATH / "data"
 """ 人物卡数据存储文件夹 """
 DICERGIRL_LOGS_PATH = DICERGIRL_DATA_PATH / "log"

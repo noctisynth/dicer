@@ -39,15 +39,14 @@ class Messages:
         "日志": ["log", "logger", "日志管理", "日志系统", "日志"],
         "消息": ["regist", "reg", "消息事件", "回复", "消息"],
     }
-    main = """Unvisitor DicerGirl 版本 {version} [Python {py_version} For Nonebot2 {nonebot_version}]
+    main = """Noctisynth DicerGirl 版本 {version} [Python {py_version} For Nonebot2 {nonebot_version}]
 .help (.h)  展示此帮助信息
 .help 指令  查看指令帮助
 .help 管理  查看骰娘管理指令
 .help 支持  获取开发者支持
 使用`.help [模式名称]`以获取该跑团模式的帮助.
-此项目以 Apache-2.0 协议开源.
-Copyright 2011-2023 Unknown Visitor, org."""
-    commands = """Unvisitor DicerGirl 版本 {version}
+此项目以 Apache-2.0 协议开源."""
+    commands = """Noctisynth DicerGirl 版本 {version}
 角色卡设定或模式切换后骰娘会自动修改群名片, 在保存新的人物卡时同样会更改群名片.
 所有指令允许大小写混用.
 .mode (.m)  切换和查询跑团模式
@@ -64,22 +63,18 @@ Copyright 2011-2023 Unknown Visitor, org."""
 .log  日志管理
 .reg (.regist)  消息事件注册
 使用`.help [指令名]`获取该指令的详细信息"""
-    admin = """Unvisitor DicerGirl 版本 {version}
+    admin = """Noctisynth DicerGirl 版本 {version}
 骰娘管理指令, 如果你是骰主或开发者, 请注意 DicerGirl 的管理员与 Nonebot2 不同.
 .su/.sudo  进行骰娘管理员鉴权
 .bot  机器人管理
 使用`.help [指令名]`获取该指令的详细信息"""
-    supports = """Unvisitor DicerGirl 版本 {version}
-开发团队: 未知访客黑客联盟
-团队官网: https://www.unvisitor.site/
-DicerGirl 主页: https://dicer.unvisitor.site/
+    supports = """Noctisynth DicerGirl 版本 {version}
+开发团队: Noctisynth
 DicerGirl 项目主页:
   1. Gitee: https://gitee.com/unvisitor/dicer
   2. Github: https://github.com/unvisitor/dicer
 BUG 提交: https://gitee.com/unvisitor/dicer/issues
-功能建议: https://gitee.com/unvisitor/dicer/issues
-公测 QQ 群: 770386358
-项目负责人: 1264983312"""
+功能建议: https://gitee.com/unvisitor/dicer/issues"""
     sudo = """用法：.su [鉴权令牌]
 描述：
     进行管理员鉴权, 获得骰娘的管理员权限。

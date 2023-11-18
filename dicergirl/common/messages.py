@@ -200,7 +200,7 @@ BUG 提交: https://gitee.com/unvisitor/dicer/issues
     .en 毁灭人类    激励技能`毁灭人类`
 注意：
     - 部分模式可能不需要给入激励点."""
-    delele = """.del (.delete) [选项] [参数]
+    delete = """.del (.delete) [选项] [参数]
 描述：
     删除数据。
 指令：

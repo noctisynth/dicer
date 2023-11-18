@@ -39,6 +39,8 @@ class StartswithRule:
     async def __call__(self, event, state) -> bool:
         try:
             text = translate_punctuation(event.get_plaintext()).strip()
+            if text.startswith("/"):
+                text = "." + text[1:]  # 兼容QQ协议`/`的协议头
         except Exception:
             return False
         if match := re.match(

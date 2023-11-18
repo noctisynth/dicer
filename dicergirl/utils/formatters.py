@@ -37,8 +37,11 @@ def format_str(message: str, begin=None, lower=True) -> str:
     """骰娘指令转义及解析"""
     regex = r"[<\[](.*?)[\]>]"
     message = str(message).lower() if lower else str(message)
-    msg = re.sub("\s+", " ", re.sub(regex, "", message)).strip(" ")
-    msg = translate_punctuation(msg)
+    msg = translate_punctuation(
+        re.sub("\s+", " ", re.sub(regex, "", message)).strip(" ")
+    )
+    if msg.startswith("/"):
+        msg = "." + msg[1:]
     logger.debug(msg)
 
     if begin:

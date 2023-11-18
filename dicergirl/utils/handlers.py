@@ -13,7 +13,10 @@ logger = multilogger(name="DicerGirl", payload="utils.handlers")
 def get_mentions(event: Event) -> List[str]:
     """获取`event`指向的消息所有被`@`的用户 QQ 号"""
     mentions = []
-    message = json.loads(event.json())["message"]
+    try:
+        message = json.loads(event.json())["message"]
+    except KeyError:
+        return []
 
     for mention in message:
         if mention["type"] == "at":

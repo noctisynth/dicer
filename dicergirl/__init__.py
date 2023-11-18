@@ -417,9 +417,7 @@ if initalized:
                 )
 
     @botcommand.handle()
-    async def bothandler(
-        bot: Bot, matcher: Matcher, event: Event, args: list = []
-    ):
+    async def bothandler(bot: Bot, matcher: Matcher, event: Event, args: list = []):
         """机器人管理指令"""
         if get_mentions(event) and not event.to_me:
             return
@@ -985,9 +983,7 @@ if initalized:
         return await matcher.send(message)
 
     @modecommand.handle()
-    async def modehandler(
-        bot: Bot, matcher: Matcher, event: Event, args: list = []
-    ):
+    async def modehandler(bot: Bot, matcher: Matcher, event: Event, args: list = []):
         """跑团模式切换指令"""
         if not get_status(event) and not event.to_me:
             return

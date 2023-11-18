@@ -1,7 +1,11 @@
-from ..utils.operator import get_name
-from ..utils.handlers import get_group_id, get_user_card, get_user_id, get_user_nickname
-from ..utils.modes import get_mode
-from ..utils.operator import get_status
+from ..utils.operator import get_name, get_status
+from ..utils.handlers import (
+    get_group_id,
+    get_user_card,
+    get_user_id,
+    get_user_nickname,
+    get_mode,
+)
 from ..reply.manager import manager
 from .const import VERSION
 
@@ -114,9 +118,7 @@ def regist_general_event():
 
 
 def regist_docimasy_event():
-    manager.register_event(
-        "utils.docimasy", "[{SenderCard}]掷骰: {DiceDiscription}."
-    )
+    manager.register_event("utils.docimasy", "[{SenderCard}]掷骰: {DiceDiscription}.")
     manager.register_event(
         "utils.docimasy.reason",
         "[{SenderCard}]由于[{Reason}]掷骰: {DiceDescription}.",

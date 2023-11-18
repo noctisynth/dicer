@@ -24,7 +24,14 @@ from .handlers.general import show_handler, set_handler, del_handler, roll, shoo
 from .reply.manager import manager
 
 from .utils.operator import botoff, boton, get_name, get_status, init, set_name
-from .utils.handlers import get_friend_qids, get_group_id, get_mentions, get_user_card
+from .utils.handlers import (
+    get_friend_qids,
+    get_group_id,
+    get_mentions,
+    get_user_card,
+    set_mode,
+    get_mode,
+)
 from .utils.formatters import format_msg, format_str
 from .utils.loggers import add_logger, get_loggers, remove_logger, loggers
 from .utils.admin import (
@@ -35,7 +42,6 @@ from .utils.admin import (
     make_uuid,
     rm_super_user,
 )
-from .utils.modes import get_mode, set_mode
 from .utils.role import rolekp, roleob
 from .utils.version import run_shell_command, get_latest_version
 from .utils.plugins import modes
@@ -270,7 +276,7 @@ if initalized:
             )
 
     @testcommand.handle()
-    async def testhandler(bot: V11Bot, matcher: Matcher, event: Event):
+    async def testhandler(bot: Bot, matcher: Matcher, event: Event):
         """测试指令"""
         args = format_msg(event.get_message(), begin=".test")
         cp = CommandParser(
@@ -932,7 +938,10 @@ if initalized:
             try:
                 if not args:
                     cache = modes[mode].__cache__
-                    user_id: int = event.user_id
+                    try:
+                        user_id: int = event.user_id
+                    except:
+                        user_id: int = event.author.id
                     got = cache.get(event, qid=str(user_id))
 
                     if isinstance(got, dict):
@@ -940,9 +949,12 @@ if initalized:
                             got = ""
 
                     name = got["name"] if got else ""
-                    await bot.set_group_card(
-                        group_id=event.group_id, user_id=user_id, card=name
-                    )
+                    try:
+                        await bot.set_group_card(
+                            group_id=event.group_id, user_id=user_id, card=name
+                        )
+                    except:
+                        pass
 
                 cards: Cards = modes[mode].__cards__
                 if not cards.get(event):
@@ -1264,7 +1276,7 @@ if initalized:
             return await roleobhandler(bot, matcher, event)
 
     @rolekpcommand.handle()
-    async def rolekphandler(bot: V11Bot, matcher: Matcher, event: Event):
+    async def rolekphandler(bot: Bot, matcher: Matcher, event: Event):
         """KP 身份组认证"""
         if not get_status(event) and not event.to_me:
             return
@@ -1301,9 +1313,12 @@ if initalized:
             )
 
         rolekp(event)
-        await bot.set_group_card(
-            group_id=event.group_id, user_id=event.get_user_id(), card="KP"
-        )
+        try:
+            await bot.set_group_card(
+                group_id=event.group_id, user_id=event.get_user_id(), card="KP"
+            )
+        except:
+            pass
         return await matcher.send(manager.process_generic_event("RoleKP", event=event))
 
     @roleobcommand.handle()

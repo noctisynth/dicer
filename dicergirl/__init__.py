@@ -4,19 +4,16 @@ from multilogging import multilogger
 
 from nonebot.matcher import Matcher
 from nonebot.plugin import on, on_request, on_notice, PluginMetadata
+from nonebot.adapters import Bot, Event, MessageSegment
+from nonebot.internal.matcher.matcher import Matcher
+from nonebot.exception import ActionFailed
+
 from nonebot.adapters.onebot import V11Bot
-from nonebot.adapters import (
-    Bot as Bot,
-    Event,
-    MessageSegment,
-)
 from nonebot.adapters.onebot.v11.event import (
     FriendRequestEvent,
     GroupRequestEvent,
     GroupDecreaseNoticeEvent,
 )
-from nonebot.exception import ActionFailed
-from nonebot.internal.matcher.matcher import Matcher
 
 from .handlers.on import on_startswith
 from .handlers.general import show_handler, set_handler, del_handler, roll, shoot
@@ -74,7 +71,6 @@ import psutil
 import html
 import nonebot
 import re
-import json
 import asyncio
 
 

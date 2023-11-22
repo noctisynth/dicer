@@ -27,8 +27,10 @@ from .utils.operator import botoff, boton, get_name, get_status, init, set_name
 from .utils.handlers import (
     get_friend_qids,
     get_group_id,
+    get_group_member_list,
     get_mentions,
     get_user_card,
+    get_user_nickname,
     set_mode,
     get_mode,
 )
@@ -467,7 +469,10 @@ if initalized:
             await matcher.send(
                 manager.process_generic_event("GroupLeaveSet", event=event)
             )
-            return await bot.set_group_leave(group_id=event.group_id)
+            try:
+                return await bot.set_group_leave(group_id=event.group_id)
+            except:
+                return await matcher.send(f"当前{get_name()}运行的平台暂不支持该指令.")
 
         if commands["on"]:
             boton(event)
@@ -544,21 +549,27 @@ if initalized:
             sn = set_name(commands["name"])
 
             if isinstance(sn, bool):
-                await bot.call_api(
-                    "set_qq_profile",
-                    **{
-                        "nickname": commands["name"],
-                    },
-                )
-                await matcher.send(
+                try:
+                    await bot.call_api(
+                        "set_qq_profile",
+                        **{
+                            "nickname": commands["name"],
+                        },
+                    )
+                except:
+                    return await matcher.send(
+                        f"当前我运行的平台不支持修改我的昵称, 不过"
+                        + manager.process_generic_event(
+                            "NameSet", event=event, NewName=commands["name"]
+                        )
+                    )
+                return await matcher.send(
                     manager.process_generic_event(
                         "NameSet", event=event, NewName=commands["name"]
                     )
                 )
             elif isinstance(sn, str):
-                await matcher.send(sn)
-
-            return
+                return await matcher.send(sn)
 
         if commands["mode"]:
             reply = "当前已正确安装的跑团插件:\n"
@@ -701,22 +712,25 @@ if initalized:
                 return await matcher.send(f"目标日志序列 {commands['download']} 不存在.")
 
             path = Path(gl[commands["download"]])
-            return await bot.call_api(
-                "upload_group_file",
-                **{
-                    "group_id": get_group_id(event),
-                    "file": str(path),
-                    "name": path.name,
-                },
-            )
+            try:
+                return await bot.call_api(
+                    "upload_group_file",
+                    **{
+                        "group_id": get_group_id(event),
+                        "file": str(path),
+                        "name": path.name,
+                    },
+                )
+            except:
+                return await matcher.send(f"{get_name()}当前运行的平台不支持上传文件.")
 
         if commands["add"]:
             if commands["name"]:
-                logname = str(DICERGIRL_LOGS_PATH / (commands["name"] + ".trpg.log"))
+                logname = str(DICERGIRL_LOGS_PATH / (commands["name"] + ".txt"))
             else:
                 logname = str(
                     DICERGIRL_LOGS_PATH
-                    / (datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".trpg.log")
+                    / (datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt")
                 )
 
             new_logger = multilogger(name="DG Msg Logger", payload="TRPG")
@@ -786,7 +800,7 @@ if initalized:
             remove_logger(event, commands["remove"])
             return await matcher.send(f"日志序列 {commands['remove']} 已删除.")
 
-        return await matcher.send("骰娘日志管理系统, 使用`.help log`指令详细信息.")
+        return await matcher.send("骰娘日志管理系统, 使用`.help log`指令获取详细信息.")
 
     def trpg_log(event) -> None:
         """外置的日志记录方法"""
@@ -795,16 +809,15 @@ if initalized:
 
         for log in loggers[get_group_id(event)].keys():
             if isinstance(event, Event):
-                raw_json = json.loads(event.json())
-                if raw_json["sender"]["card"]:
-                    if raw_json["sender"]["card"].lower() == "ob":
-                        role_or_name = f"[旁观者 - {raw_json['sender']['nickname']}]"
-                    elif raw_json["sender"]["card"].lower() == "kp":
-                        role_or_name = f"[主持人 - {raw_json['sender']['nickname']}]"
+                if get_user_card(event):
+                    if get_user_card(event).lower() == "ob":
+                        role_or_name = f"[旁观者 - {get_user_nickname(event)}]"
+                    elif get_user_card().lower() == "kp":
+                        role_or_name = f"[主持人 - {get_user_nickname(event)}]"
                     else:
-                        role_or_name = f"[{raw_json['sender']['card']}]"
-                elif raw_json["sender"]["nickname"]:
-                    role_or_name = f"[未知访客 - {raw_json['sender']['nickname']}]"
+                        role_or_name = f"[{get_user_card(event)}]"
+                elif get_user_nickname(event):
+                    role_or_name = f"[未知访客 - {get_user_nickname(event)}]"
                 else:
                     role_or_name = f"[未知访客 - {str(event.get_user_id())}]"
 
@@ -895,9 +908,14 @@ if initalized:
             cha: Character = modes[mode].__charactor__()
             cha.load(cards.get(event, qid=qid))
             setattr(cha, "name", commands["name"])
-            await bot.set_group_card(
-                group_id=event.group_id, user_id=event.user_id, card=commands["name"]
-            )
+            try:
+                await bot.set_group_card(
+                    group_id=event.group_id,
+                    user_id=event.user_id,
+                    card=commands["name"],
+                )
+            except:
+                pass
             return await matcher.send(
                 manager.process_generic_event(
                     "main.set.name", event=event, Name=commands["name"]
@@ -1018,7 +1036,7 @@ if initalized:
             if cp["mode"] in modes:
                 set_mode(event, cp["mode"])
 
-                for user in await bot.get_group_member_list(group_id=event.group_id):
+                for user in await get_group_member_list(bot, event):
                     if not hasattr(modes[cp["mode"]], "__cards__"):
                         break
 
@@ -1033,30 +1051,31 @@ if initalized:
                         continue
 
                     name = got["name"] if got else ""
-                    await bot.set_group_card(
-                        group_id=event.group_id, user_id=user_id, card=name
-                    )
+                    try:
+                        await bot.set_group_card(
+                            group_id=event.group_id, user_id=user_id, card=name
+                        )
+                    except:
+                        pass
 
-                await matcher.send(
+                return await matcher.send(
                     manager.process_generic_event(
                         "ModeChanged", event=event, Mode=cp["mode"].upper()
                     )
                 )
-                return True
             else:
-                await matcher.send(
+                return await matcher.send(
                     manager.process_generic_event(
                         "UnknownMode", event=event, Mode=cp["mode"].upper()
                     )
                 )
-                return True
         else:
             reply = "当前已正确安装的跑团插件:\n"
             for plugin in modes.keys():
                 reply += f"{plugin.upper()} 模式: {plugin}.\n"
 
             reply += f"当前的跑团模式为 {get_mode(event).upper()}."
-            await matcher.send(reply)
+            return await matcher.send(reply)
 
     @shootcommand.handle()
     async def shoothandler(matcher: Matcher, event: Event):
@@ -1168,10 +1187,14 @@ if initalized:
             return
 
         args = format_str(event.get_message(), begin=".rh")
-        await matcher.send("暗骰: 命运的骰子在滚动.")
-        return await bot.send_private_msg(
-            user_id=event.get_user_id(), message=roll(event, args)
-        )
+
+        try:
+            await bot.send_private_msg(
+                user_id=event.get_user_id(), message=roll(event, args)
+            )
+            return await matcher.send("暗骰: 命运的骰子在滚动.")
+        except:
+            return await matcher.send(f"当前{get_name()}运行的平台不支持暗骰.")
 
     @rahcommand.handle()
     async def rhahandler(bot: Bot, matcher: Matcher, event: Event):
@@ -1190,18 +1213,21 @@ if initalized:
                 await matcher.send(f"跑团模式 {mode.upper()} 不支持技能检定指令.")
                 return
 
-            await matcher.send("暗骰: 命运的骰子在滚动.")
-
             handler = modes[mode].__commands__["ra"]
             replies = handler(event, args)
-            if isinstance(replies, list):
-                for reply in replies:
+            try:
+                if isinstance(replies, list):
+                    for reply in replies:
+                        await bot.send_private_msg(
+                            user_id=event.get_user_id(), message=reply
+                        )
+                else:
                     await bot.send_private_msg(
-                        user_id=event.get_user_id(), message=reply
+                        user_id=event.get_user_id(), message=replies
                     )
-                return
-
-            await bot.send_private_msg(user_id=event.get_user_id(), message=replies)
+                return await matcher.send("暗骰: 命运的骰子在滚动.")
+            except:
+                return await matcher.send(f"{get_name()}当前运行的平台不支持暗骰.")
         else:
             await matcher.send(
                 manager.process_generic_event("UnknownMode", event=event)
@@ -1332,7 +1358,7 @@ if initalized:
         roleob(event)
 
         try:
-            if json.loads(event.json())["sender"]["card"] == "ob":
+            if get_user_card(event) == "ob":
                 await bot.set_group_card(
                     group_id=event.group_id, user_id=event.get_user_id()
                 )

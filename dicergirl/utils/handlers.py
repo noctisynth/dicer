@@ -1,4 +1,4 @@
-from nonebot.adapters import Event
+from nonebot.adapters import Event, Bot
 from multilogging import multilogger
 from typing import Callable, Dict, List
 
@@ -26,7 +26,7 @@ def get_mentions(event: Event) -> List[str]:
     return mentions
 
 
-def get_handlers(main) -> List[Callable]:
+def get_handlers(main: Callable) -> List[Callable]:
     """获取目前所有的指令触发函数方法"""
     commands_functions = []
 
@@ -39,7 +39,7 @@ def get_handlers(main) -> List[Callable]:
     return commands_functions
 
 
-def get_group_id(event) -> str:
+def get_group_id(event: Event) -> str:
     """获取`event`指向的群聊`ID`"""
     try:
         if isinstance(event, Event):
@@ -48,11 +48,11 @@ def get_group_id(event) -> str:
             except:
                 pass
             try:
-                return str(event.user_id)
+                return str(event.get_session_id())
             except:
                 pass
             try:
-                return str(event.author.id)
+                return str(event.get_user_id())
             except:
                 raise ValueError("该适配器没有user_id和group_id")
         else:
@@ -68,10 +68,7 @@ def get_group_id(event) -> str:
 def get_user_id(event: Event) -> str:
     """获取`event`指向的用户`ID`"""
     try:
-        try:
-            return str(event.user_id)
-        except:
-            return str(event.author.id)
+        return event.get_user_id()
     except Exception as error:
         logger.exception(error)
         return "0"
@@ -99,7 +96,7 @@ def get_user_card(event: Event) -> str:
         return "未知用户"
 
 
-def get_user_nickname(event) -> str:
+def get_user_nickname(event: Event) -> str:
     """获取用户昵称"""
     try:
         try:
@@ -118,12 +115,14 @@ def get_user_nickname(event) -> str:
         return "未知用户"
 
 
-async def get_friend_qids(bot) -> List[str]:
+async def get_friend_qids(bot: Bot) -> List[str]:
     result = []
-    friends = await bot.get_friend_list()
-    for friend in friends:
-        result.append(friend["user_id"])
-
+    try:
+        friends: list = await bot.get_friend_list()
+        for friend in friends:
+            result.append(friend["user_id"])
+    except:
+        pass
     return result
 
 
@@ -132,7 +131,7 @@ def load_modes() -> Dict[str, list]:
     return json.loads(open(BOT_MODES_FILE, "r").read())
 
 
-def set_mode(event, mode) -> bool:
+def set_mode(event: Event, mode) -> bool:
     """设置当前群聊的跑团模式"""
     lm = load_modes()
     lm[get_group_id(event)] = mode
@@ -148,3 +147,10 @@ def get_mode(event) -> str:
         return "coc"
 
     return lm[get_group_id(event)]
+
+
+async def get_group_member_list(bot: Bot, event: Event) -> list:
+    try:
+        return await bot.get_group_member_list(group_id=event.group_id)
+    except:
+        return []

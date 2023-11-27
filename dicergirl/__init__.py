@@ -904,6 +904,7 @@ if initalized:
             cha: Character = modes[mode].__charactor__()
             cha.load(cards.get(event, qid=qid))
             setattr(cha, "name", commands["name"])
+            cards.update(event, cha.__dict__, save=True)
             try:
                 await bot.set_group_card(
                     group_id=event.group_id,

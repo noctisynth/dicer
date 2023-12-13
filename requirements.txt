@@ -3,7 +3,6 @@ nonebot-adapter-onebot
 loguru
 pyyaml
 ruamel.yaml
-openai
 multilogging
 psutil
 nonebot_plugin_apscheduler

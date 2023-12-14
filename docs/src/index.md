@@ -13,6 +13,7 @@ features:
     details: DicerGirl 模块遵循 Infini 标准，你可以自由的开发和增删模块
   - title: 跨平台支持
     details: 你可以在任何平台部署和使用 DicerGirl
+footer: Apache-2.0 Licensed | Copyright © 2011-present Noctisynth, org.
 ---
 
 ## 快速部署
@@ -26,19 +27,3 @@ nb plugin install dicergirl
 ```
 
 你同样可以安装第三方插件, 但 Noctisynth 不对其稳定性和安全性负责。
-
-> **Noctisynth**
->
-> [Github](https://github.com/noctisynth/)
->
-> **相关链接**
->
-> [Github](https://github.com/noctisynth/dicer)
->
-> [Infini 标准](https://github.com/HydroRoll-Team/infini)
-
-::: slot footer
-
-Apache-2.0 Licensed | Copyright © 2011-present [Noctisynth](https://github.com/noctisynth/), org.
-
-:::

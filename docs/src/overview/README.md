@@ -12,13 +12,13 @@ DicerGirl 是一个开源的、跨平台、可拓展的新一代骰娘框架。�
 
 ## 特色
 
-### 多模式
+### 规则包系统
 
 DicerGirl 不像传统骰娘那样采用通配式的框架，而是允许不同的规则采用不同的业务处理方法，并允许规则包作者创建属于他们的指令。当然, 通配的默认方法也同样被 DicerGirl 所支持。我们将在下一个版本中使用 [Infini](https://github.com/HydroRoll-Team/infini/) 标准构建跑团规则包。
 
 Infini 是由 [Noctisynth](https://github.com/noctisynth/) 与 [HydroRoll-Team](https://github.com/HydroRoll-Team/) 共同指定的新一代通用型平台机器人文本输入与文本生成标准。
 
-### 插件系统
+### 插件管理
 
 DicerGirl 具有完整的插件管理系统, 任何开发者都可以发布以自定义跑团模式为规则的插件，任何骰主都有权限下载安装在 Infini 发布的规则包。它不像大多数解决方案在骰主后台进行插件增删处理，而是在支持以上方法的基础上，允许用户简单的在骰娘部署的平台使用骰娘指令对插件进行增删。例如，你可以发送消息：
 
@@ -53,3 +53,4 @@ nb plugin install dicergirl
 ::: warning
 DicerGirl Installer 目前仅适用于 Windows 平台进行 `go-cqhttp` 部署，对其它平台的支持正在开发中。
 :::
+

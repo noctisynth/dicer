@@ -4,8 +4,13 @@ title: DicerGirl - 新一代跨平台 TRPG 骰娘框架
 heroImage: https://v1.vuepress.vuejs.org/hero.png
 heroText: DicerGirl
 tagline: 新一代跨平台开源 TRPG 骰娘框架
-actionText: 开始使用 →
-actionLink: /overview/
+actions:
+  - text: 快速上手
+    link: /getting-started/
+    type: primary
+  - text: 项目概览
+    link: /overview/
+    type: secondary
 features:
   - title: 高度自由
     details: DicerGirl 是高度自由与高度可拓展的

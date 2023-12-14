@@ -1,3 +1,7 @@
+---
+prev: ./deployment.md
+next: ../usage/README.md
+---
 # 使用 DicerGirl
 
 如果你已经配置好`DicerGirl`，那么你可以开始使用了。

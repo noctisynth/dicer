@@ -1,5 +1,5 @@
 ---
-prev: ./deployment.md
+prev: ./installation.md
 next: ./using-dicergirl.md
 ---
 # 部署

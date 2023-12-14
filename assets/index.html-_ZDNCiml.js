@@ -1,0 +1,1 @@
+const t=JSON.parse('{"key":"v-ccdc4da0","path":"/getting-started/","title":"快速开始","lang":"en-US","frontmatter":{"prev":"../overview/README.md","next":"./installation.md"},"headers":[],"git":{"updatedTime":1702531309000,"contributors":[{"name":"苏向夜","email":"fu050409@163.com","commits":4}]},"filePathRelative":"getting-started/README.md"}');export{t as data};

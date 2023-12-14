@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-d0736a32","path":"/usage/","title":"DicerGirl 使用指南","lang":"en-US","frontmatter":{"prev":"../getting-started/using-dicergirl.md","next":"./commands/README.md"},"headers":[],"git":{"updatedTime":1702536232000,"contributors":[{"name":"苏向夜","email":"fu050409@163.com","commits":1}]},"filePathRelative":"usage/README.md"}');export{e as data};

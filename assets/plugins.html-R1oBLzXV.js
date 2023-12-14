@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-2c8f6cd9","path":"/usage/commands/plugins.html","title":"","lang":"en-US","frontmatter":{"prev":"./builtins.md"},"headers":[],"git":{"updatedTime":1702536232000,"contributors":[{"name":"苏向夜","email":"fu050409@163.com","commits":1}]},"filePathRelative":"usage/commands/plugins.md"}');export{e as data};

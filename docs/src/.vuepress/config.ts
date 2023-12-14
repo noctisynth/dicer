@@ -23,11 +23,8 @@ export default {
             },
             {
                 text: '开始',
+                link: '/getting-started/',
                 children: [
-                    {
-                        text: '快速开始',
-                        link: '/getting-started/README.md',
-                    },
                     {
                         text: '安装',
                         link: '/getting-started/installation.html',
@@ -42,6 +39,30 @@ export default {
                     },
                 ]
             },
+            {
+                text: '指南',
+                link: '/usage',
+                children: [
+                    {
+                        text: '指令',
+                        link: '/usage/commands/',
+                        children: [
+                            {
+                                text: '管理指令',
+                                link: '/usage/commands/manage.html',
+                            },
+                            {
+                                text: '内置指令',
+                                link: '/usage/commands/builtins.html',
+                            },
+                            {
+                                text: '插件指令',
+                                link: '/usage/commands/plugins.html',
+                            },
+                        ]
+                    },
+                ]
+            },
         ],
         sidebar: [
             {
@@ -50,11 +71,8 @@ export default {
             },
             {
                 text: '开始',
+                link: '/getting-started/',
                 children: [
-                    {
-                        text: '快速开始',
-                        link: '/getting-started/README.md',
-                    },
                     {
                         text: '安装',
                         link: '/getting-started/installation.html',
@@ -66,6 +84,30 @@ export default {
                     {
                         text: '使用',
                         link: '/getting-started/using-dicergirl.html',
+                    },
+                ]
+            },
+            {
+                text: '指南',
+                link: '/usage',
+                children: [
+                    {
+                        text: '指令',
+                        link: '/usage/commands/',
+                        children: [
+                            {
+                                text: '管理指令',
+                                link: '/usage/commands/manage.html',
+                            },
+                            {
+                                text: '内置指令',
+                                link: '/usage/commands/builtins.html',
+                            },
+                            {
+                                text: '插件指令',
+                                link: '/usage/commands/plugins.html',
+                            },
+                        ]
                     },
                 ]
             },

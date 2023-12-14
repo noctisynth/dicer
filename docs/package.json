@@ -1,6 +1,6 @@
 {
   "name": "dicer",
-  "version": "3.5.1",
+  "version": "0.0.1",
   "description": "DicerGirl - 新一代跨平台 TRPG 骰娘框架",
   "main": "index.js",
   "authors": {
@@ -12,8 +12,8 @@
     "dev": "vuepress dev src",
     "build": "vuepress build src"
   },
-  "license": "Apache-2.0",
+  "license": "MIT",
   "devDependencies": {
-    "vuepress": "^2.0.0-rc.0"
+    "vuepress": "^1.5.3"
   }
 }

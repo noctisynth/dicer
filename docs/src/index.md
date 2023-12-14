@@ -1,6 +1,5 @@
 ---
 home: true
-title: DicerGirl - 新一代跨平台 TRPG 骰娘框架
 heroImage: https://v1.vuepress.vuejs.org/hero.png
 heroText: DicerGirl
 tagline: 新一代跨平台开源 TRPG 骰娘框架
@@ -16,26 +15,24 @@ features:
 ---
 
 ## 快速部署
-
 Noctisynth DicerGirl 作为 Nonebot2 插件存在，如果你熟悉`Nonebot2`，那么你可以迅速的完成安装和部署：
-
 ```bash
 pip install nb-cli
 nb create -t bootstrap 
 nb plugin install dicergirl
 ```
-
 你同样可以安装第三方插件, 但 Noctisynth 不对其稳定性和安全性负责。
 
-> **Noctisynth**
+
+>  **Noctisynth**
 >
-> [Github](https://github.com/noctisynth/)
+>  [Github](https://github.com/noctisynth/)
 >
-> **相关链接**
+>  **相关链接**
 >
-> [Github](https://github.com/noctisynth/dicer)
+>  [Github](https://github.com/noctisynth/dicer)
 >
-> [Infini 标准](https://github.com/HydroRoll-Team/infini)
+>  [Infini 标准](https://github.com/HydroRoll-Team/infini)
 
 ::: slot footer
 

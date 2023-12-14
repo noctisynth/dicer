@@ -26,7 +26,8 @@ pip install nb-cli
 
 ```bash
 nb create -t bootstrap
-```                                                                                          
+```
+
 适配器与驱动器的选择参考你希望使用的适配器，例如`OneBot V11`的驱动器请选择`FastAPI`、`HTTPX`>与`websockets`, `QQ`适配器请选择`HTTPX`、`websockets`与`AIOHTTP`。
 
 创建完成后，在生成的项目目录中执行：
@@ -37,4 +38,3 @@ nb run --reload --reload-delay 2
 ```
 
 Nonebot2 的项目创建与插件增删详见[Nonebot CLI](https://cli.nonebot.dev/)。
-

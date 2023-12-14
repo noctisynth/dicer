@@ -53,4 +53,3 @@ nb plugin install dicergirl
 ::: warning
 DicerGirl Installer 目前仅适用于 Windows 平台进行 `go-cqhttp` 部署，对其它平台的支持正在开发中。
 :::
-

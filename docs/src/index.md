@@ -58,4 +58,3 @@ nb adapter list
 ## 获得支持
 
 Noctisynth DicerGirl 的公测 QQ 群为 [770386358](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=cSz28ntJ6XH4e-hNaWzFhNlg-zmex7v2&authKey=BNGIdFqQi8rcwv%2FZtDWyjRVUUhB2JJtsdo7yLaf54PqBXDFtdoIVd1S4V7KRRh3b&noverify=0&group_code=770386358)，你可以轻易的在其中获得相应的帮助。
-

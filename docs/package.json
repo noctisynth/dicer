@@ -1,0 +1,19 @@
+{
+  "name": "dicer",
+  "version": "0.0.1",
+  "description": "DicerGirl - 新一代跨平台 TRPG 骰娘框架",
+  "main": "index.js",
+  "authors": {
+    "name": "苏向夜",
+    "email": "fu050409@163.com"
+  },
+  "repository": "https://github.com/noctisynth/dicer/dicer",
+  "scripts": {
+    "dev": "vuepress dev src",
+    "build": "vuepress build src"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "vuepress": "^1.5.3"
+  }
+}

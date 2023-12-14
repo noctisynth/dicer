@@ -11,11 +11,6 @@ export default {
         ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }]
     ],
 
-    /**
-     * Theme configuration, here is the default theme configuration for VuePress.
-     *
-     * ref：https://v1.vuepress.vuejs.org/theme/default-theme-config.html
-     */
     theme: defaultTheme({
         repo: 'https://github.com/noctisynth/dicer',
         docsDir: 'docs',
@@ -26,17 +21,56 @@ export default {
                 text: '概览',
                 link: '/overview/',
             },
+            {
+                text: '开始',
+                children: [
+                    {
+                        text: '快速开始',
+                        link: '/getting-started/README.md',
+                    },
+                    {
+                        text: '安装',
+                        link: '/getting-started/installation.html',
+                    },
+                    {
+                        text: '部署',
+                        link: '/getting-started/deployment.html',
+                    },
+                    {
+                        text: '使用',
+                        link: '/getting-started/using-dicergirl.html',
+                    },
+                ]
+            },
         ],
-        sidebar: [{
-            text: '概览',
-            link: '/overview/',
-            children: []
-        }],
+        sidebar: [
+            {
+                text: '概览',
+                link: '/overview/',
+            },
+            {
+                text: '开始',
+                children: [
+                    {
+                        text: '快速开始',
+                        link: '/getting-started/README.md',
+                    },
+                    {
+                        text: '安装',
+                        link: '/getting-started/installation.html',
+                    },
+                    {
+                        text: '部署',
+                        link: '/getting-started/deployment.html',
+                    },
+                    {
+                        text: '使用',
+                        link: '/getting-started/using-dicergirl.html',
+                    },
+                ]
+            },
+        ],
     }),
 
-    /**
-     * Apply plugins，ref：https://v1.vuepress.vuejs.org/zh/plugin/
-     */
-    plugins: [
-    ]
+    plugins: []
 }

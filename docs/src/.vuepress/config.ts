@@ -41,7 +41,7 @@ export default {
             },
             {
                 text: '指南',
-                link: '/usage',
+                link: '/usage/',
                 children: [
                     {
                         text: '指令',

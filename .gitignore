@@ -9,3 +9,6 @@ test.py
 .idea
 *.bak
 *.log*
+
+docs/.vitepress/dist
+docs/.vitepress/cache

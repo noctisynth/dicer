@@ -1,6 +1,8 @@
 ---
-prev: ./deployment.md
-next: ../usage/README.md
+prev:
+  link: ./deployment.md
+next:
+  link: ../usage/index.md
 ---
 # 使用 DicerGirl
 
@@ -18,7 +20,7 @@ next: ../usage/README.md
 
 如果你收到了机器人的回复：
 
-```plain-text
+```txt
 Noctisynth DicerGirl 版本 3.5.2 [Python 3.12.0 For Nonebot2 2.1.2]
 此项目以 Apache-2.0 协议开源.
 欢迎使用 Noctisynth DicerGirl, 使用`.help 指令`查看指令帮助.

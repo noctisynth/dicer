@@ -1,6 +1,8 @@
 ---
-prev: ./installation.md
-next: ./using-dicergirl.md
+prev:
+  link: ./installation.md
+next:
+  link: ./using-dicergirl.md
 ---
 # 部署
 

@@ -1,5 +1,6 @@
 ---
-next: ../getting-started/README.md
+next:
+  link: ../getting-started/index.md
 ---
 # 概览
 
@@ -51,4 +52,4 @@ DicerGirl 不需要复杂的配置，如果你熟悉 Nonebot2，你可以快速�
 nb plugin install dicergirl
 ```
 
-如果你对没点计算机使用的属性，我们还对计算机使用检定失败的玩家提供了在 Windows 平台快速部署的方案。它使用 DicerGirl Installer 安装并按照指引进行配置即可使用。如果你已经决定开始使用`DicerGirl`，请移步[快速开始](../getting-started/README.md)。
+如果你对没点计算机使用的属性，我们还对计算机使用检定失败的玩家提供了在 Windows 平台快速部署的方案。它使用 DicerGirl Installer 安装并按照指引进行配置即可使用。如果你已经决定开始使用`DicerGirl`，请移步[快速开始](../getting-started/index.md)。

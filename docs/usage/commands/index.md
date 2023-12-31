@@ -1,6 +1,8 @@
 ---
-prev: ../README.md
-next: ./manage.md
+prev:
+  link: ../index.md
+next:
+  link: ./manage.md
 ---
 # 指令
 

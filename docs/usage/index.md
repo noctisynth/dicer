@@ -1,6 +1,8 @@
 ---
-prev: ../getting-started/using-dicergirl.md
-next: ./commands/README.md
+prev:
+  link: ../getting-started/using-dicergirl.md
+next:
+  link: ./commands/index.md
 ---
 # DicerGirl 使用指南
 
@@ -8,4 +10,4 @@ next: ./commands/README.md
 
 值得一提的是，DicerGirl 拥有丰富的指令体系，为使用户快速上手，我们的一些指令参考并兼容了现有的骰系指令。
 
-如果你已经准备好开始使用 DicerGirl，请移步骰娘[指令](./commands/README.md)。
+如果你已经准备好开始使用 DicerGirl，请移步骰娘[指令](./commands/index.md)。

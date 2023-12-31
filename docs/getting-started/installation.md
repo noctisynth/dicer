@@ -1,6 +1,8 @@
 ---
-prev: ./README.md
-next: ./deployment.md
+prev:
+  link: ./README.md
+next:
+  link: ./deployment.md
 ---
 # 安装
 

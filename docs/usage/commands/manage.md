@@ -1,6 +1,8 @@
 ---
-prev: ./README.md
-next: ./builtins.md
+prev:
+  link: ./index.md
+next:
+  link: ./builtins.md
 ---
 # 管理指令
 
@@ -30,13 +32,13 @@ next: ./builtins.md
 
 指令发送后，鉴权令牌会在`Nonebot2`的控制终端输出，输出模式为`CRITICAL`。鉴权令牌应当是类似这样的：
 
-```plain-text
+```txt
 7d571ca69a4711ee8c7b01ee66fa82b19312fb83fba049b39e351a51a5a01b98
 ```
 
 将鉴权令牌完整复制之后，执行以下指令：
 
-```plain-text
+```txt
 .sudo 7d571ca69a4711ee8c7b01ee66fa82b19312fb83fba049b39e351a51a5a01b98
 ```
 

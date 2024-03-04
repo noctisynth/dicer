@@ -1,0 +1,28 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pdm-project/setup-pdm@v4
+        name: Setup PDM
+        with:
+          python-version: 3.9
+          cache: true
+
+      - name: Install dependencies
+        run: pdm install
+
+      - run: pdm publish
+        shell: bash

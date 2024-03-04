@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Tag Checks
+        id: check_prerelease
+        run: |
+          tag="${{ github.ref_name }}"
+          if [[ $tag == *alpha* || $tag == *beta* || $tag == *rc* ]]; then
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pdm-project/setup-pdm@v4
+        name: Setup PDM
+        with:
+          python-version: 3.9
+          cache: true
+
+      - name: Generate Changelog
+        id: changelog
+        uses: requarks/changelog-action@v1
+        with:
+          token: ${{ github.token }}
+          tag: ${{ github.ref_name }}
+          includeInvalidCommits: true
+          changelogFilePath: CHANGELOG.md
+          writeToFile: true
+          useGitmojis: false
+
+      - name: Install Dependencies
+        run: pdm install
+
+      - name: Build
+        run: pdm build
+
+      - name: Release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          name: ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.changes }}
+          token: ${{ github.token }}
+          artifacts: "dist/*"
+          prerelease: ${{ steps.check_prerelease.outputs.is_prerelease }}

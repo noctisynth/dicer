@@ -1,6 +1,6 @@
 [project]
 name = "dicergirl"
-version = "0.0.0"
+version = "4.0.0-beta.2"
 description = "新一代跨平台开源 TRPG 骰娘框架"
 authors = [
     {name = "苏向夜", email = "fu050409@163.com"},

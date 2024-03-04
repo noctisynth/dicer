@@ -1,0 +1,34 @@
+[project]
+name = "dicergirl"
+version = "0.0.0"
+description = "新一代跨平台开源 TRPG 骰娘框架"
+authors = [
+    {name = "苏向夜", email = "fu050409@163.com"},
+    {name = "Night Resurgent <fu050409@163.com>", email = "fu050409@163.com"},
+]
+dependencies = [
+    "infini>=2.1.0",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://gitee.com/unvisitor/dicer"
+"Bug Tracker" = "https://gitee.com/unvisitor/dicer/issues"
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.dev-dependencies]
+dev = [
+]

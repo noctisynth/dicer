@@ -1,6 +1,6 @@
 [project]
 name = "dicergirl"
-version = "4.0.0-beta.2"
+version = "4.0.0-beta.3"
 description = "新一代跨平台开源 TRPG 骰娘框架"
 authors = [
     {name = "苏向夜", email = "fu050409@163.com"},
@@ -21,8 +21,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://gitee.com/unvisitor/dicer"
-"Bug Tracker" = "https://gitee.com/unvisitor/dicer/issues"
+Homepage = "https://github.com/noctisynth/dicer"
+"Bug Tracker" = "https://github.com/noctisynth/dicer/issues"
 
 [build-system]
 requires = ["pdm-backend"]

@@ -1,6 +1,6 @@
 from nonebot.plugin import on_message, on_startswith
 from nonebot.rule import Rule
-from nonebot.adapters import Event
+from nonebot.adapters import Event, Bot
 from nonebot.matcher import Matcher
 from infini.input import Input
 from infini.injector import Injector
@@ -53,6 +53,8 @@ async def ipm_handler(event: Event, matcher: Matcher):
                 Bool("hmr"),
                 Optional("add", str),
                 Optional("remove", str),
+                Bool("clear"),
+                Bool("show"),
             ]
         ),
         args=args,
@@ -72,6 +74,15 @@ async def ipm_handler(event: Event, matcher: Matcher):
         hmr()
         return await matcher.send(f"规则包[{commands['add']}]挂载完成")
 
+    if commands["clear"]:
+        status.set("bot", "packages", [])
+        hmr()
+        return await matcher.send(f"挂载规则包已清空")
+
+    if commands["show"]:
+        packages = status.get("bot", "packages") or []
+        return await matcher.send(f"挂载规则包: {[package for package in packages]!r}")
+
     if commands["remove"]:
         packages = status.get("bot", "packages") or []
         if commands["remove"] in packages:
@@ -87,7 +98,7 @@ async def ipm_handler(event: Event, matcher: Matcher):
 
 
 @interceptor.handle()
-async def handler(event: Event, matcher: Matcher):
+async def handler(bot: Bot, event: Event, matcher: Matcher):
     nb_event_name = event.get_event_name()
     nb_event_type = event.get_type()
     nb_event_description = event.get_event_description()
@@ -97,12 +108,27 @@ async def handler(event: Event, matcher: Matcher):
         nb_event_json.get("sender", {})
     ).get("nickname")
     user_id = str(event.get_user_id())
-    self_id = nb_event_json.get("self_id")
+    self_id = str(nb_event_json.get("self_id"))
     group_id = str(event.group_id) if hasattr(event, "group_id") else None
     session_id = event.get_session_id()
 
     plain_text = event.get_plaintext()
     message = [{"type": msg.type, "data": msg.data} for msg in event.get_message()]
+    mentions = [
+        mention["data"]["qq"]
+        for mention in nb_event_json["original_message"]
+        if mention["type"] == "at"
+    ]
+    is_tome = False
+
+    if self_id in mentions:
+        is_tome = True
+    elif not mentions:
+        is_tome = True
+    else:
+        if mentions:
+            if nb_event_json["original_message"][0]["type"] != "at":
+                is_tome = True
 
     input = Input(
         plain_text,
@@ -112,11 +138,13 @@ async def handler(event: Event, matcher: Matcher):
             "self_id": self_id,
             "group_id": group_id,
             "session_id": session_id,
+            "message": message,
+            "mentions": mentions,
+            "is_tome": is_tome,
             "nb_event_name": nb_event_name,
             "nb_event_type": nb_event_type,
             "nb_event_description": nb_event_description,
             "nb_event_json": nb_event_json,
-            "message": message,
         },
     )
 
@@ -124,6 +152,6 @@ async def handler(event: Event, matcher: Matcher):
         if isinstance(output, str):
             await matcher.send(output)
         else:
-            parameters = {"output": output}
+            parameters = {"output": output, "bot": bot, "matcher": matcher}
             parameters.update(output.variables)
             put(injector.inject(workflows.get(output.name), parameters=parameters))

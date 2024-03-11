@@ -145,6 +145,7 @@ async def handler(bot: Bot, event: Event, matcher: Matcher):
             "nb_event_type": nb_event_type,
             "nb_event_description": nb_event_description,
             "nb_event_json": nb_event_json,
+            "platform": "Nonebot2",
         },
     )
 
